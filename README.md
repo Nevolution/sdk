@@ -11,6 +11,8 @@ Background
 Android supports highly rich notification experience, and the feature set expanded in almost every major Android versions.
 Unfortunately, most apps only use a small set of limited capabilities of notification, rendering them less elegant and even ugly on your modern Android devices.
 
+If you use an Android Wear smart watch or Android Auto powered car, it's extremely disappointed that probably most of your favorite apps do not work on them.
+
 We are not asking the app developers for a better experience any more, but teaches them the right way to build a better experience, with the help from Nevolution community. 
 
 
