@@ -1,16 +1,15 @@
 About
 -------
 
-Nevolution is an open platform for Android to evolve the notification experience of existing apps, via various plug-ins built by developer community.
+Nevolution is an open platform for Android to evolve the notification experience of existing apps,
+in a creative developer-independent way via community-driven plug-ins, without the involvement of the original app developer.
 
 
 Background
 ------------
 
 Android supports highly rich notification experience, and the feature set expanded in almost every major Android versions.
-Unfortunately, most Android apps only used very limited capabilities of notification, render them less elegant and even ugly on your modern Android devices.
-
-Nevolution evolves the notifications in a creative developer-independent way, involving community-driven development to improve the 1st-party experience.
+Unfortunately, most apps only use a small set of limited capabilities of notification, rendering them less elegant and even ugly on your modern Android devices.
 
 We are not asking the app developers for a better experience any more, but teaches them the right way to build a better experience, with the help from Nevolution community. 
 
@@ -18,11 +17,12 @@ We are not asking the app developers for a better experience any more, but teach
 Developer Preview
 -------------------
 
-Developing a simple plug-in for Nevolution with our easy-to-use SDK is even easier than writing a tiny app.
-With a creative idea in your mind, just one or two hours of coding is enough to build a working plug-in.
-
 Nevolution is currently under active development. Since the end-user experience largely depends on the richness of 3rd-party plug-ins,
 we released developer preview version in beta test, open for all developers.
+
+Developing a simple plug-in for Nevolution with our easy-to-use SDK is even easier than writing a tiny app.
+With a creative idea in your mind, just one or two hours of coding is enough to build a working plug-in.
+The code of built-in plug-ins already shows how simple a plug-in could be.
 
 We are devoted to work with the developer community to build high quality plug-ins.
 
@@ -50,5 +50,7 @@ Get Started
 -------------
 
 Clone this repository to start developing new plug-in for Nevolution, or contribute to the built-in plug-ins.
+
+Build and install your plug-in app and Nevolution will recognize them and let you activate them right away.
 
 More documents for plug-in development is on the way. Please refer to the JavaDoc and sample code for now.
