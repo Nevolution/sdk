@@ -28,7 +28,7 @@ The code of built-in plug-ins already shows how simple a plug-in could be.
 
 We are devoted to work with the developer community to build high quality plug-ins.
 
-Join the [beta test](https://play.google.com/testing/com.oasisfeng.nevo) and install it on Google Play: https://play.google.com/store/apps/details?id=com.oasisfeng.nevo
+Join the [beta test](https://play.google.com/apps/testing/com.oasisfeng.nevo) and install it on Google Play: https://play.google.com/store/apps/details?id=com.oasisfeng.nevo
 
 Discussion goes to [our G+ community](https://plus.google.com/communities/108874686073587920040), while issues and formal feature request should be posted on the GitHub for better tracking.
 
