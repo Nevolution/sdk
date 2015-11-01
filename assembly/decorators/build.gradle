@@ -1,0 +1,26 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.oasisfeng.nevo.decorators"
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+        }
+    }
+}
+
+dependencies {
+    debugCompile project(path: ':decorators-misc', configuration: 'debug')
+    debugCompile project(path: ':decorators-bundle', configuration: 'debug')
+    debugCompile project(path: ':decorators-mediaplayer', configuration: 'debug')
+    debugCompile project(path: ':decorators-wechat', configuration: 'debug')
+
+    releaseCompile project(path: ':decorators-misc', configuration: 'release')
+    releaseCompile project(path: ':decorators-bundle', configuration: 'release')
+}

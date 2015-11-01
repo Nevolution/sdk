@@ -1,0 +1,7 @@
+include ':sdk', ':decorators-misc', ':decorators-bundle', ':decorators-mediaplayer', ':decorators-wechat', ':assembly-decorators'
+
+project(':decorators-misc').projectDir = new File(settingsDir, 'decorators/misc')
+project(':decorators-bundle').projectDir = new File(settingsDir, 'decorators/bundle')
+project(':decorators-mediaplayer').projectDir = new File(settingsDir, 'decorators/mediaplayer')
+project(':decorators-wechat').projectDir = new File(settingsDir, 'decorators/wechat')
+project(':assembly-decorators').projectDir = new File(settingsDir, 'assembly/decorators')
