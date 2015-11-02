@@ -45,7 +45,7 @@
             android:theme="@style/Theme.MyTheme"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE">
-            <intent-filter android:icon="@android:drawable/ic_menu_edit" android:label="@string/decorator_bundle_action">
+            <intent-filter android:label="@string/decorator_bundle_action">
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.PREFERENCE" />
                 <!-- <data> tag declares the associated decorator -->
