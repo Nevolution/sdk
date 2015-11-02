@@ -14,6 +14,7 @@ allprojects {
     repositories {
         jcenter()
     }
+    buildDir = "${rootProject.projectDir}/build/${project.parent != null ? project.parent.name : rootProject.name}/${project.name}"
 }
 
 project.ext {
