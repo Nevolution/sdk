@@ -85,7 +85,7 @@
             android:exported="false"
             android:process=":service" >
             <intent-filter>
-                <action android:name="com.oasisfeng.nevo.engine.bundle.INotificationBundle" />
+                <action android:name="com.oasisfeng.nevo.decorators.bundle.INotificationBundle" />
             </intent-filter>
         </service>
 

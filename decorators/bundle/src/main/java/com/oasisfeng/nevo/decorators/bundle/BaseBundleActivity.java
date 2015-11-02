@@ -20,8 +20,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,9 +37,7 @@ public abstract class BaseBundleActivity extends Activity implements BaseBundleD
         super.onCreate(savedInstanceState);
         overridePendingTransition(0, 0);
 
-        Intent intent = new Intent(INotificationBundle.class.getCanonicalName());
-        ResolveInfo info = getPackageManager().resolveService(intent, PackageManager.GET_RESOLVED_FILTER);
-        intent.setPackage(info.serviceInfo.packageName);
+        Intent intent = new Intent(INotificationBundle.class.getName()).setPackage(getPackageName());
 
         if (!bindService(intent, mConnection = new ServiceConnection() {
             @Override

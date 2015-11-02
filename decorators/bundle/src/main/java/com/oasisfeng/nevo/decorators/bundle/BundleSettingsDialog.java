@@ -16,6 +16,7 @@
 
 package com.oasisfeng.nevo.decorators.bundle;
 
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
@@ -26,7 +27,7 @@ public class BundleSettingsDialog extends BaseBundleDialog {
 
     @Override
     protected void onSetRemoveText(TextView textView) {
-        if (getPackageRule() == null)
+        if (TextUtils.isEmpty(getPackageRule()))
             textView.setVisibility(View.GONE);
         else {
             textView.setVisibility(View.VISIBLE);

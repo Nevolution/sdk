@@ -18,6 +18,7 @@ package com.oasisfeng.nevo.decorators.bundle;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,8 +42,8 @@ public class BundleActionDialog extends BaseBundleDialog {
 
     @Override
     protected void onSetRemoveText(TextView textView) {
-        if (getTitleRule() == null || getTitleRule().length() == 0) {
-            if (getPackageRule() == null) textView.setVisibility(View.GONE);
+        if (TextUtils.isEmpty(getTitleRule())) {
+            if (TextUtils.isEmpty(getPackageRule())) textView.setVisibility(View.GONE);
             else {
                 textView.setText(getString(R.string.bundle_remove_rule, getPackageRule()));
             }
@@ -69,6 +70,6 @@ public class BundleActionDialog extends BaseBundleDialog {
 
     @Override
     protected String getCurrentBundle() {
-        return getTitleRule() == null ? getPackageRule() : getTitleRule();
+        return TextUtils.isEmpty(getTitleRule()) ? getPackageRule() : getTitleRule();
     }
 }
