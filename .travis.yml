@@ -1,11 +1,13 @@
 language: android
+jdk: oraclejdk7
 
 android:
   components:
     - build-tools-23.0.1
     - android-23
-
-jdk: oraclejdk7
+    - extra-android-m2repository
+  licenses:
+    - android-sdk-license-.+
 
 script:
-    - ./gradlew check
+    - ./gradlew build
