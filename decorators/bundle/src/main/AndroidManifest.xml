@@ -36,9 +36,9 @@
         </service>
 
         <!-- Optional decorator settings activity which will be launched when "settings" button of this decorator is pressed by user.
-             Following extras are passed along in the launching intent:
-               "decorator": full component name of the decorator (e.g. "com.oasisfeng.nevo.decorators/com.oasisfeng.nevo.decorators.bundle.BundleDecorator")
-               "notification_package": package name of the currently selected notification.
+             Following extras are passed along in the launching intent: (please refer to com.oasisfeng.nevo.NevoConstants in SDK library project)
+               "nevo.decorator.component": full component name of the decorator (e.g. "com.oasisfeng.nevo.decorators/com.oasisfeng.nevo.decorators.bundle.BundleDecorator")
+               "nevo.notification.package": package name of the currently selected notification.
           -->
         <activity
             android:name=".BundleSettingsActivity"
@@ -59,11 +59,11 @@
              This action will only show up on notifications for which the user has activated the associated decorator.
              The icon and label of this action should be defined in <intent-filter>.
 
-             Following extras are passed along in the launching intent:
-                "decorator": full component name of the decorator (e.g. "com.oasisfeng.nevo.decorators/BundleDecorator")
-                "notification_package": package name of the currently selected notification.
-                "notification_key": the key of selected notification
-                "notification_title": the title of selected notification (maybe null)
+             Following extras are passed along in the launching intent: (please refer to com.oasisfeng.nevo.NevoConstants in SDK library project)
+                "nevo.decorator.component": full component name of the decorator (e.g. "com.oasisfeng.nevo.decorators/BundleDecorator")
+                "nevo.notification.package": package name of the currently selected notification.
+                "nevo.notification.key": the key of selected notification
+                "nevo.notification.title": the EXTRA_TITLE_BIG of selected notification (might be notification's "EXTRA_TITLE" if EXTRA_TITLE_BIG doesn't exist or might be null if both don't exist)
               -->
         <activity
             android:name=".BundleActionActivity"
