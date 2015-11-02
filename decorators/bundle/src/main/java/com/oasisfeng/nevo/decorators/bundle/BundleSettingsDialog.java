@@ -16,6 +16,7 @@
 
 package com.oasisfeng.nevo.decorators.bundle;
 
+import android.app.Activity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
@@ -38,12 +39,13 @@ public class BundleSettingsDialog extends BaseBundleDialog {
     @Override
     protected void onRemove() {
         setBundleRule(getPackage(), null, "");
+        getActivity().setResult(Activity.RESULT_OK);
     }
 
     @Override
     protected void onApply(String newBundle) {
         setBundleRule(getPackage(), null, newBundle);
-        dismiss();
+        getActivity().setResult(Activity.RESULT_OK);
     }
 
     @Override
