@@ -47,4 +47,4 @@ Clone this repository to start developing new plug-in for Nevolution, or fork it
 
 Build and install your plug-in app on the device, Nevolution will recognize it and let you activate it for the selected app right away.
 
-More documents for plug-in development are on the way. Please refer to the JavaDoc and samples for now.
+Head to wiki page for more details: [Decorator Plug-in Development](https://github.com/oasisfeng/nevolution/wiki/Decorator-Plugin-Development)
