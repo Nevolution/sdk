@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/oasisfeng/nevolution.svg?branch=master)](https://travis-ci.org/oasisfeng/nevolution)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/oasisfeng/nevolution)
+
 About
 -------
 
@@ -48,3 +51,8 @@ Clone this repository to start developing new plug-in for Nevolution, or fork it
 Build and install your plug-in app on the device, Nevolution will recognize it and let you activate it for the selected app right away.
 
 Head to wiki page for more details: [Decorator Plug-in Development](https://github.com/oasisfeng/nevolution/wiki/Decorator-Plugin-Development)
+
+
+License
+---------
+The source code and related materials of the SDK and built-in decorators are licensed under Apache License 2.0.
