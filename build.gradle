@@ -13,7 +13,6 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     }
     buildDir = "${rootProject.projectDir}/build/${project.parent != null ? project.parent.name : rootProject.name}/${project.name}"
 }
