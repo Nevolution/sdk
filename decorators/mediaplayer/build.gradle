@@ -17,5 +17,6 @@ android {
 }
 
 dependencies {
-    compile project(':sdk')
+    compile 'com.oasisfeng.nevo:sdk:0.8.0.201511091758'
+    compile 'com.android.support:support-v4:23.1.1'
 }

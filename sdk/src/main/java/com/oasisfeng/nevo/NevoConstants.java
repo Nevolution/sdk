@@ -16,6 +16,7 @@
 
 package com.oasisfeng.nevo;
 
+import android.content.ComponentName;
 import android.service.notification.StatusBarNotification;
 
 import com.oasisfeng.android.service.notification.StatusBarNotificationCompat.SbnCompat;
@@ -58,4 +59,18 @@ public class NevoConstants {
 	 * This is one of the arguments passed to decorator action activity.
 	 */
 	public static final String EXTRA_NOTIFICATION_TITLE = "nevo.notification.title";
+
+	/**
+	 * The action to start main Nevolution user interface and tell user to enable their own app-specified decorator to certain application.
+	 * You should also set Category to: "android.intent.category.PREFERENCE".
+	 * Note: this is only a suggestion to user, please start with startActivityForResult().
+	 *		 {@link android.app.Activity#RESULT_OK}: User enabled your decorator or already enabled for that application.
+	 *		 {@link android.app.Activity#RESULT_CANCELED}: This operation is canceled by user.
+	 *		 {@link android.app.Activity#RESULT_FIRST_USER}: Other internal error for debug propose. Like your decorator doesn't not declared to support this application.
+	 * Please pass following params:
+	 * 		 {@link #EXTRA_DECORATOR_COMPONENT}: Your full decorator component name in string, see {@link ComponentName#flattenToString()}.
+	 * 		 {@link #EXTRA_NOTIFICATION_PACKAGE}: The application package which you hope user enable decorator on.
+	 *
+	 */
+	public static final String ACTION_ENABLE_DECORATOR = "com.oasisfeng.nevo.mobile.EnableDecorator";
 }
