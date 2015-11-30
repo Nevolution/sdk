@@ -11,11 +11,11 @@ Nevolution is an open platform for Android to evolve the notification experience
 Background
 ------------
 
-Android supports highly rich notification experience, and the feature set expanded in almost every major Android versions. Unfortunately, most apps in the wild only use a small set of limited capabilities in their notifications, rendering them less elegant, functionality lacking and even ugly on your modern Android devices.
+Android supports a highly rich notification experience, and the feature set has expanded in almost every major Android version. Unfortunately, most apps in the wild only use a small set of the limited capabilities in their notifications, rendering them less elegant, functionality lacking and even ugly on your modern Android devices.
 
-If you use Android Wear smart watch or Android Auto powered car, it's extremely disappointing that probably most of your favorite apps do not work on them.
+If you use an Android Wear smart watch or Android Auto powered car, it's extremely disappointing that many of your favorite apps do not integrate fully with your tech.
 
-We are not asking any more, but teaching them the right way to build better experience, with the efforts from Nevolution community.
+The Nevolution Community is proactively changing the philosophy behind notifications and aims to set an example of great user experience.
 
 
 Developer Preview
@@ -27,7 +27,7 @@ Developing a simple plug-in for Nevolution with our developer-friendly SDK is ev
 
 [Join the beta test](https://play.google.com/apps/testing/com.oasisfeng.nevo) first, then [install it on Google Play](https://play.google.com/store/apps/details?id=com.oasisfeng.nevo). There might be a short delay before the latter link could work.
 
-We are devoted to work with the developer community to build high quality plug-ins and improve Nevolution. So developers are the most important roles to build a healthy community.
+We are devoted to working with the developer community to build high quality plug-ins and improve Nevolution. So developers are the most important roles to build a healthy community.
 
 Discussion goes to [our G+ community](https://plus.google.com/communities/108874686073587920040) or [Gitter chat](https://gitter.im/oasisfeng/nevolution?utm_source=readme&utm_medium=link&utm_campaign=dev-preview&utm_content=discussion), while issues and formal feature request should be posted on the GitHub for better tracking.
 
@@ -35,11 +35,11 @@ Discussion goes to [our G+ community](https://plus.google.com/communities/108874
 How Does Nevolution Work
 --------------------------
 
-Nevolution consists of one platform app and many plug-in apps, developed by different developers. Plug-in is not necessarily just a single-purpose app, it can bundle several plug-ins, or be part of an regular app.
+Nevolution consists of one platform app and many third party plug-in apps. A plug-in is not necessarily just a single-purpose app, it can bundle several plug-ins, or be part of a regular app.
 
-Currently the only supported plug-in type is "decorator", which receives notification and makes necessary modifications on the fly. All decorators enabled by user works together in a pipeline to decorate any incoming notification.
+Currently the only supported plug-in type is "decorator", which receives notification and makes necessary modifications on the fly. All decorators enabled by user work together in a pipeline to decorate any incoming notification.
 
-A decorator plug-in is essentially a regular exported Android service component declared with an intent-filter recognized by Nevolution platform. See the code of decorators in this repository for details.
+A decorator plug-in is essentially a regular exported Android service component declared with an intent-filter recognized by Nevolution platform. [See the code of decorators in this repository for details.](/decorators)
 
 Nevolution does not require *root*, but root-capable features are planned to be added in the near future.
 
