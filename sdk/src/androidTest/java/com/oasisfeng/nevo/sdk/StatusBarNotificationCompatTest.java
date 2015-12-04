@@ -22,8 +22,8 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
 
-import com.oasisfeng.android.service.notification.StatusBarNotificationCompat;
-import com.oasisfeng.android.service.notification.StatusBarNotificationCompat.SbnCompat;
+import com.oasisfeng.nevo.StatusBarNotificationCompat;
+import com.oasisfeng.nevo.StatusBarNotificationCompat.SbnCompat;
 
 public class StatusBarNotificationCompatTest extends AndroidTestCase {
 
@@ -39,7 +39,7 @@ public class StatusBarNotificationCompatTest extends AndroidTestCase {
 		assertEquals(user, sbnc.getUser());
 		assertEquals(time, sbnc.getPostTime());
 
-		assertEquals(sbnc.getUser(), StatusBarNotificationCompat.getUser(sbnc));
+		assertEquals(sbnc.getUser(), SbnCompat.userOf(sbnc));
 		assertEquals(sbnc.getKey(), SbnCompat.keyOf(sbnc));
 		assertEquals(sbnc.getGroupKey(), SbnCompat.groupKeyOf(sbnc));
 	}
@@ -82,7 +82,7 @@ public class StatusBarNotificationCompatTest extends AndroidTestCase {
 		assertEquals(sbnc.getUser(), unparcelled.getUser());
 		assertEquals(sbnc.getPostTime(), unparcelled.getPostTime());
 
-		assertEquals(sbnc.getUser(), StatusBarNotificationCompat.getUser(unparcelled));
+		assertEquals(sbnc.getUser(), SbnCompat.userOf(unparcelled));
 		assertEquals(sbnc.getKey(), SbnCompat.keyOf(unparcelled));
 		assertEquals(sbnc.getGroupKey(), SbnCompat.groupKeyOf(unparcelled));
 

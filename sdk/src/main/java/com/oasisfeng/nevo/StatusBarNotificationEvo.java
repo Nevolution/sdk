@@ -24,12 +24,6 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-
-import com.oasisfeng.android.service.notification.StatusBarNotificationCompat;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 /**
  * Ease the code across Nevolution with following features:
@@ -47,7 +41,7 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	public static StatusBarNotificationEvo from(final StatusBarNotification sbn) {
 		if (sbn instanceof StatusBarNotificationEvo) return (StatusBarNotificationEvo) sbn;
 		return new StatusBarNotificationEvo(sbn.getPackageName(), null, sbn.getId(), sbn.getTag(),
-				getUid(sbn), 0, 0, sbn.getNotification(), getUser(sbn), sbn.getPostTime());
+				SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime());
 	}
 
 	public StatusBarNotificationEvo(final String pkg, final String opPkg, final int id, final String tag, final int uid, final int initialPid, final int score, final Notification notification, final UserHandle user, final long postTime) {
@@ -124,7 +118,7 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 			out.writeInt(1);
 			out.writeString(getTag());
 		} else out.writeInt(0);
-		out.writeInt(getUid(this));
+		out.writeInt(SbnCompat.getUid(this));
 		getUser().writeToParcel(out, flags);
 		out.writeLong(getPostTime());
 		out.writeStrongInterface(notification == null ? holder : new NotificationHolder(notification));	// The local copy of notification is "dirty" (possibly modified), hence needs to be updated.
@@ -161,16 +155,6 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		public StatusBarNotificationEvo[] newArray(final int size) { return new StatusBarNotificationEvo[size]; }
 	};
 
-	private static int getUid(final StatusBarNotification sbn) {
-		if (sMethodGetUid != null)
-			try { return (int) sMethodGetUid.invoke(sbn); } catch (final Exception ignored) {}
-		if (sFieldUid != null)
-			try { return (int) sFieldUid.get(sbn); } catch (final IllegalAccessException ignored) {}
-		// TODO: PackageManager.getPackageUid()
-		Log.e(TAG, "Incompatible ROM: StatusBarNotification");
-		return 0;
-	}
-
 	private static boolean equal(final @Nullable Object a, final @Nullable Object b) {
 		return a == b || (a != null && a.equals(b));
 	}
@@ -182,22 +166,5 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	private @Nullable Notification notification;	// Cache of remote notification to avoid expensive duplicate fetch.
 
     private static final int PARCEL_MAGIC = "NEVO".hashCode();  // TODO: Are they really magic enough?
-	private static final Method sMethodGetUid;
-	private static final Field sFieldUid;
-	static {
-		Method method = null; Field field = null;
-		try {
-			method = StatusBarNotification.class.getDeclaredMethod("getUid");
-			method.setAccessible(true);
-		} catch (final NoSuchMethodException ignored) {}
-		sMethodGetUid = method;
-		if (method == null) try {       // If no such method, try accessing the field
-			field = StatusBarNotification.class.getDeclaredField("uid");
-			field.setAccessible(true);
-		} catch (final NoSuchFieldException ignored) {}
-		sFieldUid = field;
-	}
-
 	private static final Notification NULL_NOTIFICATION = new Notification();	// Must be placed before VOID to avoid NPE.
-	private static final String TAG = "Nevo.SBN";
 }

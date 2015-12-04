@@ -19,7 +19,7 @@ package com.oasisfeng.nevo;
 import android.content.ComponentName;
 import android.service.notification.StatusBarNotification;
 
-import com.oasisfeng.android.service.notification.StatusBarNotificationCompat.SbnCompat;
+import com.oasisfeng.nevo.StatusBarNotificationCompat.SbnCompat;
 
 /**
  * Constants

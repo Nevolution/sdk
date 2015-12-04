@@ -27,7 +27,7 @@ import android.service.notification.StatusBarNotification;
 import android.test.ServiceTestCase;
 
 import com.oasisfeng.android.content.pm.ParceledListSlice;
-import com.oasisfeng.android.service.notification.StatusBarNotificationCompat;
+import com.oasisfeng.nevo.StatusBarNotificationCompat;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.INevoDecorator;
 import com.oasisfeng.nevo.engine.INevoController;

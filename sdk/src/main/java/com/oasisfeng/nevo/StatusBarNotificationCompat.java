@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.oasisfeng.android.service.notification;
+package com.oasisfeng.nevo;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -27,6 +27,9 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * Backward support for {@link android.service.notification.StatusBarNotification StatusBarNotification}
@@ -45,6 +48,7 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 
 	@Override public String getKey() { return key; }
 	@Override public String getGroupKey() { return groupKey; }
+
 	@TargetApi(VERSION_CODES.KITKAT_WATCH) private String getBaseKey() { return super.getKey(); }
 	@TargetApi(VERSION_CODES.LOLLIPOP) private String getBaseGroupKey() { return super.getGroupKey(); }
 
@@ -54,32 +58,23 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
         catch (final Throwable t) { return android.os.Process.myUserHandle(); }
     }
 
-    @SuppressLint("NewApi") /** {@link StatusBarNotification#getUser()} is hidden but accessible in API level 18~20 */
-    public static UserHandle getUser(final StatusBarNotification sbn) {
-        return sbn.getUser();
-    }
-
     public static Key parseKey(final String key) {
-		if (VERSION.SDK_INT >= VERSION_CODES.KITKAT_WATCH) {
-			// userId + "|" + pkg + "|" + id + "|" + tag + "|" + uid
-			final int pos_last = key.lastIndexOf('|');
-			final String[] user_pkg_id_tag = key.substring(0, pos_last).split("\\|", 4);
-			String tag = user_pkg_id_tag[3];
-			if ("null".equals(tag)) tag = null;             // Nasty hole (Google should fix this!)
-			UserHandle user; int id = 0;
-			try {
-				user = toUserHandle(Integer.parseInt(user_pkg_id_tag[0]));
-			} catch (final NumberFormatException e) {
-				Log.w(TAG, "Malformed key: " + key);
-				user = android.os.Process.myUserHandle();
-			}
-			try {
-				id = Integer.parseInt(user_pkg_id_tag[2]);
-			} catch (final NumberFormatException e) { Log.w(TAG, "Malformed key: " + key); }
-			return new Key(user, user_pkg_id_tag[1], id, tag, Integer.parseInt(key.substring(pos_last + 1)));
+		// userId + "|" + pkg + "|" + id + "|" + tag + "|" + uid
+		final int pos_last = key.lastIndexOf('|');
+		final String[] user_pkg_id_tag = key.substring(0, pos_last).split("\\|", 4);
+		String tag = user_pkg_id_tag[3];
+		if ("null".equals(tag)) tag = null;             // Nasty hole (Google should fix this!)
+		UserHandle user; int id = 0;
+		try {
+			user = toUserHandle(Integer.parseInt(user_pkg_id_tag[0]));
+		} catch (final NumberFormatException e) {
+			Log.w(TAG, "Malformed key: " + key);
+			user = android.os.Process.myUserHandle();
 		}
-		final String[] pkg_id_tag = key.split("\\|", 3);    // Tag is optional
-		return new Key(null, pkg_id_tag[0], Integer.valueOf(pkg_id_tag[1]), pkg_id_tag.length > 2 ? pkg_id_tag[2] : null, -1);
+		try {
+			id = Integer.parseInt(user_pkg_id_tag[2]);
+		} catch (final NumberFormatException e) { Log.w(TAG, "Malformed key: " + key); }
+		return new Key(user, user_pkg_id_tag[1], id, tag, Integer.parseInt(key.substring(pos_last + 1)));
 	}
 
 	// TODO: Reflection?
@@ -125,9 +120,8 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 				if (key != null) return key;				// May actually be null when called by the constructor
 			}
 			if (VERSION.SDK_INT >= VERSION_CODES.KITKAT_WATCH) return StatusBarNotificationCompat20.getKey(sbn);
-			final StringBuilder key = new StringBuilder(sbn.getPackageName()).append('|').append(sbn.getId());
-			if (sbn.getTag() != null) key.append('|').append(sbn.getTag()); // Tag must be the last one since it may contain '|'
-			return key.toString();
+			// Use the exact same format of API level 20+: userId | pkg | id | tag | uid
+			return String.valueOf(sUserId) + '|' + sbn.getPackageName() + '|' + sbn.getId() + '|' + sbn.getTag() + '|' + getUid(sbn);
 		}
 
 		public static String groupKeyOf(final StatusBarNotification sbn) {
@@ -140,6 +134,37 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 			final String sortKey = NotificationCompat.getSortKey(sbn.getNotification());
 			if (group == null && sortKey == null) return keyOf(sbn);        // a group of one
 			return sbn.getPackageName() + "|" + (group == null ? "p:" + sbn.getNotification().priority : "g:" + group);
+		}
+
+		@SuppressLint("NewApi") /** {@link StatusBarNotification#getUser()} is hidden but accessible in API level 18~20 */
+		public static UserHandle userOf(final StatusBarNotification sbn) {
+			return sbn.getUser();
+		}
+
+		static int getUid(final StatusBarNotification sbn) {
+			if (sMethodGetUid != null)
+				try { return (int) sMethodGetUid.invoke(sbn); } catch (final Exception ignored) {}
+			if (sFieldUid != null)
+				try { return (int) sFieldUid.get(sbn); } catch (final IllegalAccessException ignored) {}
+			// TODO: PackageManager.getPackageUid()
+			Log.e(TAG, "Incompatible ROM: StatusBarNotification");
+			return 0;
+		}
+
+		private static final int sUserId = android.os.Process.myUserHandle().hashCode(); // Equivalent to getIdentifier()
+		private static final Method sMethodGetUid;
+		private static final Field sFieldUid;
+		static {
+			Method method = null; Field field = null;
+			try {
+				method = StatusBarNotification.class.getMethod("getUid");
+			} catch (final NoSuchMethodException ignored) {}
+			sMethodGetUid = method;
+			if (method == null) try {       // If no such method, try accessing the field
+				field = StatusBarNotification.class.getDeclaredField("uid");
+				field.setAccessible(true);
+			} catch (final NoSuchFieldException ignored) {}
+			sFieldUid = field;
 		}
 	}
 

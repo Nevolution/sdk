@@ -20,7 +20,7 @@ import android.app.Notification;
 import android.os.*;
 import android.os.Process;
 
-import com.oasisfeng.android.service.notification.StatusBarNotificationCompat.SbnCompat;
+import com.oasisfeng.nevo.StatusBarNotificationCompat.SbnCompat;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 
 public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTest {

@@ -33,7 +33,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.oasisfeng.android.service.notification.StatusBarNotificationCompat;
+import com.oasisfeng.nevo.StatusBarNotificationCompat;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.engine.INevoController;
 import com.oasisfeng.nevo.sdk.BuildConfig;
