@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion this.compileSdkVersion
+    buildToolsVersion this.buildToolsVersion
 
     defaultConfig {
         applicationId "com.oasisfeng.nevo.decorators"

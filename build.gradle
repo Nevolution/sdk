@@ -17,7 +17,9 @@ allprojects {
     buildDir = "${rootProject.projectDir}/build/${project.parent != null ? project.parent.name : rootProject.name}/${project.name}"
 }
 
-project.ext {
-    compileSdkVersion = 23
-    buildToolsVersion = '23.0.1'
+subprojects {
+    ext.compileSdkVersion = 23
+    ext.buildToolsVersion = '23.0.1'
+    ext.supportLibrariesVersion = '23.0.1'
+    ext.nevoSdkVersion = '0.8.1.201512052358'
 }
