@@ -21,5 +21,5 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:' + this.supportLibrariesVersion
+    compile 'com.android.support:support-v4:' + supportLibrariesVersion
 }

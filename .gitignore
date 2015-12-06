@@ -10,6 +10,7 @@
 
 # Gradle files
 gradle.properties
+local.gradle
 .gradle/
 build/
 /*/build/

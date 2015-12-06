@@ -22,5 +22,5 @@ dependencies {
     compile 'com.android.support:design:' + supportLibrariesVersion
     compile 'com.android.support:cardview-v7:' + supportLibrariesVersion
     compile 'com.google.guava:guava:18.0'
-    compile 'com.oasisfeng.nevo:sdk:' + this.nevoSdkVersion // Or local: compile project(':sdk')
+    compile 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion  // Or local: compile project(':sdk')
 }

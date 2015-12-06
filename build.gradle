@@ -10,16 +10,17 @@ buildscript {
     }
 }
 
+if (file('local.gradle').exists()) apply from: 'local.gradle'
+
 allprojects {
     repositories {
         jcenter()
     }
-    buildDir = "${rootProject.projectDir}/build/${project.parent != null ? project.parent.name : rootProject.name}/${project.name}"
 }
 
 subprojects {
     ext.compileSdkVersion = 23
-    ext.buildToolsVersion = '23.0.1'
+    ext.buildToolsVersion = '23.0.2'
     ext.supportLibrariesVersion = '23.0.1'
     ext.nevoSdkVersion = '0.8.1.201512052358'
 }

@@ -17,5 +17,5 @@ android {
 }
 
 dependencies {
-    compile 'com.oasisfeng.nevo:sdk:' + this.nevoSdkVersion // Or local: compile project(':sdk')
+    compile 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion  // Or local: compile project(':sdk')
 }
