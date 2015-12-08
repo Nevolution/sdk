@@ -33,6 +33,9 @@
                 <action android:name="com.oasisfeng.nevo.Decorator" />
                 <data android:scheme="package" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.oasisfeng.nevo.decorators.bundle.INotificationBundle" />
+            </intent-filter>
         </service>
 
         <!-- Optional decorator settings activity which will be launched when "settings" button of this decorator is pressed by user.
@@ -79,15 +82,6 @@
                       android:host="com.oasisfeng.nevo.decorators.bundle.BundleDecorator" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".NotificationBundle$AidlService"
-            android:exported="false"
-            android:process=":service" >
-            <intent-filter>
-                <action android:name="com.oasisfeng.nevo.decorators.bundle.INotificationBundle" />
-            </intent-filter>
-        </service>
 
     </application>
 

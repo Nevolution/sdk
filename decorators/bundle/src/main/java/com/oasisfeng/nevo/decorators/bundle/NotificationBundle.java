@@ -16,12 +16,9 @@
 
 package com.oasisfeng.nevo.decorators.bundle;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -150,12 +147,6 @@ public class NotificationBundle extends INotificationBundle.Stub {
 	private volatile List<String> mDefinedBundles;
 	private final Multimap<String/* bundle */, String/* key */> mBundledNotificationKeys = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.<String, String>create());
 	private final Map<String/* key */, String/* bundle */> mNotificationBundle = Collections.synchronizedMap(new HashMap<String, String>());	// Reverse map
-
-	public static class AidlService extends Service {
-		@Override public void onCreate() { mBinder = new NotificationBundle(this); }
-		@Override public IBinder onBind(final Intent intent) { return mBinder; }
-		private NotificationBundle mBinder;
-	}
 
 	private static final String TAG = "Nevo.Bundle";
 }

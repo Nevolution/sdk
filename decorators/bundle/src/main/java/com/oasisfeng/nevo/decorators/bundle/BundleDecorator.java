@@ -19,17 +19,16 @@ package com.oasisfeng.nevo.decorators.bundle;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -80,21 +79,19 @@ public class BundleDecorator extends NevoDecoratorService {
 				Log.w(TAG, "Bundle notification without bundled keys: " + existent.getKey());
 				continue;
 			}
-			Log.i(TAG, "Add already bundled notifications to bundle " + bundle + ": " + keys);
+			Log.i(TAG, "Add already bundled notifications in bundle \"" + bundle + "\": " + keys);
 			for (final String key : keys)
 				mBundles.setNotificationBundle(key, bundle);
 		}
 	}
 
 	@Override protected void apply(final StatusBarNotificationEvo evolved) throws RemoteException {
-		if (mBundles == null) return;
 		final String bundle = mBundles.queryRuleForNotification(evolved);
 		if (bundle == null || bundle.isEmpty()) return;		// No matched rule or configured to be not bundled (empty for exclusion)
 		bundle(evolved, bundle);
 	}
 
 	@Override protected void onNotificationRemoved(final String key) throws RemoteException {
-		if (mBundles == null) return;
 		mBundles.setNotificationBundle(key, null);	// Might be one of the extracted notifications after bundle notification is clicked.
 	}
 
@@ -141,29 +138,39 @@ public class BundleDecorator extends NevoDecoratorService {
 			bundled_keys.add(sbn.getKey());
 		}
 
-		final Intent delete_intent = new Intent(ACTION_BUNDLE_CLEAR).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
-				.putStringArrayListExtra(EXTRA_KEYS, bundled_keys);
-		final PendingIntent delete_pending_intent = PendingIntent.getBroadcast(this, 0, delete_intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		final Builder builder = new Builder(this).setContentTitle(bundle).setSmallIcon(R.drawable.ic_notification_bundle)
-				.setWhen(latest_when).setAutoCancel(false).setPriority(PRIORITY_MIN).setNumber(number).setDeleteIntent(delete_pending_intent);
+				.setWhen(latest_when).setAutoCancel(false).setPriority(PRIORITY_MIN).setNumber(number);
 		if (bundled_pkgs.size() == 1) {
 			final IBundle last_extras = sbns.get(0).notification().extras();
 			builder.setContentText(last_extras.getCharSequence(NotificationCompat.EXTRA_TITLE))
 					.setSubText(last_extras.getCharSequence(NotificationCompat.EXTRA_TEXT));
 		} else builder.setContentText(getSourceNames(bundled_pkgs));
 
-		builder.getExtras().putBoolean(NevoConstants.EXTRA_PHANTOM, true);		// Bundle notification should never be evolved or stored.
+		final Bundle extras = builder.getExtras();
+		extras.putStringArrayList(EXTRA_KEYS, bundled_keys);
+		extras.putBoolean(NevoConstants.EXTRA_PHANTOM, true);		// Bundle notification should never be evolved or stored.
 
-		final Notification notification = builder.build();
+		final Intent delete_intent = new Intent(ACTION_BUNDLE_CLEAR).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
+				.putStringArrayListExtra(EXTRA_KEYS, bundled_keys);
+		final PendingIntent delete_pending_intent = PendingIntent.getBroadcast(this, 0, delete_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		builder.setDeleteIntent(delete_pending_intent);
+
+
 		// Set on-click pending intent explicitly, to avoid notification drawer collapse when bundle is clicked.
 		final Intent click_intent = new Intent(ACTION_BUNDLE_EXPAND).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
 				.putStringArrayListExtra(EXTRA_KEYS, bundled_keys);
 		final PendingIntent click_pending_intent = PendingIntent.getBroadcast(this, 0, click_intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		final int view_id = Resources.getSystem().getIdentifier("status_bar_latest_event_content", "id", "android");
-		if (view_id != 0) notification.contentView.setOnClickPendingIntent(view_id, click_pending_intent);
-		else builder.setContentIntent(click_pending_intent);	// Fallback to normal content intent (notification drawer will collapse)
+		final Notification notification;
+		if (s1UViewId != 0) {
+			notification = builder.build();
+			notification.contentView.setOnClickPendingIntent(s1UViewId, click_pending_intent);
+		} else {
+			builder.setContentIntent(click_pending_intent);	// Fallback to normal content intent (notification drawer will collapse)
+			notification = builder.build();
+		}
 
 		notification.bigContentView = buildExpandedView(sbns);
+
 		return notification;
 	}
 
@@ -226,29 +233,27 @@ public class BundleDecorator extends NevoDecoratorService {
 	}
 
 	@Override public void onCreate() {
+		mBundles = new NotificationBundle(this);
+		mNotificationManager = NotificationManagerCompat.from(getApplication());
 		final IntentFilter filter = new IntentFilter(ACTION_BUNDLE_EXPAND);
 		filter.addAction(ACTION_BUNDLE_CLEAR);
 		filter.addDataScheme(SCHEME_BUNDLE);
 		registerReceiver(mOnBundleAction, filter);
-		mNotificationManager = NotificationManagerCompat.from(getApplication());
-
-		if (! bindService(new Intent(INotificationBundle.class.getName()).setPackage(getPackageName()), mBundlesConnection = new ServiceConnection() {
-
-			@Override public void onServiceConnected(final ComponentName name, final IBinder service) {
-				mBundles = INotificationBundle.Stub.asInterface(service);
-			}
-
-			@Override public void onServiceDisconnected(final ComponentName name) {/* Should never happen */}
-		}, BIND_AUTO_CREATE)) Log.e(TAG, "Failed to bind bundle service.");
 	}
 
 	@Override public void onDestroy() {
 		unregisterReceiver(mOnBundleAction);
-		if (mBundlesConnection != null) unbindService(mBundlesConnection);
 		super.onDestroy();
 	}
 
+	@Override public IBinder onBind(final Intent intent) {
+		if (intent != null && INotificationBundle.class.getName().equals(intent.getAction())) return mBundles;
+		return super.onBind(intent);
+	}
+
 	private NotificationManagerCompat mNotificationManager;
-	private INotificationBundle mBundles;
-	private ServiceConnection mBundlesConnection;
+	private INotificationBundle.Stub mBundles;
+
+	private static final int s1UViewId = Resources.getSystem().getIdentifier("status_bar_latest_event_content", "id", "android");
+	{ if (s1UViewId == 0) Log.w(TAG, "Partially incompatible ROM: android.R.id.status_bar_latest_event_content not found."); }
 }
