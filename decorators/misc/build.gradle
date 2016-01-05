@@ -1,10 +1,9 @@
-apply plugin: 'com.android.library'
+if (project.plugins.hasPlugin("com.android.library")) android { publishNonDefault true }
+else apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion this.compileSdkVersion
     buildToolsVersion this.buildToolsVersion
-
-    publishNonDefault true
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -14,8 +13,14 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    dexOptions {
+        incremental true
+        preDexLibraries true
+    }
 }
 
 dependencies {
-    compile 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion  // Or local: compile project(':sdk')
+    releaseCompile 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
+    debugCompile project.rootProject.childProjects.containsKey('sdk') ? project(':sdk') : 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
 }
