@@ -1,4 +1,3 @@
-[![Join the chat at https://gitter.im/oasisfeng/nevolution](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/oasisfeng/nevolution?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/oasisfeng/nevolution.svg?branch=master)](https://travis-ci.org/oasisfeng/nevolution)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/oasisfeng/nevolution)
 
@@ -29,7 +28,7 @@ Developing a simple plug-in for Nevolution with our developer-friendly SDK is ev
 
 We are devoted to working with the developer community to build high quality plug-ins and improve Nevolution. So developers are the most important roles to build a healthy community.
 
-Discussion goes to [our G+ community](https://plus.google.com/communities/108874686073587920040) or [Gitter chat](https://gitter.im/oasisfeng/nevolution?utm_source=readme&utm_medium=link&utm_campaign=dev-preview&utm_content=discussion), while issues and formal feature request should be posted on the GitHub for better tracking.
+Discussion goes to [our G+ community](https://plus.google.com/communities/108874686073587920040), while issues and formal feature request should be posted on the GitHub for better tracking.
 
 
 How Does Nevolution Work
