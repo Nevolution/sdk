@@ -136,6 +136,7 @@ public class BundleHolder extends IBundle.Stub {
 		onChanged(key, value);
 	}
 
+	public Object get(final String key) { synchronized (local) { return local.get(key); }}
 	@Override public boolean getBoolean(final String key, final boolean defaultValue) { synchronized (local) { return local.getBoolean(key, defaultValue); }}
 	@Override public int getInt(final String key, final int defaultValue) { synchronized (local) { return local.getInt(key, defaultValue); }}
 	@Override public long getLong(final String key, final long defaultValue) { synchronized (local) { return local.getLong(key, defaultValue); }}
