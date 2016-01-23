@@ -27,7 +27,6 @@ import android.service.notification.StatusBarNotification;
 import android.test.ServiceTestCase;
 
 import com.oasisfeng.android.content.pm.ParceledListSlice;
-import com.oasisfeng.nevo.StatusBarNotificationCompat;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.INevoDecorator;
 import com.oasisfeng.nevo.engine.INevoController;
@@ -126,8 +125,8 @@ public class BundleDecoratorTest extends ServiceTestCase<BundleDecorator> {
 			return Collections.unmodifiableMap(mRules);
 		}
 
-		@Override public String queryRule(final String key, final String title) {
-			return mRules.get(StatusBarNotificationCompat.parseKey(key).pkg);
+		@Override public String queryRule(final String pkg, final String title) {
+			return mRules.get(pkg);
 		}
 
 		@Override public void setNotificationBundle(final String key, final String bundle) {

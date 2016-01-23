@@ -58,50 +58,6 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
         catch (final Throwable t) { return android.os.Process.myUserHandle(); }
     }
 
-    public static Key parseKey(final String key) {
-		// userId + "|" + pkg + "|" + id + "|" + tag + "|" + uid
-		final int pos_last = key.lastIndexOf('|');
-		final String[] user_pkg_id_tag = key.substring(0, pos_last).split("\\|", 4);
-		String tag = user_pkg_id_tag[3];
-		if ("null".equals(tag)) tag = null;             // Nasty hole (Google should fix this!)
-		UserHandle user; int id = 0;
-		try {
-			user = toUserHandle(Integer.parseInt(user_pkg_id_tag[0]));
-		} catch (final NumberFormatException e) {
-			Log.w(TAG, "Malformed key: " + key);
-			user = android.os.Process.myUserHandle();
-		}
-		try {
-			id = Integer.parseInt(user_pkg_id_tag[2]);
-		} catch (final NumberFormatException e) { Log.w(TAG, "Malformed key: " + key); }
-		return new Key(user, user_pkg_id_tag[1], id, tag, Integer.parseInt(key.substring(pos_last + 1)));
-	}
-
-	// TODO: Reflection?
-	private static UserHandle toUserHandle(final int user) {
-		final Parcel parcel = Parcel.obtain();
-		try {
-			parcel.writeInt(user);
-			parcel.setDataPosition(0);
-			return UserHandle.readFromParcel(parcel);
-		} finally {
-			parcel.recycle();
-		}
-	}
-
-	public static final class Key {
-		Key(final UserHandle user, final String pkg, final int id, final String tag, final int uid) {
-			this.user = user; this.pkg = pkg; this.id = id; this.tag = tag; this.uid = uid;
-		}
-		/** User of this notification, or null on Android prior to 5.0 */
-		public final UserHandle user;
-		public final String pkg;
-		public final int id;
-		public final String tag;
-		/** The UID of app who posted this notification, or -1 on Android prior to 5.0 */
-		public final int uid;
-	}
-
 	public StatusBarNotificationCompat(final Parcel parcel) { super(parcel); key = SbnCompat.keyOf(this); groupKey = SbnCompat.groupKeyOf(this); }
 
 	public static final Parcelable.Creator<StatusBarNotificationCompat> CREATOR = new Parcelable.Creator<StatusBarNotificationCompat>() {

@@ -26,7 +26,6 @@ import com.oasisfeng.nevo.StatusBarNotificationEvo;
 public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTest {
 
 	public void testCreatorAndHelpers() { super.testCreatorAndHelpers(); }
-	public void testKeyParsing() { super.testKeyParsing(); }
 	public void testParcel() { super.testParcel(); }
 
 	public void testTagOverride() {

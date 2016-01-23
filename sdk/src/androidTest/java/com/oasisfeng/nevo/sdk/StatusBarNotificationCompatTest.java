@@ -44,30 +44,6 @@ public class StatusBarNotificationCompatTest extends AndroidTestCase {
 		assertEquals(sbnc.getGroupKey(), SbnCompat.groupKeyOf(sbnc));
 	}
 
-	public void testKeyParsing() {
-		final UserHandle user = Process.myUserHandle();
-		final Notification n = new Notification();
-		final long time = System.currentTimeMillis();
-
-		StatusBarNotificationCompat sbnc = create("pkg", "TAG", 1, user, 100, n, time);
-		StatusBarNotificationCompat.Key parsed = StatusBarNotificationCompat.parseKey(sbnc.getKey());
-		assertEquals("pkg", parsed.pkg);
-		assertEquals("TAG", parsed.tag);
-		assertEquals(1, parsed.id);
-
-		sbnc = create("com.a.b.c.d", null, -12, user, 100, n, time);
-		parsed = StatusBarNotificationCompat.parseKey(sbnc.getKey());
-		assertEquals("com.a.b.c.d", parsed.pkg);
-		assertNull(parsed.tag);
-		assertEquals(-12, parsed.id);
-
-		sbnc = create("com.a.b.c.d", "TAG|x", -12, user, 100, n, time);
-		parsed = StatusBarNotificationCompat.parseKey(sbnc.getKey());
-		assertEquals("com.a.b.c.d", parsed.pkg);
-		assertEquals("TAG|x", parsed.tag);
-		assertEquals(-12, parsed.id);
-	}
-
 	public void testParcel() {
 		final Notification n = new Notification(); n.tickerText = "ticker";
 		final StatusBarNotificationCompat sbnc = create("pkg", "TAG", 1, Process.myUserHandle(), 12, n, System.currentTimeMillis());
