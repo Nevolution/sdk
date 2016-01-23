@@ -33,7 +33,6 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.oasisfeng.nevo.StatusBarNotificationCompat;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.engine.INevoController;
 import com.oasisfeng.nevo.sdk.BuildConfig;
@@ -69,10 +68,9 @@ public abstract class NevoDecoratorService extends Service {
 	 * Apply this decorator to the notification. <b>Implementation should be idempotent</b>,
 	 * assuming the given notification may be (or may be not) already evolved by this decorator before.
 	 *
-	 * <p>Tip: Since the notification might be evolved already, the tag and ID could be altered, only the key is immutable.
-	 * To retrieve the original tag and ID, use {@link StatusBarNotificationCompat#parseKey(String)}.
+	 * <p>Notice: Since the notification might be evolved already, the tag and ID could be altered, only the key is immutable.
 	 *
-	 * Beware: Not all notifications can be modified, the decoration made here may be ignored if it is not modifiable.
+	 * <p>Beware: Not all notifications can be modified, the decoration made here may be ignored if it is not modifiable.
 	 * For example, sticky notification ({@link StatusBarNotification#isClearable()} is false) is not modifiable at present.
 	 *
 	 * @param evolving the incoming notification evolved by preceding decorators and to be evolved by this decorator,
@@ -93,14 +91,19 @@ public abstract class NevoDecoratorService extends Service {
 	 * this API does not return notifications from apps other than the caller itself.
 	 */
 	protected final StatusBarNotificationEvo[] getMyActiveNotifications() throws RemoteException {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! (mController instanceof Binder)) {
 			final StatusBarNotification[] notifications = ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).getActiveNotifications();
 			final StatusBarNotificationEvo[] transformed = new StatusBarNotificationEvo[notifications.length];
 			for (int i = 0; i < notifications.length; i ++) transformed[i] = StatusBarNotificationEvo.from(notifications[i]);
 			return transformed;
 		}
-		@SuppressWarnings("unchecked") final List<StatusBarNotificationEvo> notifications = mController.getActiveNotifications(mWrapper).getList();
-		return notifications.toArray(new StatusBarNotificationEvo[notifications.size()]);
+		final long identity = Binder.clearCallingIdentity();
+		try {
+			@SuppressWarnings("unchecked") final List<StatusBarNotificationEvo> notifications = mController.getActiveNotifications(mWrapper).getList();
+			return notifications.toArray(new StatusBarNotificationEvo[notifications.size()]);
+		} finally {
+			Binder.restoreCallingIdentity(identity);
+		}
 	}
 
 	/**
