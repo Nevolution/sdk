@@ -33,31 +33,48 @@ public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTes
 		StatusBarNotificationEvo sbne = create("pkg", "TAG"/* initially non-null */, 1, Process.myUserHandle(), 12, n(), System.currentTimeMillis());
 		String key = SbnCompat.keyOf(sbne);
 		assertEquals("TAG", sbne.getTag());
+		pupAndVerify(sbne);
+
 		sbne.setTag("a|b.c");
 		assertEquals("a|b.c", sbne.getTag());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		sbne.setTag("");
 		assertEquals("", sbne.getTag());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		sbne.setTag(null);
 		assertNull(sbne.getTag());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		sbne.setTag("TAG");
 		assertEquals("TAG", sbne.getTag());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		// Override tag (null initially)
 		sbne = create("pkg", null/* initially null */, 1, Process.myUserHandle(), 12, n(), System.currentTimeMillis());
 		key = SbnCompat.keyOf(sbne);
 		assertNull(sbne.getTag());
+		pupAndVerify(sbne);
+
 		sbne.setTag("a|b.c");
 		assertEquals("a|b.c", sbne.getTag());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		sbne.setTag("");
 		assertEquals("", sbne.getTag());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		sbne.setTag(null);
 		assertNull(sbne.getTag());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
 	}
 
 	public void testIdOverride() {
@@ -68,12 +85,17 @@ public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTes
 		sbne.setId(0);
 		assertEquals(0, sbne.getId());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		sbne.setId(1);
 		assertEquals(1, sbne.getId());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
+
 		sbne.setId(- 1);
 		assertEquals(- 1, sbne.getId());
 		assertEquals(key, sbne.getKey());
+		pupAndVerify(sbne);
 	}
 
 	public void testINotification() throws RemoteException {
@@ -131,6 +153,24 @@ public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTes
 
 	protected StatusBarNotificationEvo createFromParcel(final Parcel parcel) {
 		return StatusBarNotificationEvo.CREATOR.createFromParcel(parcel);
+	}
+
+	private void pupAndVerify(final StatusBarNotificationEvo sbne) {
+		final StatusBarNotificationEvo pup = pup(sbne);
+		assertEquals(sbne.getId(), pup.getId());
+		assertEquals(sbne.getTag(), pup.getTag());
+		assertEquals(sbne.getKey(), pup.getKey());
+	}
+
+	private <T extends Parcelable> T pup(final T object) {
+		final Parcel parcel = Parcel.obtain();
+		try {
+			parcel.writeParcelable(object, 0);
+			parcel.setDataPosition(0);
+			return parcel.readParcelable(object.getClass().getClassLoader());
+		} finally {
+			parcel.recycle();
+		}
 	}
 
 	private Notification n() { return new Notification(); }

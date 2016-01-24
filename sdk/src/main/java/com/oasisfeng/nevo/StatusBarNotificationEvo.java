@@ -24,12 +24,13 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 /**
  * Ease the code across Nevolution with following features:
  * <ul>
  *   <li>Automatic proxy for heavy notification instance as lazy binder.</li>
- *   <li>Decorator to alter package, tag, ID, key and group key.</li>
+ *   <li>Methods for decorator to alter package, tag, ID, key and group key.</li>
  * </ul>
  *
  * Two states: wrapper and proxy (via binder)
@@ -66,12 +67,13 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		return this;
 	}
 
-    @Override public String getTag() { return tag_decorated ? tag : super.getTag(); }
-    @Override public int getId() { return id != null ? id : super.getId(); }
+	@Override public String getTag() { return tag_decorated ? tag : super.getTag(); }
+	@Override public int getId() { return id != null ? id : super.getId(); }
 
 	/**
 	 * Beware, calling this method on remote instance will retrieve the whole instance, which is inefficient and slow.
-	 * This local instance will also be marked as "dirty", increasing the cost of future {@link #writeToParcel(Parcel, int)}.
+	 * This local instance will also be marked as "dirty", greatly increasing the cost of future {@link #writeToParcel(Parcel, int)},
+	 * even if nothing is actually changed.
 	 *
 	 * @deprecated Consider using {@link #notification()} whenever possible to avoid the overhead of this method.
 	 */
@@ -80,7 +82,12 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 			if (holder == null) return super.getNotification();	// holder is null only if called by super constructor StatusBarNotification().
 			if (holder instanceof INotification.Stub) return holder.get();	// Direct fetch for local instance
 			if (notification == null) {
-				notification = holder.get();
+				try {
+					notification = holder.get();
+				} catch (final RuntimeException e) {
+					Log.e(TAG, "Failed to retrieve notification: " + getKey());
+					throw e;
+				}
 				NotificationCompat.getExtras(notification).setClassLoader(StatusBarNotificationEvo.class.getClassLoader());	// For our parcelable classes
 			}
 		} catch (final RemoteException e) { throw new IllegalStateException(e); }
@@ -113,15 +120,23 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		}
 		out.writeInt(PARCEL_MAGIC);
 		out.writeString(getPackageName());
-		out.writeInt(getId());
-		if (getTag() != null) {
+		out.writeInt(super.getId());
+		if (super.getTag() != null) {
 			out.writeInt(1);
-			out.writeString(getTag());
+			out.writeString(super.getTag());
 		} else out.writeInt(0);
 		out.writeInt(SbnCompat.getUid(this));
 		getUser().writeToParcel(out, flags);
 		out.writeLong(getPostTime());
 		out.writeStrongInterface(notification == null ? holder : new NotificationHolder(notification));	// The local copy of notification is "dirty" (possibly modified), hence needs to be updated.
+		if (id != null) {
+			out.writeInt(1);
+			out.writeInt(id);
+		} else out.writeInt(0);
+		if (tag_decorated) {
+			out.writeInt(1);
+			out.writeString(tag);
+		} else out.writeInt(0);
 	}
 
 	/** Write to parcel as plain {@link StatusBarNotification}, all decorations will be ignored. */
@@ -138,6 +153,10 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		super(in.readString(), null, in.readInt(), in.readInt() != 0 ? in.readString() : null, in.readInt(), 0, 0,
 				NULL_NOTIFICATION, UserHandle.readFromParcel(in), in.readLong());
 		holder = INotification.Stub.asInterface(in.readStrongBinder());
+		if (in.readInt() == 0) id = null;
+		else id = in.readInt();
+		tag_decorated = in.readInt() != 0;
+		if (tag_decorated) tag = in.readString();
 	}
 
 	public static final Parcelable.Creator<StatusBarNotificationEvo> CREATOR = new Parcelable.Creator<StatusBarNotificationEvo>() {
@@ -160,11 +179,12 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	}
 
     private String tag;     // Null is allowed, that's why "tag_decorated" is introduced.
-    private Integer id;
+    private @Nullable Integer id;
     private boolean tag_decorated;
     private final INotification holder;
 	private @Nullable Notification notification;	// Cache of remote notification to avoid expensive duplicate fetch.
 
     private static final int PARCEL_MAGIC = "NEVO".hashCode();  // TODO: Are they really magic enough?
 	private static final Notification NULL_NOTIFICATION = new Notification();	// Must be placed before VOID to avoid NPE.
+	private static final String TAG = "Nevo.Sbn";
 }
