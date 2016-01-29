@@ -174,10 +174,10 @@ public abstract class NevoDecoratorService extends Service {
 	private INevoController mController;
 	private int mFlags;
 
-	/** Internal flag */ public static final int FLAG_DECORATION_AWARE = 0x1;
-	/** Internal flag */ public static final int FLAG_REMOVAL_AWARE = 0x2;
-	/** Internal extra */ public static final String EXTRA_TAG_OVERRIDE = "nevo.tag.override";
-	/** Internal extra */ public static final String EXTRA_ID_OVERRIDE = "nevo.id.override";
+	/** Internal flag */ static final int FLAG_DECORATION_AWARE = 0x1;
+	/** Internal flag */ static final int FLAG_REMOVAL_AWARE = 0x2;
+	/** Internal extra */ static final String EXTRA_TAG_OVERRIDE = "nevo.tag.override";
+	/** Internal extra */ static final String EXTRA_ID_OVERRIDE = "nevo.id.override";
 	private static final String NEVO_PACKAGE_NAME = "com.oasisfeng.nevo";
 	protected final String TAG = "Nevo.Decorator[" + shorten(getClass().getSimpleName()) + "]";
 
