@@ -85,6 +85,13 @@ public abstract class NevoDecoratorService extends Service {
 	protected void onNotificationRemoved(final String key) throws Exception {}
 
 	/**
+	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
+	 *
+	 * If notification payload is not relevant, please consider overriding {@link #onNotificationRemoved(String)} instead.
+	 */
+	protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
+
+	/**
 	 * Backward-compatible version of {@link NotificationManager#getActiveNotifications()}
 	 *
 	 * BEWARE: Unlike {@link NotificationListenerService#getActiveNotifications()},
@@ -159,7 +166,10 @@ public abstract class NevoDecoratorService extends Service {
 				if (clazz.getDeclaredMethod("apply", StatusBarNotificationEvo.class) != null) mFlags |= FLAG_DECORATION_AWARE;
 			} catch (final NoSuchMethodException ignored) {}
 			try {
-				if (getClass().getDeclaredMethod("onNotificationRemoved", String.class) != null) mFlags |= FLAG_REMOVAL_AWARE;
+				if (getClass().getDeclaredMethod("onNotificationRemoved", String.class) != null) mFlags |= FLAG_REMOVAL_AWARE_KEY_ONLY;
+			} catch (final NoSuchMethodException ignored) {}
+			try {
+				if (getClass().getDeclaredMethod("onNotificationRemoved", StatusBarNotificationEvo.class) != null) mFlags |= FLAG_REMOVAL_AWARE;
 			} catch (final NoSuchMethodException ignored) {}
 		}
 		return mWrapper == null ? mWrapper = new INevoDecoratorWrapper() : mWrapper;
@@ -175,7 +185,8 @@ public abstract class NevoDecoratorService extends Service {
 	private int mFlags;
 
 	/** Internal flag */ static final int FLAG_DECORATION_AWARE = 0x1;
-	/** Internal flag */ static final int FLAG_REMOVAL_AWARE = 0x2;
+	/** Internal flag */ static final int FLAG_REMOVAL_AWARE_KEY_ONLY = 0x2;
+	/** Internal flag */ static final int FLAG_REMOVAL_AWARE = 0x3;
 	/** Internal extra */ static final String EXTRA_TAG_OVERRIDE = "nevo.tag.override";
 	/** Internal extra */ static final String EXTRA_ID_OVERRIDE = "nevo.id.override";
 	private static final String NEVO_PACKAGE_NAME = "com.oasisfeng.nevo";
@@ -214,6 +225,15 @@ public abstract class NevoDecoratorService extends Service {
 		@Override public void onNotificationRemoved(final String key, final @Nullable Bundle options) {
 			try {
 				NevoDecoratorService.this.onNotificationRemoved(key);
+			} catch (final Throwable t) {
+				Log.e(TAG, "Error running onNotificationRemoved()", t);
+				throw asParcelableException(t);
+			}
+		}
+
+		@Override public void onNotificationRemovedLight(final StatusBarNotificationEvo notification, final @Nullable Bundle options) {
+			try {
+				NevoDecoratorService.this.onNotificationRemoved(notification);
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running onNotificationRemoved()", t);
 				throw asParcelableException(t);
