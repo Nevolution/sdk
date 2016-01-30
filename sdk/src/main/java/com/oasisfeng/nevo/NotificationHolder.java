@@ -25,6 +25,8 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 
 /**
@@ -156,7 +158,7 @@ public final class NotificationHolder extends INotification.Stub {
 	public static final int FIELD_PRIORITY = 1 << 9;
 	public static final int FIELD_VIBRATE = 1 << 10;
 
-	@IntDef(value = { FIELD_EXTRAS, FIELD_CONTENT_VIEW, FIELD_BIG_CONTENT_VIEW, FIELD_HEADS_UP_CONTENT_VIEW,
+	@Retention(RetentionPolicy.SOURCE) @IntDef(value = { FIELD_EXTRAS, FIELD_CONTENT_VIEW, FIELD_BIG_CONTENT_VIEW, FIELD_HEADS_UP_CONTENT_VIEW,
 			FIELD_NUMBER, FIELD_WHEN, FIELD_COLOR, FIELD_FLAGS, FIELD_GROUP, FIELD_PRIORITY, FIELD_VIBRATE }, flag = true)
 	public @interface UpdatedField {}
 
