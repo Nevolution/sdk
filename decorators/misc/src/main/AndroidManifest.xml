@@ -21,7 +21,7 @@
         android:minSdkVersion="18"
         android:targetSdkVersion="23" />
 
-    <application>
+    <application android:label="Decorator Pack">
 
         <service
             android:name=".StackDecorator"
