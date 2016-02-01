@@ -27,6 +27,5 @@ dependencies {
     compile 'com.android.support:cardview-v7:' + supportLibrariesVersion
     compile 'com.google.guava:guava:18.0'
 
-    releaseCompile 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
-    debugCompile project.rootProject.childProjects.containsKey('sdk') ? project(':sdk') : 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
+    compile project.rootProject.childProjects.containsKey('sdk') ? project(':sdk') : 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
 }

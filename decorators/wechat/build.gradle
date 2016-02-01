@@ -21,6 +21,5 @@ android {
 }
 
 dependencies {
-    releaseCompile 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
-    debugCompile project.rootProject.childProjects.containsKey('sdk') ? project(':sdk') : 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
+    compile project.rootProject.childProjects.containsKey('sdk') ? project(':sdk') : 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
 }
