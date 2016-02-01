@@ -24,7 +24,7 @@ Nevolution is currently under active development. Since the end-user experience 
 
 Developing a simple plug-in for Nevolution with our developer-friendly SDK is even easier than writing a tiny app. With a creative idea in your mind, just one or two hours of coding is enough to build a working plug-in. The code of built-in plug-ins already shows how simple a plug-in could be.
 
-[Join the beta test](https://play.google.com/apps/testing/com.oasisfeng.nevo) first, then [install it on Google Play](https://play.google.com/store/apps/details?id=com.oasisfeng.nevo). There might be a short delay before the latter link could work.
+[Join the beta test](https://play.google.com/apps/testing/com.oasisfeng.nevo) first, then [install it on Google Play](https://play.google.com/store/apps/details?id=com.oasisfeng.nevo&referrer=utm_source%3Dgithub%26utm_medium%3Dreadme). There might be a short delay before the latter link could work.
 
 We are devoted to working with the developer community to build high quality plug-ins and improve Nevolution. So developers are the most important roles to build a healthy community.
 
