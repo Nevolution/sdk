@@ -186,7 +186,7 @@ public abstract class NevoDecoratorService extends Service {
 
 	/** Internal flag */ static final int FLAG_DECORATION_AWARE = 0x1;
 	/** Internal flag */ static final int FLAG_REMOVAL_AWARE_KEY_ONLY = 0x2;
-	/** Internal flag */ static final int FLAG_REMOVAL_AWARE = 0x3;
+	/** Internal flag */ static final int FLAG_REMOVAL_AWARE = 0x4;
 	/** Internal extra */ static final String EXTRA_TAG_OVERRIDE = "nevo.tag.override";
 	/** Internal extra */ static final String EXTRA_ID_OVERRIDE = "nevo.id.override";
 	private static final String NEVO_PACKAGE_NAME = "com.oasisfeng.nevo";
