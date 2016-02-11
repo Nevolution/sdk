@@ -3,6 +3,10 @@ if (! project.plugins.hasPlugin("com.android.library")) apply plugin: 'com.andro
 android {
     compileSdkVersion this.compileSdkVersion
     buildToolsVersion this.buildToolsVersion
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
