@@ -47,6 +47,9 @@ import java.util.List;
  */
 public abstract class NevoDecoratorService extends Service {
 
+	/** The action to bind {@link NevoDecoratorService} */
+	public static final String ACTION_DECORATOR_SERVICE = "com.oasisfeng.nevo.Decorator";
+
 	/**
 	 * Add this extra to indicate that the big content view of the evolving notification should be rebuilt with this style.
 	 *
