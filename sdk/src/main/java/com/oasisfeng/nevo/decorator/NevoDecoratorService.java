@@ -19,6 +19,7 @@ package com.oasisfeng.nevo.decorator;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Build;
@@ -35,7 +36,6 @@ import android.util.Log;
 
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.engine.INevoController;
-import com.oasisfeng.nevo.sdk.BuildConfig;
 
 import java.util.Arrays;
 import java.util.List;
@@ -115,7 +115,6 @@ public abstract class NevoDecoratorService extends Service {
 
 	/**
 	 * All the historic notifications posted with the given key (including the incoming one without decoration at the last).
-	 * Only available if category "com.oasisfeng.nevo.decorator.NEED_HISTORY" is specified.
 	 *
 	 * Restriction: Only the key of decorated packages is accessible, empty list will be returned for others.
 	 */
@@ -153,7 +152,7 @@ public abstract class NevoDecoratorService extends Service {
 	}
 
 	@CallSuper @Override public IBinder onBind(final Intent intent) {
-		if (! BuildConfig.DEBUG) {
+		if ((getApplicationContext().getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
 			// TODO: Verify signature instead
 			final int caller_uid = Binder.getCallingUid();
 			if (caller_uid != Process.myUid()) {
