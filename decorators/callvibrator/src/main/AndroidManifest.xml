@@ -23,7 +23,7 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <application android:label="Decorator Pack">
+    <application android:label="[Nevo] Call Vibrator">
 
         <service
             android:name=".CallVibratorDecorator"

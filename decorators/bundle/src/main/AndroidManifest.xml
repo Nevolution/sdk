@@ -21,7 +21,7 @@
         android:minSdkVersion="18"
         android:targetSdkVersion="23" />
 
-    <application android:label="Decorator Pack">
+    <application android:label="[Nevo] Bundle">
 
         <service
             android:name=".BundleDecorator"
