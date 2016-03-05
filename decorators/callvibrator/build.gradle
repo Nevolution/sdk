@@ -4,11 +4,6 @@ android {
     compileSdkVersion this.compileSdkVersion
     buildToolsVersion this.buildToolsVersion
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
-
     lintOptions {
         abortOnError false
     }

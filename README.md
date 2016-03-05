@@ -12,7 +12,7 @@ Background
 
 Android supports a highly rich notification experience, and the feature set has expanded in almost every major Android version. Unfortunately, most apps in the wild only use a small set of the limited capabilities in their notifications, rendering them less elegant, functionality lacking and even ugly on your modern Android devices.
 
-If you use an Android Wear smart watch or Android Auto powered car, it's extremely disappointing that many of your favorite apps do not integrate fully with your tech.
+If you use an Android Wear smart watch or Android Auto powered car, it's extremely disappointing that many of your favorite apps do not provide friendly integration with them.
 
 The Nevolution Community is proactively changing the philosophy behind notifications and aims to set an example of great user experience.
 
@@ -20,11 +20,11 @@ The Nevolution Community is proactively changing the philosophy behind notificat
 Developer Preview
 -------------------
 
-Nevolution is currently under active development. Since the end-user experience largely depends on the richness of 3rd-party plug-ins, we decided to release the developer preview version in beta test before the public release.
+Nevolution is currently under active development. Since the end-user experience largely depends on the richness of 3rd-party plug-ins, we decided to release the developer preview version in alpha test before the public beta release.
 
 Developing a simple plug-in for Nevolution with our developer-friendly SDK is even easier than writing a tiny app. With a creative idea in your mind, just one or two hours of coding is enough to build a working plug-in. The code of built-in plug-ins already shows how simple a plug-in could be.
 
-[Join the beta test](https://play.google.com/apps/testing/com.oasisfeng.nevo) first, then [install it on Google Play](https://play.google.com/store/apps/details?id=com.oasisfeng.nevo). There might be a short delay before the latter link could work.
+[Join the beta test](https://play.google.com/apps/testing/com.oasisfeng.nevo) first, then [install it on Google Play](https://play.google.com/store/apps/details?id=com.oasisfeng.nevo&referrer=utm_source%3Dgithub%26utm_medium%3Dreadme). There might be a short delay before the latter link could work.
 
 We are devoted to working with the developer community to build high quality plug-ins and improve Nevolution. So developers are the most important roles to build a healthy community.
 
@@ -38,7 +38,7 @@ Nevolution consists of one platform app and many third party plug-in apps. A plu
 
 Currently the only supported plug-in type is "decorator", which receives notification and makes necessary modifications on the fly. All decorators enabled by user work together in a pipeline to decorate any incoming notification.
 
-A decorator plug-in is essentially a regular exported Android service component declared with an intent-filter recognized by Nevolution platform. [See the code of decorators in this repository for details.](/decorators)
+A decorator plug-in is essentially a regular exported Android service component declared with an intent-filter recognized by Nevolution platform. See [the code of decorators in this repository](/decorators) for details.
 
 Nevolution does not require *root*, but root-capable features are planned to be added in the near future.
 
@@ -46,7 +46,7 @@ Nevolution does not require *root*, but root-capable features are planned to be 
 Get Started
 -------------
 
-Clone this repository to start developing new plug-in for Nevolution, or fork it to contribute to the built-in plug-ins and SDK.
+Clone this repository to start developing new plug-in for Nevolution, or fork it to contribute to the SDK and built-in plug-ins.
 
 Build and install your plug-in app on the device, Nevolution will recognize it and let you activate it for the selected app right away.
 

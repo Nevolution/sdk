@@ -15,7 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-    package="com.oasisfeng.nevo.decorators.wechat" android:versionCode="1" android:versionName="1.0">
+    package="com.oasisfeng.nevo.decorators.whatsapp" android:versionCode="1" android:versionName="1.0">
 
     <uses-sdk
         android:minSdkVersion="18"
@@ -23,17 +23,16 @@
 
     <application android:label="Decorator Pack">
 
-        <service
-            android:name=".WeChatDecorator"
-            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
-            android:process=":service"
-            android:label="@string/decorator_wechat_title"
-            android:description="@string/decorator_wechat_description">
+        <service android:name=".WhatsAppDecorator"
+                 android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
+                 android:process=":service"
+                 android:label="@string/decorator_whatsapp_title"
+                 android:description="@string/decorator_whatsapp_description">
             <intent-filter android:priority="5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
                 <data android:scheme="package"
-                      android:ssp="com.tencent.mm" tools:ignore="UnusedAttribute"
-                      android:host="com.tencent.mm" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
+                      android:ssp="com.whatsapp" tools:ignore="UnusedAttribute"
+                      android:host="com.whatsapp" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
             </intent-filter>
         </service>
 

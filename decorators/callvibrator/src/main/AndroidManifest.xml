@@ -15,25 +15,30 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-    package="com.oasisfeng.nevo.decorators.wechat" android:versionCode="1" android:versionName="1.0">
+    package="com.oasisfeng.nevo.decorators.callvibrator" android:versionCode="1" android:versionName="1.0">
 
     <uses-sdk
         android:minSdkVersion="18"
         android:targetSdkVersion="23" />
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application android:label="Decorator Pack">
 
         <service
-            android:name=".WeChatDecorator"
+            android:name=".CallVibratorDecorator"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
             android:process=":service"
-            android:label="@string/decorator_wechat_title"
-            android:description="@string/decorator_wechat_description">
+            android:label="@string/decorator_callvibrator_title"
+            android:description="@string/decorator_callvibrator_description">
             <intent-filter android:priority="5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
                 <data android:scheme="package"
-                      android:ssp="com.tencent.mm" tools:ignore="UnusedAttribute"
-                      android:host="com.tencent.mm" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
+                      android:ssp="com.google.android.dialer" tools:ignore="UnusedAttribute"
+                      android:host="com.google.android.dialer" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
+                <data android:scheme="package"
+                      android:ssp="com.android.dialer" tools:ignore="UnusedAttribute"
+                      android:host="com.android.dialer" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
             </intent-filter>
         </service>
 
