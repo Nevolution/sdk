@@ -25,7 +25,7 @@
 
         <service
             android:name=".WeChatDecorator"
-            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
+            android:permission="${permission}"
             android:process=":service"
             android:label="@string/decorator_wechat_title"
             android:description="@string/decorator_wechat_description">
