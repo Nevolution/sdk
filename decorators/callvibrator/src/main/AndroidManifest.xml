@@ -23,11 +23,11 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <application android:label="Decorator Pack">
+    <application android:label="[Nevo] Call Vibrator">
 
         <service
             android:name=".CallVibratorDecorator"
-            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
+            android:permission="${permission}"
             android:process=":service"
             android:label="@string/decorator_callvibrator_title"
             android:description="@string/decorator_callvibrator_description">

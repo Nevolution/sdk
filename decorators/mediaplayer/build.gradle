@@ -3,17 +3,4 @@ if (! project.plugins.hasPlugin("com.android.library")) apply plugin: 'com.andro
 android {
     compileSdkVersion this.compileSdkVersion
     buildToolsVersion this.buildToolsVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
-
-    lintOptions {
-        abortOnError false
-    }
-}
-
-dependencies {
-    compile project.rootProject.childProjects.containsKey('sdk') ? project(':sdk') : 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
 }

@@ -21,11 +21,11 @@
         android:minSdkVersion="18"
         android:targetSdkVersion="23" />
 
-    <application android:label="Decorator Pack">
+    <application android:label="[Nevo] Misc">
 
         <service
             android:name=".StackDecorator"
-            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
+            android:permission="${permission}"
             android:process=":service"
             android:label="@string/decorator_stack_title"
             android:description="@string/decorator_stack_description">
