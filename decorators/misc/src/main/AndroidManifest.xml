@@ -55,7 +55,6 @@
             android:description="@string/decorator_heads_up_clear_description">
             <intent-filter android:priority="-10">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package" />
             </intent-filter>
         </service>
 

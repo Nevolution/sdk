@@ -33,13 +33,8 @@
             android:description="@string/decorator_callvibrator_description">
             <intent-filter android:priority="5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package"
-                      android:ssp="com.google.android.dialer" tools:ignore="UnusedAttribute"
-                      android:host="com.google.android.dialer" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
-                <data android:scheme="package"
-                      android:ssp="com.android.dialer" tools:ignore="UnusedAttribute"
-                      android:host="com.android.dialer" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
             </intent-filter>
+            <meta-data android:name="packages" android:value="com.android.dialer|com.google.android.dialer" />
         </service>
 
     </application>

@@ -31,7 +31,6 @@
             android:description="@string/decorator_media_player_description">
             <intent-filter android:priority="-10">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package" />
             </intent-filter>
         </service>
 

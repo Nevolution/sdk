@@ -31,9 +31,6 @@
             android:description="@string/decorator_bundle_description">
             <intent-filter android:priority="-100">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="com.oasisfeng.nevo.decorators.bundle.INotificationBundle" />
             </intent-filter>
         </service>
