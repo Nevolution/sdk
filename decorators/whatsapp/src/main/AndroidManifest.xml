@@ -30,10 +30,8 @@
                  android:description="@string/decorator_whatsapp_description">
             <intent-filter android:priority="5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package"
-                      android:ssp="com.whatsapp" tools:ignore="UnusedAttribute"
-                      android:host="com.whatsapp" /> <!-- For backward-compatibility since "android:ssp" is only available on Android 4.4+ -->
             </intent-filter>
+            <meta-data android:name="packages" android:value="com.whatsapp" />
         </service>
 
     </application>
