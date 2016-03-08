@@ -31,7 +31,6 @@
             android:description="@string/decorator_stack_description">
             <intent-filter android:priority="-1">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package" />
             </intent-filter>
         </service>
 
@@ -43,7 +42,6 @@
             android:description="@string/decorator_big_text_description">
             <intent-filter>
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package" />
             </intent-filter>
         </service>
 
