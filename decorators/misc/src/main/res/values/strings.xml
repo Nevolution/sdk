@@ -16,11 +16,14 @@
   -->
 
 <resources>
-    <string name="decorator_big_text_title">Multi-line Text</string>
-    <string name="decorator_big_text_description">Expand truncated single-line text into multi-line full text.</string>
+    <string name="decorator_elastic_inbox_title">Elastic List</string>
+    <string name="decorator_elastic_inbox_description">Stretch the single-lined text into multi-lines for the expanded list-style notification when there are only a few lines, to make the most of the available space.</string>
 
     <string name="decorator_stack_title">Stack</string>
     <string name="decorator_stack_description">Stack recent messages within the same slot as a list in expanded form.</string>
+
+    <string name="decorator_big_text_title">Multi-line Text</string>
+    <string name="decorator_big_text_description">Expand truncated single-line text into multi-line full text.</string>
 
     <string name="decorator_heads_up_clear_title">No Heads-up</string>
     <string name="decorator_heads_up_clear_description">Disable the heads-up notification to avoid disturbance.</string>
