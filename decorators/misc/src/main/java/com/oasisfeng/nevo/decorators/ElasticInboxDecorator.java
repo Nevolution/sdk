@@ -21,27 +21,28 @@ import static android.support.v4.app.NotificationCompat.EXTRA_TEXT_LINES;
  */
 public class ElasticInboxDecorator extends NevoDecoratorService {
 
-	private static final int MAX_INBOX_LINES = 7;
+	private static final int MAX_INBOX_ENTRIES = 7;
+	private static final int MAX_TOTAL_LINES = 10;
 
 	@Override protected void apply(final StatusBarNotificationEvo evolving) throws Exception {
 		final INotification n = evolving.notification();
 		if (! n.hasBigContentView()) return;
 		@SuppressWarnings("unchecked") final List<CharSequence> lines = n.extras().getCharSequenceArray(EXTRA_TEXT_LINES);
 		if (lines == null || lines.isEmpty()) return;
-		final int num_lines_left = MAX_INBOX_LINES - lines.size();
+		final int num_lines_left = MAX_TOTAL_LINES - lines.size();
 		if (num_lines_left <= 0) return;
 		final RemoteViews inbox = n.getBigContentView();
-		final int num_lines = Math.min(lines.size(), MAX_INBOX_LINES);
-		final int[] line_length = new int[num_lines];
+		final int num_entries = Math.min(lines.size(), MAX_INBOX_ENTRIES);
+		final int[] line_length = new int[num_entries];
 		int length_sum = 0;
-		for (int i = 0; i < num_lines; i ++)
-			length_sum += line_length[i] = lines.get(i).length();
-		final StringBuilder log_buffer = new StringBuilder(32).append("Stretched: ");
+		for (int i = 0; i < num_entries; i ++) length_sum += line_length[i] = lines.get(i).length();
+		final StringBuilder log_buffer = new StringBuilder(32).append("Assign: ");
 		boolean updated = false;
-		for (int i = 0; i < num_lines; i ++) {
+		for (int i = 0; i < num_entries; i ++) {
 			final int view_id = sInboxLinesViewId[i];
 			if (view_id == 0) continue;
-			final int max_lines = 1 + num_lines_left * line_length[i] / length_sum / (i + 1);    // 1/i as weight
+			// Weight of extra lines for each item is its text length proportion (not accurate enough)
+			final int max_lines = 1 + (num_lines_left * line_length[i] + length_sum / 2) / length_sum;
 			if (max_lines > 1) {
 				updated = true;
 				setMaxLines(inbox, view_id, max_lines);
@@ -58,10 +59,10 @@ public class ElasticInboxDecorator extends NevoDecoratorService {
 		rvs.setInt(res, "setMaxLines", max_lines);
 	}
 
-	private static final int[] sInboxLinesViewId = new int[MAX_INBOX_LINES];
+	private static final int[] sInboxLinesViewId = new int[MAX_INBOX_ENTRIES];
 	static {
 		final Resources res = Resources.getSystem();
-		for (int i = 0; i < MAX_INBOX_LINES; i ++)
+		for (int i = 0; i < MAX_INBOX_ENTRIES; i ++)
 			sInboxLinesViewId[i] = res.getIdentifier("inbox_text" + i, "id", "android");
 	}
 }
