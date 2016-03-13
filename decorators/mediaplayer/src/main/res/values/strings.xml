@@ -16,6 +16,6 @@
   -->
 
 <resources>
-    <string name="decorator_media_player_title">Normalize Media Player</string>
-    <string name="decorator_media_player_description">Convert the custom media player notification to the Android standard style, to support lock-screen and Android Wear.</string>
+    <string name="decorator_media_player_title">Media Notification</string>
+    <string name="decorator_media_player_description">Convert the custom media player notification to the Android standard style, supporting lock-screen and Android Wear.</string>
 </resources>

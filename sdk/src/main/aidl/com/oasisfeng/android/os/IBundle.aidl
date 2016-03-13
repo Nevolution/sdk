@@ -38,9 +38,9 @@ interface IBundle {
 	oneway void putStringArrayList(String key, in List<String> value);
 
 	oneway void putCharSequence(String key, in CharSequence value);
-	/** Use List<CharSequence> instead of CharSequence[] since the latter is not supported by AIDL */
+	/** @param value in List&lt;CharSequence&gt; instead of CharSequence[] since the latter is not supported by AIDL */
 	oneway void putCharSequenceArray(String key, in List/*<CharSequence>*/ value);
-	/** Pass value argument in ArrayList<CharSequence> even if declared as List<CharSequence>, since ArrayList is not supported by AIDL */
+	/** @param value in ArrayList&lt;CharSequence&gt */
 	oneway void putCharSequenceArrayList(String key, in List/*<CharSequence>*/ value);
 
 	boolean getBoolean(String key, boolean defaultValue);
@@ -58,9 +58,9 @@ interface IBundle {
 	List<String> getStringArrayList(String key);
 
 	CharSequence getCharSequence(String key);
-	/** Returns ArrayList<CharSequence> instead of CharSequence[] since the latter is not supported by AIDL */
+	/** @return List&lt;CharSequence&gt; instead of CharSequence[] since the latter is not supported by AIDL */
 	List/*<CharSequence>*/ getCharSequenceArray(String key);
-	/** Returns ArrayList<CharSequence> despite declared as List, since ArrayList and List<CharSequence> are both not supported by AIDL */
+	/** @return List<CharSequence> */
 	List/*<CharSequence>*/ getCharSequenceArrayList(String key);
 
 	boolean containsKey(String key);
@@ -69,4 +69,17 @@ interface IBundle {
 	 * There is no equivalent API to {@link android.os.Bundle#putBundle(String, Bundle)}, use the instance returned here instead.
 	 */
 	IBundle getBundle(String key);
+
+	/** @param value in List&lt;Parcelable&gt; instead of Parcelable[] since the latter is not supported by AIDL */
+	oneway void putParcelableArray(String key, in List/*<Parcelable>*/ value);
+	/** @param value in ArrayList&lt;Parcelable&gt; */
+	oneway void putParcelableArrayList(String key, in List/*<Parcelable>*/ value);
+	/** @param value in Map&lt;Integer, Parcelable&gt; instead of SparseArray&lt;Parcelable&gt; since the latter is not supported by AIDL */
+	oneway void putSparseParcelableArray(String key, in Map/*<Integer, Parcelable>*/ value);
+	/** @return List&lt;Parcelable&gt; instead of Parcelable[] since the latter is not supported by AIDL */
+	List/*<Parcelable>*/ getParcelableArray(String key);
+	/** @return List&lt;Parcelable&gt; */
+	List/*<Parcelable>*/ getParcelableArrayList(String key);
+	/** @return Map&lt;Integer, Parcelable&gt; instead of SparseArray since the latter is not supported by AIDL */
+	Map/*<Integer, Parcelable>*/ getSparseParcelableArray(String key);
 }

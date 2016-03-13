@@ -24,6 +24,17 @@
     <application android:label="[Nevo] Misc">
 
         <service
+            android:name=".ElasticInboxDecorator"
+            android:permission="${permission}"
+            android:process=":service"
+            android:label="@string/decorator_elastic_inbox_title"
+            android:description="@string/decorator_elastic_inbox_description">
+            <intent-filter android:priority="-10">
+                <action android:name="com.oasisfeng.nevo.Decorator" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".StackDecorator"
             android:permission="${permission}"
             android:process=":service"
@@ -31,7 +42,6 @@
             android:description="@string/decorator_stack_description">
             <intent-filter android:priority="-1">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package" />
             </intent-filter>
         </service>
 
@@ -41,9 +51,8 @@
             android:process=":service"
             android:label="@string/decorator_big_text_title"
             android:description="@string/decorator_big_text_description">
-            <intent-filter>
+            <intent-filter android:priority="-5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
-                <data android:scheme="package" />
             </intent-filter>
         </service>
 

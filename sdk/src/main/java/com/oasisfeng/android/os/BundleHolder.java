@@ -18,11 +18,14 @@ package com.oasisfeng.android.os;
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Keep track of updated entries in local
@@ -136,6 +139,25 @@ public class BundleHolder extends IBundle.Stub {
 		onChanged(key, value);
 	}
 
+	@Override public void putParcelableArray(final String key, final List value) {
+		@SuppressWarnings("unchecked") final List<Parcelable> list = (List<Parcelable>) value;
+		synchronized (local) { local.putParcelableArray(key, list.toArray(new Parcelable[list.size()])); }
+		onChanged(key, list);
+	}
+	@Override public void putParcelableArrayList(final String key, final List value) {
+		@SuppressWarnings("unchecked") final ArrayList<Parcelable> list = (ArrayList<Parcelable>) value;
+		synchronized (local) { local.putParcelableArrayList(key, list); }
+		onChanged(key, list);
+	}
+	@Override public void putSparseParcelableArray(final String key, final Map value) {
+		@SuppressWarnings("unchecked") final Map<Integer, Parcelable> map = (Map<Integer, Parcelable>) value;
+		final SparseArray<Parcelable> array = new SparseArray<>(map.size());
+		for (final Map.Entry<Integer, Parcelable> entry : map.entrySet())
+			array.put(entry.getKey(), entry.getValue());
+		synchronized (local) { local.putSparseParcelableArray(key, array); }
+		onChanged(key, map);
+	}
+
 	public Object get(final String key) { synchronized (local) { return local.get(key); }}
 	@Override public boolean getBoolean(final String key, final boolean defaultValue) { synchronized (local) { return local.getBoolean(key, defaultValue); }}
 	@Override public int getInt(final String key, final int defaultValue) { synchronized (local) { return local.getInt(key, defaultValue); }}
@@ -158,6 +180,19 @@ public class BundleHolder extends IBundle.Stub {
 		return array != null ? Arrays.asList(array) : null;
 	}
 	@Override public List<CharSequence> getCharSequenceArrayList(final String key) { synchronized (local) { return local.getCharSequenceArrayList(key); }}
+
+	@Override public List<Parcelable> getParcelableArray(final String key) {
+		final Parcelable[] array; synchronized (local) { array = local.getParcelableArray(key); }
+		return array != null ? Arrays.asList(array) : null;
+	}
+	@Override public List<Parcelable> getParcelableArrayList(final String key) { synchronized (local) { return local.getParcelableArrayList(key); }}
+	@Override public Map<Integer, Parcelable> getSparseParcelableArray(final String key) {
+		final SparseArray<Parcelable> array; synchronized (local) { array = local.getSparseParcelableArray(key); }
+		if (array == null) return null;
+		final HashMap<Integer, Parcelable> map = new HashMap<>();
+		for (int i = 0; i < array.size(); i ++) map.put(array.keyAt(i), array.valueAt(i));
+		return map;
+	}
 
 	@Override public boolean containsKey(final String key) { synchronized (local) { return local.containsKey(key); }}
 
