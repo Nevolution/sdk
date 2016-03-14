@@ -45,9 +45,26 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 				SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime());
 	}
 
-	public StatusBarNotificationEvo(final String pkg, final String opPkg, final int id, final String tag, final int uid, final int initialPid, final int score, final Notification notification, final UserHandle user, final long postTime) {
+	/** For internal use, not public API */
+	public static StatusBarNotificationEvo from(final StatusBarNotification sbn, final NotificationHolder.OnDemandSuppliers suppliers) {
+		if (sbn instanceof StatusBarNotificationEvo) return (StatusBarNotificationEvo) sbn;
+		return new StatusBarNotificationEvo(sbn.getPackageName(), null, sbn.getId(), sbn.getTag(),
+				SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime(), suppliers);
+	}
+
+	public StatusBarNotificationEvo(final String pkg, final String opPkg, final int id, final String tag,
+									final int uid, final int initialPid, final int score,
+									final Notification notification, final UserHandle user, final long postTime) {
 		super(pkg, opPkg, id, tag, uid, initialPid, score, notification, user, postTime);
 		holder = new NotificationHolder(notification);
+	}
+
+	private StatusBarNotificationEvo(final String pkg, final String opPkg, final int id, final String tag,
+									final int uid, final int initialPid, final int score,
+									final Notification notification, final UserHandle user, final long postTime,
+									final NotificationHolder.OnDemandSuppliers suppliers) {
+		super(pkg, opPkg, id, tag, uid, initialPid, score, notification, user, postTime);
+		holder = new NotificationHolder(notification, suppliers);
 	}
 
 	public StatusBarNotificationEvo setTag(final @Nullable String tag) {
