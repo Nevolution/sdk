@@ -69,23 +69,32 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 
 	public StatusBarNotificationEvo setTag(final @Nullable String tag) {
 		if (equal(tag, this.tag)) return this;
-		if (equal(tag, super.getTag())) {
-			this.tag = null; tag_decorated = false;
+		if (equal(tag, super.getTag())) {			// Equal to the original tag
+			this.tag = null; tag_decorated = false;		// Clear the tag decoration
 		} else {
 			this.tag = tag; tag_decorated = true;
 		}
+		updateKey();
 		return this;
 	}
 
 	public StatusBarNotificationEvo setId(final int id) {
 		if (this.id != null && id == this.id) return this;
-		if (id == super.getId()) this.id = null;
+		if (id == super.getId()) this.id = null;	// Equal to the original ID, clear the decorated value
 		else this.id = id;
+		updateKey();
 		return this;
+	}
+
+	private void updateKey() {
+		if (! tag_decorated && id == null) key = null;
+		else key = SbnCompat.buildKey(this);
 	}
 
 	@Override public String getTag() { return tag_decorated ? tag : super.getTag(); }
 	@Override public int getId() { return id != null ? id : super.getId(); }
+	@Override public String getKey() { return key != null ? key : super.getKey(); }
+	public String getOriginalKey() { return super.getKey(); }
 
 	/**
 	 * Beware, calling this method on remote instance will retrieve the whole instance, which is inefficient and slow.
@@ -131,10 +140,6 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 
 	/** Write all fields except the Notification which is passed as IPC holder */
 	@Override public void writeToParcel(final Parcel out, final int flags) {
-		if ((flags & FLAG_WRITE_AS_ORIGINAL) != 0) {
-			super.writeToParcel(out, flags & ~ FLAG_WRITE_AS_ORIGINAL);
-			return;
-		}
 		out.writeInt(PARCEL_MAGIC);
 		out.writeString(getPackageName());
 		out.writeInt(super.getId());
@@ -155,9 +160,6 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 			out.writeString(tag);
 		} else out.writeInt(0);
 	}
-
-	/** Write to parcel as plain {@link StatusBarNotification}, all decorations will be ignored. */
-	public static final int FLAG_WRITE_AS_ORIGINAL = 0x1000;
 
     // Parcel written by plain StatusBarNotification
 	private StatusBarNotificationEvo(final Parcel in, final @Nullable INotification holder) {
@@ -199,7 +201,8 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
     private @Nullable Integer id;
     private boolean tag_decorated;
     private final INotification holder;
-	private @Nullable Notification notification;	// Cache of remote notification to avoid expensive duplicate fetch.
+	private transient String key;
+	private transient @Nullable Notification notification;	// Cache of remote notification to avoid expensive duplicate fetch.
 
     private static final int PARCEL_MAGIC = "NEVO".hashCode();  // TODO: Are they really magic enough?
 	private static final Notification NULL_NOTIFICATION = new Notification();	// Must be placed before VOID to avoid NPE.

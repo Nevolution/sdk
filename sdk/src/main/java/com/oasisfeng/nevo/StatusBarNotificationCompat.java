@@ -72,12 +72,17 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 
 		public static String keyOf(final StatusBarNotification sbn) {
 			if (sbn instanceof StatusBarNotificationCompat) {
-				final String key = ((StatusBarNotificationCompat) sbn).key;
+				final StatusBarNotificationCompat sbnc = (StatusBarNotificationCompat) sbn;
+				final String key = sbnc.getKey();
 				if (key != null) return key;				// May actually be null when called by the constructor
 			}
 			if (VERSION.SDK_INT >= VERSION_CODES.KITKAT_WATCH) return StatusBarNotificationCompat20.getKey(sbn);
-			// Use the exact same format of API level 20+: userId | pkg | id | tag | uid
-			return String.valueOf(sUserId) + '|' + sbn.getPackageName() + '|' + sbn.getId() + '|' + sbn.getTag() + '|' + getUid(sbn);
+			// Use the exact same format as Android SDK 20+: userId | pkg | id | tag | uid
+			return buildKey(sbn);
+		}
+
+		static @TargetApi(VERSION_CODES.LOLLIPOP) String buildKey(final StatusBarNotification sbn) {
+			return String.valueOf(userOf(sbn).hashCode()) + '|' + sbn.getPackageName() + '|' + sbn.getId() + '|' + sbn.getTag() + '|' + getUid(sbn);
 		}
 
 		public static String groupKeyOf(final StatusBarNotification sbn) {
@@ -107,7 +112,6 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 			return 0;
 		}
 
-		private static final int sUserId = android.os.Process.myUserHandle().hashCode(); // Equivalent to getIdentifier()
 		private static final Method sMethodGetUid;
 		private static final Field sFieldUid;
 		static {
@@ -127,7 +131,7 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 	@TargetApi(VERSION_CODES.KITKAT_WATCH)
 	private static class StatusBarNotificationCompat20 {
 
-		public static String getKey(final StatusBarNotification sbn) {
+		private static String getKey(final StatusBarNotification sbn) {
 			if (sbn instanceof StatusBarNotificationCompat)
 				return ((StatusBarNotificationCompat) sbn).getBaseKey();
 			return sbn.getKey();
@@ -137,7 +141,7 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 	@TargetApi(VERSION_CODES.LOLLIPOP)
 	private static class StatusBarNotificationCompat21 {
 
-		public static String getGroupKey(final StatusBarNotification sbn) {
+		private static String getGroupKey(final StatusBarNotification sbn) {
 			if (sbn instanceof StatusBarNotificationCompat)
 				return ((StatusBarNotificationCompat) sbn).getBaseGroupKey();
 			return sbn.getGroupKey();
