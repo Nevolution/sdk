@@ -35,41 +35,88 @@ import java.lang.reflect.Field;
  */
 public final class NotificationHolder extends INotification.Stub {
 
+	public interface OnDemandSuppliers {
+		RemoteViews getContentView(Notification n);
+		/** @return whether the content view is changed */
+		boolean setContentView(Notification n, RemoteViews views);
+		boolean hasBigContentView(Notification n);
+		RemoteViews getBigContentView(Notification n);
+		/** @return whether the big content view is changed */
+		boolean setBigContentView(Notification n, RemoteViews views);
+		boolean hasHeadsUpContentView(Notification n);
+		RemoteViews getHeadsUpContentView(Notification n);
+		/** @return whether the heads-up content view is changed */
+		boolean setHeadsUpContentView(Notification n, RemoteViews views);
+	}
+
+	public NotificationHolder(final Notification notification, final OnDemandSuppliers suppliers) {
+		n = notification;
+		extras = new ChangeTrackingBundleHolder(NotificationCompat.getExtras(n));
+		this.suppliers = suppliers;
+	}
+
 	public NotificationHolder(final Notification notification) {
 		n = notification;
 		extras = new ChangeTrackingBundleHolder(NotificationCompat.getExtras(n));
+		suppliers = new OnDemandSuppliers() {
+			@Override public RemoteViews getContentView(final Notification n) {
+				return n.contentView;
+			}
+			@Override public boolean setContentView(final Notification n, final RemoteViews views) {
+				n.contentView = views; return true;
+			}
+			@Override public boolean hasBigContentView(final Notification n) {
+				return n.bigContentView != null;
+			}
+			@Override public RemoteViews getBigContentView(final Notification n) {
+				return n.bigContentView;
+			}
+			@Override public boolean setBigContentView(final Notification n, final RemoteViews views) {
+				n.bigContentView = views; return true;
+			}
+			@Override public boolean hasHeadsUpContentView(final Notification n) {
+				return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && n.headsUpContentView != null;
+			}
+			@Override public RemoteViews getHeadsUpContentView(final Notification n) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) return n.headsUpContentView;
+				return null;
+			}
+			@Override public boolean setHeadsUpContentView(final Notification n, final RemoteViews views) {
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false;
+				n.headsUpContentView = views; return true;
+			}
+		};
 	}
 
 	@Override public Notification get() { return n; }
 
 	@Override public ChangeTrackingBundleHolder extras() { return extras; }
 
-	@Override public RemoteViews getContentView() { return n.contentView; }
+	@Override public RemoteViews getContentView() {
+		return suppliers.getContentView(n);
+	}
 	@Override public void setContentView(final RemoteViews views) {
-		n.contentView = views;
-		updated |= FIELD_CONTENT_VIEW;
+		if (suppliers.setContentView(n, views)) updated |= FIELD_CONTENT_VIEW;
 	}
 
-	@Override public boolean hasBigContentView() { return n.bigContentView != null; }
-	@Override public RemoteViews getBigContentView() { return n.bigContentView; }
+	@Override public boolean hasBigContentView() {
+		return suppliers.hasBigContentView(n);
+	}
+	@Override public RemoteViews getBigContentView() {
+		return suppliers.getBigContentView(n);
+	}
 	@Override public void setBigContentView(final RemoteViews views) {
-		n.bigContentView = views;
-		updated |= FIELD_BIG_CONTENT_VIEW;
+		if (suppliers.setBigContentView(n, views)) updated |= FIELD_BIG_CONTENT_VIEW;
 	}
 
 	@Override public boolean hasHeadsUpContentView() {
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && n.headsUpContentView != null;
+		return suppliers.hasHeadsUpContentView(n);
 	}
 	@Override public RemoteViews getHeadsUpContentView() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-			return n.headsUpContentView;
-		return null;
+		return suppliers.getHeadsUpContentView(n);
 	}
-	@Override public void setHeadsUpContentView(final RemoteViews view) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			n.headsUpContentView = view;
-			updated |= FIELD_HEADS_UP_CONTENT_VIEW;
-		}
+	@Override public void setHeadsUpContentView(final RemoteViews views) {
+		if (suppliers.setHeadsUpContentView(n, views)) updated |= FIELD_HEADS_UP_CONTENT_VIEW;
 	}
 
 	@Override public long getWhen() { return n.when; }
@@ -162,7 +209,7 @@ public final class NotificationHolder extends INotification.Stub {
 			FIELD_NUMBER, FIELD_WHEN, FIELD_COLOR, FIELD_FLAGS, FIELD_GROUP, FIELD_PRIORITY, FIELD_VIBRATE }, flag = true)
 	public @interface UpdatedField {}
 
-	public int getUpdatedFields() {
+	public @UpdatedField int getUpdatedFields() {
 		checkExtrasUpdate();
 		return updated;
 	}
@@ -179,6 +226,7 @@ public final class NotificationHolder extends INotification.Stub {
 
 	private final Notification n;
 	private final ChangeTrackingBundleHolder extras;
+	private final OnDemandSuppliers suppliers;
 	private @UpdatedField int updated;
 
 	static final String TAG = "Nevo.Holder";
