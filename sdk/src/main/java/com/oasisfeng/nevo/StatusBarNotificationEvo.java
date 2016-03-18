@@ -17,6 +17,7 @@
 package com.oasisfeng.nevo;
 
 import android.app.Notification;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -197,7 +198,18 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		return a == b || (a != null && a.equals(b));
 	}
 
-    private String tag;     // Null is allowed, that's why "tag_decorated" is introduced.
+	@Override public String toString() {
+		final StringBuilder string = new StringBuilder("StatusBarNotificationEvo(key=");
+		string.append(getOriginalKey());
+		if (key != null) string.append(" -> ").append(key);
+		string.append(": ");
+		if (holder instanceof Binder) try { string.append(holder.get()); } catch (final RemoteException ignored) {}	// Should never happen
+		else string.append("remote");
+		string.append(')');
+		return string.toString();
+	}
+
+	private String tag;     // Null is allowed, that's why "tag_decorated" is introduced.
     private @Nullable Integer id;
     private boolean tag_decorated;
     private final INotification holder;
