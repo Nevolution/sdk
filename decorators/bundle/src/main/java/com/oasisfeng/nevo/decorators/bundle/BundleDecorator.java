@@ -118,8 +118,8 @@ public class BundleDecorator extends NevoDecoratorService {
 			mHandler.postAtTime(new Runnable() { @Override public void run() {	// Postpone for quick decoration.
 				try {
 					showAsBundleIfAppropriate(bundle);
-				} catch (final RemoteException e) {
-					Log.w(TAG, "Failed to show bundle \"" + bundle + "\" due to " + e);
+				} catch (final Exception e) {	// Catch all exceptions to avoid crashing the process
+					Log.e(TAG, "Error showing bundle: " + bundle, e);
 				}
 			}}, token, SystemClock.uptimeMillis());
 		} catch (final RemoteException e) {
@@ -228,7 +228,7 @@ public class BundleDecorator extends NevoDecoratorService {
 
 				for (final String key : keys) try {
 					// The removal of group summary notification will cause all the group children being removed too,
-					// We track the keys of notification being revived to detect this glitch in onNotificationRemoved().
+					// Track the keys of notification being revived to ignore this glitch in onNotificationRemoved().
 					mPendingRevival.add(key);
 					mHandler.removeCallbacks(mResetPendingRevival);
 					mHandler.postDelayed(mResetPendingRevival, 3000);	// Avoid potential leaks
@@ -241,7 +241,7 @@ public class BundleDecorator extends NevoDecoratorService {
 			}
 		}
 
-		public java.lang.Runnable mResetPendingRevival = new Runnable() { @Override public void run() {
+		public Runnable mResetPendingRevival = new Runnable() { @Override public void run() {
 			mPendingRevival.clear();
 		}};
 	};
