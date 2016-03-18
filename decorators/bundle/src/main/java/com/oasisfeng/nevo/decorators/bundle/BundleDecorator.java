@@ -28,10 +28,13 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
@@ -39,6 +42,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.oasisfeng.android.os.IBundle;
+import com.oasisfeng.nevo.INotification;
 import com.oasisfeng.nevo.NevoConstants;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.NevoDecoratorService;
@@ -48,7 +52,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static android.app.Notification.PRIORITY_MIN;
+import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
 
 /**
  * Bundle notifications in same category into one "bundle notification"
@@ -71,6 +75,7 @@ public class BundleDecorator extends NevoDecoratorService {
 
 	@Override protected void onConnected() throws Exception {
 		super.onConnected();
+		Log.i(TAG, "Retrieving active bundles...");
 		for (final StatusBarNotificationEvo existent : getMyActiveNotifications()) {
 			if (existent.getTag() == null || ! existent.getTag().startsWith(TAG_PREFIX)) continue;
 			final String bundle = existent.getTag().substring(TAG_PREFIX.length());
@@ -79,7 +84,7 @@ public class BundleDecorator extends NevoDecoratorService {
 				Log.w(TAG, "Bundle notification without bundled keys: " + existent.getKey());
 				continue;
 			}
-			Log.i(TAG, "Add already bundled notifications in bundle \"" + bundle + "\": " + keys);
+			Log.i(TAG, keys.size() + " in \"" + bundle + "\": " + keys);
 			for (final String key : keys)
 				mBundles.setNotificationBundle(key, bundle);
 		}
@@ -91,55 +96,64 @@ public class BundleDecorator extends NevoDecoratorService {
 		bundle(evolved, bundle);
 	}
 
-	@Override protected void onNotificationRemoved(final String key) throws RemoteException {
-		mBundles.setNotificationBundle(key, null);	// Might be one of the extracted notifications after bundle notification is clicked.
-	}
-
 	private void bundle(final StatusBarNotificationEvo evolving, final String bundle) {
-		Log.i(TAG, "Bundle " + evolving.getKey() + " into " + bundle);
+		final String key = evolving.getKey();
+		Log.i(TAG, "Bundle into " + bundle + ": " + key);
+		mBundles.setNotificationBundle(key, bundle);
+		final INotification n = evolving.notification();
 		try {
-			mBundles.setNotificationBundle(evolving.getKey(), bundle);
-			if (! showBundleNotificationIfNeeded(bundle)) return;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) n.setGroup(TAG_PREFIX + bundle);
+			else n.extras().putString("android.support.groupKey", bundle);
 
-			final IBundle extras = evolving.notification().extras();
-			if ((evolving.notification().getFlags() & Notification.FLAG_LOCAL_ONLY) != 0) {
-				extras.putBoolean(NevoConstants.EXTRA_REMOVED, true);
-				return;
-			}
-			extras.putBoolean(NotificationManagerCompat.EXTRA_USE_SIDE_CHANNEL, true);
-			extras.putString("android.support.groupKey", bundle);
-		} catch (final RemoteException ignored) {}		// Should never happen
+			final String token = bundle.intern();
+			mHandler.removeCallbacksAndMessages(token);
+			mHandler.postAtTime(new Runnable() { @Override public void run() {	// Postpone for quick decoration.
+				try {
+					showAsBundleIfAppropriate(bundle);
+				} catch (final RemoteException e) {
+					Log.w(TAG, "Failed to show bundle \"" + bundle + "\" due to " + e);
+				}
+			}}, token, SystemClock.uptimeMillis());
+		} catch (final RemoteException e) {
+			Log.w(TAG, "Failed to show bundle \"" + bundle + "\" due to " + e);
+		}
 	}
 
-	private boolean showBundleNotificationIfNeeded(final String bundle) throws RemoteException {
-		List<String> keys = mBundles.getBundledNotificationKeys(bundle);
-		if (keys.size() < MIN_NUM_TO_BUNDLE) {
-			Log.d(TAG, "Not showing " + keys.size() + " notification(s) as bundle until " + MIN_NUM_TO_BUNDLE + " bundled");
+	private boolean showAsBundleIfAppropriate(final String bundle) throws RemoteException {
+		final List<String> all_keys = mBundles.getBundledNotificationKeys(bundle);
+		if (all_keys.size() < MIN_NUM_TO_BUNDLE) {
+			Log.d(TAG, "Not showing " + all_keys.size() + " notification(s) as bundle until " + MIN_NUM_TO_BUNDLE + " bundled");
 			return false;
 		}
-		if (keys.size() > 4) keys = keys.subList(keys.size() - 4, keys.size());		// Just last 4
-		@SuppressWarnings("unchecked") final List<StatusBarNotificationEvo> sbns = getNotifications(keys);
-		final Notification notification = buildBundleNotification(bundle, keys.size(), sbns);
+		final List<String> keys = all_keys.size() <= 4 ? all_keys : all_keys.subList(all_keys.size() - 4, all_keys.size()); // No more than 4
+
+		final List<StatusBarNotificationEvo> sbns = getMyActiveNotifications(keys);
+		if (sbns.size() <= 1) {
+			Log.e(TAG, "Failed to ");
+			return false;
+		}
+
+		final Notification notification = buildBundleNotification(bundle, all_keys.size()/* total number */, keys, sbns);
 		mNotificationManager.notify(TAG_PREFIX + bundle, 0, notification);
 
-		for (final StatusBarNotificationEvo sbn : sbns)
-			cancelNotification(sbn.getKey());
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH)	// Cancel notification explicitly if group is not supported.
+			for (final StatusBarNotificationEvo sbn : sbns)
+				cancelNotification(sbn.getKey());
 		return true;
 	}
 
-	private Notification buildBundleNotification(final String bundle, final int number, final List<StatusBarNotificationEvo> sbns) throws RemoteException {
+	private Notification buildBundleNotification(final String bundle, final int number, final List<String> bundled_keys, final List<StatusBarNotificationEvo> sbns) throws RemoteException {
 		final Set<String> bundled_pkgs = new HashSet<>(sbns.size());
-		final ArrayList<String> bundled_keys = new ArrayList<>(sbns.size());
 		long latest_when = 0;
 		for (final StatusBarNotificationEvo sbn : sbns) {
 			final long when = sbn.notification().getWhen();
 			if (when > latest_when) latest_when = when;
 			bundled_pkgs.add(sbn.getPackageName());
-			bundled_keys.add(sbn.getKey());
 		}
 
-		final Builder builder = new Builder(this).setContentTitle(bundle).setSmallIcon(R.drawable.ic_notification_bundle)
-				.setWhen(latest_when).setAutoCancel(false).setPriority(PRIORITY_MIN).setNumber(number);
+		final Builder builder = new Builder(this).setGroup(TAG_PREFIX + bundle).setGroupSummary(true)
+				.setContentTitle(bundle).setSmallIcon(R.drawable.ic_notification_bundle)
+				.setWhen(latest_when).setAutoCancel(false).setNumber(number)/*.setPriority(PRIORITY_MIN)*/;
 		if (bundled_pkgs.size() == 1) {
 			final IBundle last_extras = sbns.get(0).notification().extras();
 			builder.setContentText(last_extras.getCharSequence(NotificationCompat.EXTRA_TITLE))
@@ -147,18 +161,18 @@ public class BundleDecorator extends NevoDecoratorService {
 		} else builder.setContentText(getSourceNames(bundled_pkgs));
 
 		final Bundle extras = builder.getExtras();
-		extras.putStringArrayList(EXTRA_KEYS, bundled_keys);
+		final ArrayList<String> bundled_key_list = new ArrayList<>(bundled_keys);
+		extras.putStringArrayList(EXTRA_KEYS, bundled_key_list);
 		extras.putBoolean(NevoConstants.EXTRA_PHANTOM, true);		// Bundle notification should never be evolved or stored.
 
 		final Intent delete_intent = new Intent(ACTION_BUNDLE_CLEAR).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
-				.putStringArrayListExtra(EXTRA_KEYS, bundled_keys);
+				.putStringArrayListExtra(EXTRA_KEYS, bundled_key_list);
 		final PendingIntent delete_pending_intent = PendingIntent.getBroadcast(this, 0, delete_intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setDeleteIntent(delete_pending_intent);
 
-
 		// Set on-click pending intent explicitly, to avoid notification drawer collapse when bundle is clicked.
 		final Intent click_intent = new Intent(ACTION_BUNDLE_EXPAND).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
-				.putStringArrayListExtra(EXTRA_KEYS, bundled_keys);
+				.putStringArrayListExtra(EXTRA_KEYS, bundled_key_list);
 		final PendingIntent click_pending_intent = PendingIntent.getBroadcast(this, 0, click_intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		final Notification notification;
 		if (s1UViewId != 0) {
@@ -200,6 +214,7 @@ public class BundleDecorator extends NevoDecoratorService {
 		case ACTION_BUNDLE_EXPAND:
 			if (keys == null || keys.isEmpty()) break;
 			Log.d(TAG, "Expanding " + keys.size() + " notifications in bundle: " + bundle);
+
 			for (final String key : keys) try {
 				reviveNotification(key);
 			} catch (final RemoteException ignored) {}		// TODO: Try reviving later?
@@ -209,12 +224,11 @@ public class BundleDecorator extends NevoDecoratorService {
 		case ACTION_BUNDLE_CLEAR:
 			if (keys == null || keys.isEmpty()) break;
 			Log.d(TAG, "Clearing " + keys.size() + " notifications in bundle " + bundle + ": " + keys);
-			for (final String key : keys) try {
+			for (final String key : keys)
 				mBundles.setNotificationBundle(key, null);
-			} catch (final RemoteException ignored) {}
 			// Show another bundle notification in place for rest notifications bundled.
 			try {
-				showBundleNotificationIfNeeded(bundle);    // TODO: Place it in exactly same place as the previous one by sort key.
+				showAsBundleIfAppropriate(bundle);    // TODO: Place it in exactly same place as the previous one by sort key.
 			} catch (final RemoteException ignored) {}
 			break;
 		}
@@ -225,8 +239,8 @@ public class BundleDecorator extends NevoDecoratorService {
 		final PackageManager pm = getPackageManager();
 		final StringBuilder names = new StringBuilder();
 		for (final String pkg : pkgs)
-			try {
-				final ApplicationInfo app_info = pm.getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+			try { @SuppressWarnings("WrongConstant")
+				final ApplicationInfo app_info = pm.getApplicationInfo(pkg, GET_UNINSTALLED_PACKAGES);
 				names.append(", ").append(app_info.loadLabel(pm));
 			} catch (final NameNotFoundException ignored) {}          // TODO: Packages from other user profiles?
 		return names.substring(2);
@@ -252,7 +266,8 @@ public class BundleDecorator extends NevoDecoratorService {
 	}
 
 	private NotificationManagerCompat mNotificationManager;
-	private INotificationBundle.Stub mBundles;
+	private NotificationBundle mBundles;
+	private final Handler mHandler = new Handler();
 
 	private static final int s1UViewId = Resources.getSystem().getIdentifier("status_bar_latest_event_content", "id", "android");
 	{ if (s1UViewId == 0) Log.w(TAG, "Partially incompatible ROM: android.R.id.status_bar_latest_event_content not found."); }
