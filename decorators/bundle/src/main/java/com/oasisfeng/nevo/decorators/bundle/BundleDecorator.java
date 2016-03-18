@@ -66,7 +66,6 @@ import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
 public class BundleDecorator extends NevoDecoratorService {
 
 	static final String ACTION_BUNDLE_EXPAND = "com.oasisfeng.nevo.bundle.action.EXPAND";
-	static final String ACTION_BUNDLE_CLEAR = "com.oasisfeng.nevo.bundle.action.CLEAR";
 	private static final String EXTRA_KEYS = "com.oasisfeng.nevo.bundle.extra.KEYS";	// ArrayList<String>
 	private static final String SCHEME_BUNDLE = "bundle";
 	private static final String TAG_PREFIX = "B>";
@@ -94,6 +93,11 @@ public class BundleDecorator extends NevoDecoratorService {
 		final String bundle = mBundles.queryRuleForNotification(evolved);
 		if (bundle == null || bundle.isEmpty()) return;		// No matched rule or configured to be not bundled (empty for exclusion)
 		bundle(evolved, bundle);
+	}
+
+	@Override protected void onNotificationRemoved(final String key) throws RemoteException {
+		if (mPendingRevival.remove(key)) return;		// This removal is caused by the glitch before revival.
+		mBundles.setNotificationBundle(key, null);		// Remove it from bundle since it should not be shown in bundle any more.
 	}
 
 	private void bundle(final StatusBarNotificationEvo evolving, final String bundle) {
@@ -128,9 +132,9 @@ public class BundleDecorator extends NevoDecoratorService {
 		final List<String> keys = all_keys.size() <= 4 ? all_keys : all_keys.subList(all_keys.size() - 4, all_keys.size()); // No more than 4
 
 		final List<StatusBarNotificationEvo> sbns = getMyActiveNotifications(keys);
-		if (sbns.size() <= 1) {
-			Log.e(TAG, "Failed to ");
-			return false;
+		if (sbns.size() != keys.size()) {
+			Log.w(TAG, sbns.size() + " out of " + keys.size() + " bundled notifications are retrieved successfully.");
+			if (sbns.size() < MIN_NUM_TO_BUNDLE) return false;
 		}
 
 		final Notification notification = buildBundleNotification(bundle, all_keys.size()/* total number */, keys, sbns);
@@ -164,11 +168,6 @@ public class BundleDecorator extends NevoDecoratorService {
 		final ArrayList<String> bundled_key_list = new ArrayList<>(bundled_keys);
 		extras.putStringArrayList(EXTRA_KEYS, bundled_key_list);
 		extras.putBoolean(NevoConstants.EXTRA_PHANTOM, true);		// Bundle notification should never be evolved or stored.
-
-		final Intent delete_intent = new Intent(ACTION_BUNDLE_CLEAR).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
-				.putStringArrayListExtra(EXTRA_KEYS, bundled_key_list);
-		final PendingIntent delete_pending_intent = PendingIntent.getBroadcast(this, 0, delete_intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		builder.setDeleteIntent(delete_pending_intent);
 
 		// Set on-click pending intent explicitly, to avoid notification drawer collapse when bundle is clicked.
 		final Intent click_intent = new Intent(ACTION_BUNDLE_EXPAND).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
@@ -204,35 +203,38 @@ public class BundleDecorator extends NevoDecoratorService {
 	}
 
 	// TODO: Use static receiver instead to withstand service down-time.
-	private final BroadcastReceiver mOnBundleAction = new BroadcastReceiver() { @Override public void onReceive(final Context context, final Intent intent) {
-		if (intent == null || intent.getData() == null) return;
-		if (Binder.getCallingPid() != Process.myPid()) return;
-		final String bundle = intent.getData().getSchemeSpecificPart();
-		final ArrayList<String> keys = intent.getStringArrayListExtra(EXTRA_KEYS);
+	private final BroadcastReceiver mOnBundleAction = new BroadcastReceiver() {
 
-		switch (intent.getAction()) {
-		case ACTION_BUNDLE_EXPAND:
-			if (keys == null || keys.isEmpty()) break;
-			Log.d(TAG, "Expanding " + keys.size() + " notifications in bundle: " + bundle);
+		@Override public void onReceive(final Context context, final Intent intent) {
+			if (intent == null || intent.getData() == null) return;
+			if (Binder.getCallingPid() != Process.myPid()) return;
+			final String bundle = intent.getData().getSchemeSpecificPart();
+			final ArrayList<String> keys = intent.getStringArrayListExtra(EXTRA_KEYS);
 
-			for (final String key : keys) try {
-				reviveNotification(key);
-			} catch (final RemoteException ignored) {}		// TODO: Try reviving later?
-			// Remove the bundle notification after restoration,
-			mNotificationManager.cancel(TAG_PREFIX + bundle, 0);
-			break;
-		case ACTION_BUNDLE_CLEAR:
-			if (keys == null || keys.isEmpty()) break;
-			Log.d(TAG, "Clearing " + keys.size() + " notifications in bundle " + bundle + ": " + keys);
-			for (final String key : keys)
-				mBundles.setNotificationBundle(key, null);
-			// Show another bundle notification in place for rest notifications bundled.
-			try {
-				showAsBundleIfAppropriate(bundle);    // TODO: Place it in exactly same place as the previous one by sort key.
-			} catch (final RemoteException ignored) {}
-			break;
+			switch (intent.getAction()) {
+			case ACTION_BUNDLE_EXPAND:
+				if (keys == null || keys.isEmpty()) break;
+				Log.d(TAG, "Expanding " + keys.size() + " notifications in bundle: " + bundle);
+
+				for (final String key : keys) try {
+					// The removal of group summary notification will cause all the group children being removed too,
+					// We track the keys of notification being revived to detect this glitch in onNotificationRemoved().
+					mPendingRevival.add(key);
+					mHandler.removeCallbacks(mResetPendingRevival);
+					mHandler.postDelayed(mResetPendingRevival, 3000);	// Avoid potential leaks
+
+					reviveNotification(key);
+				} catch (final RemoteException ignored) {}		// TODO: Try reviving later?
+				// Remove the bundle notification after restoration,
+				mNotificationManager.cancel(TAG_PREFIX + bundle, 0);
+				break;
+			}
 		}
-	}};
+
+		public java.lang.Runnable mResetPendingRevival = new Runnable() { @Override public void run() {
+			mPendingRevival.clear();
+		}};
+	};
 
 	// TODO: Reuse names when update
 	private String getSourceNames(final Set<String> pkgs) {
@@ -250,7 +252,6 @@ public class BundleDecorator extends NevoDecoratorService {
 		mBundles = new NotificationBundle(this);
 		mNotificationManager = NotificationManagerCompat.from(getApplication());
 		final IntentFilter filter = new IntentFilter(ACTION_BUNDLE_EXPAND);
-		filter.addAction(ACTION_BUNDLE_CLEAR);
 		filter.addDataScheme(SCHEME_BUNDLE);
 		registerReceiver(mOnBundleAction, filter);
 	}
@@ -267,6 +268,7 @@ public class BundleDecorator extends NevoDecoratorService {
 
 	private NotificationManagerCompat mNotificationManager;
 	private NotificationBundle mBundles;
+	private final Set<String> mPendingRevival = new HashSet<>();
 	private final Handler mHandler = new Handler();
 
 	private static final int s1UViewId = Resources.getSystem().getIdentifier("status_bar_latest_event_content", "id", "android");
