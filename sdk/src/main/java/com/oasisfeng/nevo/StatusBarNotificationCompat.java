@@ -81,8 +81,12 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 			return buildKey(sbn);
 		}
 
-		static @TargetApi(VERSION_CODES.LOLLIPOP) String buildKey(final StatusBarNotification sbn) {
-			return String.valueOf(userOf(sbn).hashCode()) + '|' + sbn.getPackageName() + '|' + sbn.getId() + '|' + sbn.getTag() + '|' + getUid(sbn);
+		static String buildKey(final StatusBarNotification sbn) {
+			return buildKey(userOf(sbn), sbn.getPackageName(), sbn.getId(), sbn.getTag(), getUid(sbn));
+		}
+
+		static String buildKey(final UserHandle user, final String pkg, final int id, final String tag, final int uid) {
+			return String.valueOf(user.hashCode()) + '|' + pkg + '|' + id + '|' + tag + '|' + uid;
 		}
 
 		public static String groupKeyOf(final StatusBarNotification sbn) {
