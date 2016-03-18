@@ -41,6 +41,10 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
 import com.oasisfeng.android.os.IBundle;
 import com.oasisfeng.nevo.INotification;
 import com.oasisfeng.nevo.NevoConstants;
@@ -137,7 +141,13 @@ public class BundleDecorator extends NevoDecoratorService {
 			if (sbns.size() < MIN_NUM_TO_BUNDLE) return false;
 		}
 
-		final Notification notification = buildBundleNotification(bundle, all_keys.size()/* total number */, keys, sbns);
+		// Sort by post time
+		final ImmutableList<StatusBarNotificationEvo> sorted_sbns = FluentIterable.from(sbns).toSortedList(
+				Ordering.natural().reverse().onResultOf(new Function<StatusBarNotificationEvo, Comparable>() { @Override public Comparable apply(final StatusBarNotificationEvo sbn) {
+					return sbn.getPostTime();
+				}}));
+
+		final Notification notification = buildBundleNotification(bundle, all_keys.size()/* total number */, keys, sorted_sbns);
 		mNotificationManager.notify(TAG_PREFIX + bundle, 0, notification);
 
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH)	// Cancel notification explicitly if group is not supported.
