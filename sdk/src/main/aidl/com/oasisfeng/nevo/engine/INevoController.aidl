@@ -18,12 +18,14 @@ package com.oasisfeng.nevo.engine;
 
 import com.oasisfeng.android.content.pm.ParceledListSlice;
 import com.oasisfeng.nevo.decorator.INevoDecorator;
+import com.oasisfeng.nevo.StatusBarNotificationEvo;
 
 interface INevoController {
 
-	ParceledListSlice/*<StatusBarNotificationEvo>*/ getActiveNotifications(in INevoDecorator token);
+	ParceledListSlice/*<StatusBarNotificationEvo>*/ deprecated_getActiveNotifications(in INevoDecorator token);
     ParceledListSlice/*<StatusBarNotificationEvo>*/ getArchivedNotifications(in INevoDecorator token, String key, int limit);
     ParceledListSlice/*<StatusBarNotificationEvo>*/ getNotifications(in INevoDecorator token, in List<String> keys);
     oneway void cancelNotification(in INevoDecorator token, String key);
     oneway void reviveNotification(in INevoDecorator token, String key);
+	List<StatusBarNotificationEvo> getActiveNotifications(in INevoDecorator token, in List<String> keys);
 }
