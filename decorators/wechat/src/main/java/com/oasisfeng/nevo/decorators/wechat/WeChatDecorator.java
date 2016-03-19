@@ -50,7 +50,7 @@ public class WeChatDecorator extends NevoDecoratorService {
 		evolving.setId(calcSplitId(title));		// Split into separate slots
 
 		// Chat history in big content view
-		final Collection<StatusBarNotificationEvo> history = getArchivedNotifications(evolving.getKey(), 20);
+		final Collection<StatusBarNotificationEvo> history = getArchivedNotifications(evolving.getOriginalKey(), 20);
 		if (history.isEmpty()) return;
 		final List<CharSequence> lines = new ArrayList<>(KMaxNumLines);
 		CharSequence text = null; int count = 0; final String redundant_prefix = title.toString() + ": ";

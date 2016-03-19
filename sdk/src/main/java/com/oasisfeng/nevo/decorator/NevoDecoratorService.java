@@ -28,7 +28,6 @@ import android.os.IBinder;
 import android.os.NetworkOnMainThreadException;
 import android.os.Process;
 import android.os.RemoteException;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
@@ -38,10 +37,13 @@ import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.engine.INevoController;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Interface for notification decorator.
+ *
+ * <p><b>Decorator permission restriction:</b> Only notifications from packages enabled for this decorator are accessible via APIs below.
  *
  * @author Oasis
  */
@@ -51,9 +53,12 @@ public abstract class NevoDecoratorService extends Service {
 	public static final String ACTION_DECORATOR_SERVICE = "com.oasisfeng.nevo.Decorator";
 
 	/**
-	 * Add this extra to indicate that the big content view of the evolving notification should be rebuilt with this style.
+	 * Add this extra to indicate that the big content view of the evolving notification should be rebuilt with this style,
+	 * usually after the specific extras for built-in style of big content view are altered.
 	 *
-	 * The string value is the class name of the big content style to be rebuilt with. Only the Android built-in styles are supported.
+	 * <p>Don't check this key in extras, since it will be removed during decoration.</p>
+	 *
+	 * <p>The string value is the class name of the big content style to be rebuilt with. Only the Android built-in styles are supported.
 	 *
 	 * @see #STYLE_BIG_TEXT
 	 * @see #STYLE_INBOX
@@ -94,32 +99,28 @@ public abstract class NevoDecoratorService extends Service {
 	 */
 	protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
 
-	/**
-	 * Backward-compatible version of {@link NotificationManager#getActiveNotifications()}
-	 *
-	 * BEWARE: Unlike {@link NotificationListenerService#getActiveNotifications()},
-	 * this API does not return notifications from apps other than the caller itself.
-	 */
-	protected final StatusBarNotificationEvo[] getMyActiveNotifications() throws RemoteException {
+	/** Retrieve active notifications posted by the caller UID. */
+	protected final List<StatusBarNotificationEvo> getMyActiveNotifications() throws RemoteException {
+		return getMyActiveNotifications(null);
+	}
+
+	/** Retrieve active notifications with the specified keys, posted by the caller UID. */
+	protected final List<StatusBarNotificationEvo> getMyActiveNotifications(final List<String> keys) throws RemoteException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! (mController instanceof Binder)) {
 			final StatusBarNotification[] notifications = ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).getActiveNotifications();
-			final StatusBarNotificationEvo[] transformed = new StatusBarNotificationEvo[notifications.length];
-			for (int i = 0; i < notifications.length; i ++) transformed[i] = StatusBarNotificationEvo.from(notifications[i]);
+			final List<StatusBarNotificationEvo> transformed = new ArrayList<>(notifications.length);
+			for (final StatusBarNotification notification : notifications)
+				transformed.add(StatusBarNotificationEvo.from(notification));
 			return transformed;
 		}
-		final long identity = Binder.clearCallingIdentity();
-		try {
-			@SuppressWarnings("unchecked") final List<StatusBarNotificationEvo> notifications = mController.getActiveNotifications(mWrapper).getList();
-			return notifications.toArray(new StatusBarNotificationEvo[notifications.size()]);
-		} finally {
-			Binder.restoreCallingIdentity(identity);
-		}
+		return mController.getActiveNotifications(mWrapper, keys);
 	}
 
 	/**
-	 * All the historic notifications posted with the given key (including the incoming one without decoration at the last).
+	 * Retrieve historic notifications posted with the given key (including the incoming one without decoration at the last).
+	 * The number of notifications kept in archive is undefined.
 	 *
-	 * Restriction: Only the key of decorated packages is accessible, empty list will be returned for others.
+	 * Decorator permission restriction applies.
 	 */
 	@SuppressWarnings("unchecked") protected final List<StatusBarNotificationEvo> getArchivedNotifications(final String key, final int limit) throws RemoteException {
 		return mController.getArchivedNotifications(mWrapper, key, limit).getList();
@@ -127,9 +128,10 @@ public abstract class NevoDecoratorService extends Service {
 
 	/**
 	 * Retrieve notifications by key (in evolved form, no matter active or removed, only the latest for each key).
-	 * Returned list may contain less entries than requested keys if some keys are not allowed or missing in archive.
+	 * Returned list may not contain entries for some of the requested keys, if not allowed or missing in archive.
+	 * It may also contain multiple entries for some requested keys, since split notifications with altered tag and ID share the same key.
 	 *
-	 * Restriction: Only the keys of notification from packages with this decorator enabled are allowed, others will be ignored.
+	 * Decorator permission restriction applies.
 	 */
 	@SuppressWarnings("unchecked") protected final List<StatusBarNotificationEvo> getNotifications(final List<String> keys) throws RemoteException {
 		return mController.getNotifications(mWrapper, keys).getList();
@@ -138,8 +140,8 @@ public abstract class NevoDecoratorService extends Service {
 	/**
 	 * Cancel an active notification, remove it from notification panel.
 	 *
-	 * Restriction: Only notification from packages with this decorator enabled is allowed to cancel.
-	 * */
+	 * Decorator permission restriction applies.
+	 */
 	protected final void cancelNotification(final String key) throws RemoteException {
 		mController.cancelNotification(mWrapper, key);
 	}
@@ -148,7 +150,7 @@ public abstract class NevoDecoratorService extends Service {
 	 * Revive a previously cancelled (removed or swiped) notification, with no alerts (sound, vibration, lights).
 	 * If the notification is still active, it will not be affected.
 	 *
-	 * Restriction: Only notifications from packages with this decorator enabled are allowed to revive.
+	 * Decorator permission restriction applies.
 	 */
 	protected final void reviveNotification(final String key) throws RemoteException {
 		mController.reviveNotification(mWrapper, key);

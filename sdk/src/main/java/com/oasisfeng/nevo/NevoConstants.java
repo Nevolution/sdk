@@ -28,14 +28,6 @@ import com.oasisfeng.nevo.StatusBarNotificationCompat.SbnCompat;
  */
 public class NevoConstants {
 
-	/**
-	 * Mark the notification to be removed, in decorator during evolution.
-	 *
-	 * Currently only the built-in decorator has privilege to use it. It is ignored from 3rd-party decorators.
-	 * Talk to us in the developer community if you do need this in your decorator.
-	 */
-	public static final String EXTRA_REMOVED = "nevo.removed";
-
 	/** Mark the notification being posted to be ignored by Nevolution, thus always untouched. */
 	public static final String EXTRA_PHANTOM = "nevo.phantom";
 

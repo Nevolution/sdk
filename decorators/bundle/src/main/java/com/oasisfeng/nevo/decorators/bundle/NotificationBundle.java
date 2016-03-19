@@ -18,17 +18,15 @@ package com.oasisfeng.nevo.decorators.bundle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
@@ -51,7 +49,7 @@ public class NotificationBundle extends INotificationBundle.Stub {
 
 	private static final String RULE_PREFS_NAME = "bundle.rules";
 
-	@Override public void setRule(final String pkg, final String title, final @Nullable String bundle) throws RemoteException {
+	@Override public void setRule(final String pkg, final String title, final @Nullable String bundle) {
 		if (bundle != null) mPrefs.edit().putString(buildRuleKey(pkg, title), bundle).apply();
 		else mPrefs.edit().remove(buildRuleKey(pkg, title)).apply();
 		mDefinedBundles = null;		// Invalidate the cache.
@@ -63,7 +61,7 @@ public class NotificationBundle extends INotificationBundle.Stub {
 		return queryRule(sbn.getPackageName(), title == null ? null : title.toString());
 	}
 
-	@Override public String queryRule(final String pkg, final String title) throws RemoteException {
+	@Override public String queryRule(final String pkg, final String title) {
 		if (title != null) {	// Query package + title first
 			final String bundle = mPrefs.getString(buildRuleKey(pkg, title), null);
 			if (bundle != null) return bundle;
@@ -78,30 +76,23 @@ public class NotificationBundle extends INotificationBundle.Stub {
 	}
 
 	@Override public void setNotificationBundle(final String key, final @Nullable String bundle) {
-		Preconditions.checkArgument(! TextUtils.isEmpty(key), "key is null or empty");
+		Preconditions.checkNotNull(key);
+		Preconditions.checkArgument(! key.isEmpty(), "key is empty");
 		final String previous_bundle = bundle != null ? mNotificationBundle.put(key, bundle) : mNotificationBundle.remove(key);
 		if (Objects.equal(bundle, previous_bundle)) return;		// Unchanged
 
 		if (previous_bundle != null) {			// Remove from previous bundle
 			if (mBundledNotificationKeys.remove(previous_bundle, key)) {
 				Log.i(TAG, previous_bundle + ": - " + key);
-				save(previous_bundle);
 			} else Log.e(TAG, "Internal inconsistency: " + key + " is expected to be but not in " + previous_bundle);
 		}
 		if (bundle != null) {
 			if (mBundledNotificationKeys.put(bundle, key)) {
-				Log.i(TAG, bundle + ": + " + key);
-				save(bundle);
+				Log.d(TAG, bundle + ": + " + key);
 			} else Log.e(TAG, "Internal inconsistency: " + key + " is already in " + bundle);
-			if (BuildConfig.DEBUG) logKeysInBundle(bundle);
+			logKeysInBundle(bundle);
 		}
 		// FIXME: Let nevolution engine observe this
-	}
-
-	private void save(final String bundle) {
-		final Collection<String> keys = mBundledNotificationKeys.get(bundle);
-		final Bundle data = new Bundle();
-		data.putStringArrayList(bundle, Lists.newArrayList(keys));
 	}
 
 	@Override public List<String> getDefinedBundles() {
@@ -136,17 +127,17 @@ public class NotificationBundle extends INotificationBundle.Stub {
 	}
 
 	private void logKeysInBundle(final String bundle) {
-		final StringBuilder log = new StringBuilder("Keys in bundle ").append(bundle).append(':');
-		for (final String each_key : mBundledNotificationKeys.get(bundle)) {
+		final Collection<String> keys = mBundledNotificationKeys.get(bundle);
+		final StringBuilder log = new StringBuilder().append(keys.size()).append(" keys in bundle ").append(bundle).append(':');
+		for (final String each_key : keys)
 			log.append(each_key).append(',');
-		}
-		Log.v(TAG, log.toString());
+		Log.d(TAG, log.substring(0, log.length() - 1));
 	}
 
 	private final SharedPreferences mPrefs;
 	private volatile List<String> mDefinedBundles;
-	private final Multimap<String/* bundle */, String/* key */> mBundledNotificationKeys = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.<String, String>create());
-	private final Map<String/* key */, String/* bundle */> mNotificationBundle = Collections.synchronizedMap(new HashMap<String, String>());	// Reverse map
+	private final Multimap<String/* bundle */, String/* decorated key */> mBundledNotificationKeys = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.<String, String>create());
+	private final Map<String/* decorated key */, String/* bundle */> mNotificationBundle = Collections.synchronizedMap(new ArrayMap<String, String>());	// Reverse map
 
 	private static final String TAG = "Nevo.Bundle";
 }
