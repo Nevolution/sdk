@@ -17,6 +17,7 @@
 package com.oasisfeng.nevo.decorators.wechat;
 
 import android.os.RemoteException;
+import android.support.annotation.ColorRes;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -26,7 +27,6 @@ import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.NevoDecoratorService;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,6 +38,7 @@ import java.util.List;
 public class WeChatDecorator extends NevoDecoratorService {
 
 	private static final int KMaxNumLines = 10;
+	private static final @ColorRes int PRIMARY_COLOR = 0xFF33B332;
 
 	@Override public void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		final INotification n = evolving.notification();
@@ -50,8 +51,9 @@ public class WeChatDecorator extends NevoDecoratorService {
 		evolving.setId(calcSplitId(title));		// Split into separate slots
 
 		// Chat history in big content view
-		final Collection<StatusBarNotificationEvo> history = getArchivedNotifications(evolving.getOriginalKey(), 20);
+		final List<StatusBarNotificationEvo> history = getArchivedNotifications(evolving.getOriginalKey(), 20);
 		if (history.isEmpty()) return;
+
 		final List<CharSequence> lines = new ArrayList<>(KMaxNumLines);
 		CharSequence text = null; int count = 0; final String redundant_prefix = title.toString() + ": ";
 		for (final StatusBarNotificationEvo each : history) {
@@ -67,18 +69,24 @@ public class WeChatDecorator extends NevoDecoratorService {
 				if (trimmed_text.toString().startsWith(redundant_prefix))	// Remove redundant prefix
 					trimmed_text = trimmed_text.subSequence(redundant_prefix.length(), trimmed_text.length());
 				lines.add(text = trimmed_text);
-			} else lines.add(text = its_text);
+			} else {
+				count = 1;
+				lines.add(text = its_text);
+			}
 		}
 		if (lines.isEmpty()) return;
-		Collections.reverse(lines);			// Latest first, since earliest lines will be trimmed by InboxStyle.
+
+		Collections.reverse(lines);			// Latest first, since bottom lines will be trimmed by InboxStyle.
 
 		extras.putCharSequence(NotificationCompat.EXTRA_TEXT, text);
-		extras.putCharSequence(NotificationCompat.EXTRA_TITLE_BIG, title);
-		extras.putCharSequenceArray(NotificationCompat.EXTRA_TEXT_LINES, lines);
-		extras.putString(EXTRA_REBUILD_STYLE, STYLE_INBOX);
+		if (count > 1) {
+			n.setNumber(count);
+			extras.putCharSequence(NotificationCompat.EXTRA_TITLE_BIG, title);
+			extras.putCharSequenceArray(NotificationCompat.EXTRA_TEXT_LINES, lines.size() > count ? lines.subList(0, count) : lines);
+			extras.putString(EXTRA_REBUILD_STYLE, STYLE_INBOX);
+		}
 
-		n.setColor(0xFF33B332);
-		if (count != 0) n.setNumber(count);
+		n.setColor(PRIMARY_COLOR);
 	}
 
 	/** @return the extracted count in 0xFF range and start position in 0xFF00 range */
@@ -102,7 +110,7 @@ public class WeChatDecorator extends NevoDecoratorService {
 		}
 	}
 
-	private int calcSplitId(final CharSequence title) {
+	private static int calcSplitId(final CharSequence title) {
 		return title == null ? 0 : title.hashCode();
 	}
 }
