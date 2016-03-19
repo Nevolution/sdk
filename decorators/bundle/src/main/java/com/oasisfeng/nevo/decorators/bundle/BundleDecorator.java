@@ -52,6 +52,7 @@ import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.NevoDecoratorService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +74,7 @@ public class BundleDecorator extends NevoDecoratorService {
 	private static final String EXTRA_KEYS = "com.oasisfeng.nevo.bundle.extra.KEYS";	// ArrayList<String>
 	private static final String SCHEME_BUNDLE = "bundle";
 	private static final String TAG_PREFIX = "B>";
+	private static final String GROUP_PREFIX = "B>";
 
 	private static final int MIN_NUM_TO_BUNDLE = 2;
 
@@ -94,8 +96,10 @@ public class BundleDecorator extends NevoDecoratorService {
 	}
 
 	@Override protected void apply(final StatusBarNotificationEvo evolved) throws RemoteException {
-		final String bundle = mBundles.queryRuleForNotification(evolved);
-		if (bundle == null || bundle.isEmpty()) return;		// No matched rule or configured to be not bundled (empty for exclusion)
+		String bundle = mBundles.queryRuleForNotification(evolved);
+		if (bundle == null)		// No explicit bundle set, default to app name
+			bundle = getSourceNames(Collections.singleton(evolved.getPackageName()));
+		else if (bundle.isEmpty()) return;		// No matched rule or configured to be not bundled (empty for exclusion)
 		bundle(evolved, bundle);
 	}
 
@@ -110,7 +114,7 @@ public class BundleDecorator extends NevoDecoratorService {
 		mBundles.setNotificationBundle(key, bundle);
 		final INotification n = evolving.notification();
 		try {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) n.setGroup(TAG_PREFIX + bundle);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) n.setGroup(GROUP_PREFIX + bundle);
 			else n.extras().putString("android.support.groupKey", bundle);
 
 			final String token = bundle.intern();
@@ -165,7 +169,7 @@ public class BundleDecorator extends NevoDecoratorService {
 			bundled_pkgs.add(sbn.getPackageName());
 		}
 
-		final Builder builder = new Builder(this).setGroup(TAG_PREFIX + bundle).setGroupSummary(true)
+		final Builder builder = new Builder(this).setGroup(GROUP_PREFIX + bundle).setGroupSummary(true)
 				.setContentTitle(bundle).setSmallIcon(R.drawable.ic_notification_bundle)
 				.setWhen(latest_when).setAutoCancel(false).setNumber(number)/*.setPriority(PRIORITY_MIN)*/;
 		if (bundled_pkgs.size() == 1) {
