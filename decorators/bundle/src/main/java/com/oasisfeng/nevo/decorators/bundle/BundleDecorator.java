@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
@@ -64,7 +65,8 @@ import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
  *
  * Created by Oasis on 2015/1/5.
  *
- * TODO: Re-bundle notifications a while after explicit expanding
+ * TODO: Re-bundle notifications a while after expanding
+ * TODO: Show another bundle notification with more notifications if a bundle with more than 4 notifications is swiped.
  * TODO: An option to set the priority (with status-bar icon or not)
  * TODO: An option to configure specific bundle as "unswipeable" (can only be removed explicitly via action)
  */
@@ -196,13 +198,12 @@ public class BundleDecorator extends NevoDecoratorService {
 			notification = builder.build();
 		}
 
-		notification.bigContentView = buildExpandedView(sbns);
-
+		notification.bigContentView = buildExpandedView(sbns, click_pending_intent);
 		return notification;
 	}
 
 	/** Preview the last a few notifications vertically as expanded view of bundle notification. */
-	private RemoteViews buildExpandedView(final List<StatusBarNotificationEvo> sbns) {
+	private @Nullable RemoteViews buildExpandedView(final List<StatusBarNotificationEvo> sbns, final PendingIntent click_pending_intent) {
 		if (sbns.isEmpty()) return null;
 		final RemoteViews expanded = new RemoteViews(getPackageName(), R.layout.bundle_expanded_notification);
 
@@ -213,6 +214,8 @@ public class BundleDecorator extends NevoDecoratorService {
 		for (final StatusBarNotificationEvo sbn : sbns) try {
 			expanded.addView(R.id.bundle_expanded_container, sbn.notification().getContentView());
 		} catch (final RemoteException ignored) {}	// Should not happen
+
+		expanded.setOnClickPendingIntent(R.id.bundle_expanded_container, click_pending_intent);
 		return expanded;
 	}
 
