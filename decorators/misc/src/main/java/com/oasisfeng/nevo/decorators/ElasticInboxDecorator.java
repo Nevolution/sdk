@@ -32,6 +32,8 @@ public class ElasticInboxDecorator extends NevoDecoratorService {
 		final int num_lines_left = MAX_TOTAL_LINES - lines.size();
 		if (num_lines_left <= 0) return;
 		final RemoteViews inbox = n.getBigContentView();
+		if (inbox == null) return;
+
 		final int num_entries = Math.min(lines.size(), MAX_INBOX_ENTRIES);
 		final int[] line_length = new int[num_entries];
 		int length_sum = 0;
