@@ -40,7 +40,7 @@
             android:process=":service"
             android:label="@string/decorator_stack_title"
             android:description="@string/decorator_stack_description">
-            <intent-filter android:priority="-1">
+            <intent-filter android:priority="-5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
             </intent-filter>
         </service>
@@ -51,7 +51,7 @@
             android:process=":service"
             android:label="@string/decorator_big_text_title"
             android:description="@string/decorator_big_text_description">
-            <intent-filter android:priority="-5">
+            <intent-filter android:priority="-20">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
             </intent-filter>
         </service>
@@ -62,7 +62,7 @@
             android:process=":service"
             android:label="@string/decorator_heads_up_clear_title"
             android:description="@string/decorator_heads_up_clear_description">
-            <intent-filter android:priority="-10">
+            <intent-filter android:priority="-50">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
             </intent-filter>
         </service>
