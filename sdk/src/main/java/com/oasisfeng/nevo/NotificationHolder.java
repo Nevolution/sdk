@@ -193,7 +193,8 @@ public final class NotificationHolder extends INotification.Stub {
 
 	private static final String KEY_GROUP = "android.support.groupKey";
 
-	public static final int FIELD_EXTRAS = 1;
+	/* Updated field will no longer reflect the changes in extras, use getExtrasChangeCount() instead.
+	public static final int FIELD_EXTRAS = 1; */
 	public static final int FIELD_CONTENT_VIEW = 1 << 1;
 	public static final int FIELD_BIG_CONTENT_VIEW = 1 << 2;
 	public static final int FIELD_HEADS_UP_CONTENT_VIEW = 1 << 3;
@@ -205,23 +206,24 @@ public final class NotificationHolder extends INotification.Stub {
 	public static final int FIELD_PRIORITY = 1 << 9;
 	public static final int FIELD_VIBRATE = 1 << 10;
 
-	@Retention(RetentionPolicy.SOURCE) @IntDef(value = { FIELD_EXTRAS, FIELD_CONTENT_VIEW, FIELD_BIG_CONTENT_VIEW, FIELD_HEADS_UP_CONTENT_VIEW,
+	@Retention(RetentionPolicy.SOURCE) @IntDef(value = { FIELD_CONTENT_VIEW, FIELD_BIG_CONTENT_VIEW, FIELD_HEADS_UP_CONTENT_VIEW,
 			FIELD_NUMBER, FIELD_WHEN, FIELD_COLOR, FIELD_FLAGS, FIELD_GROUP, FIELD_PRIORITY, FIELD_VIBRATE }, flag = true)
 	public @interface UpdatedField {}
 
 	public @UpdatedField int getUpdatedFields() {
-		checkExtrasUpdate();
 		return updated;
 	}
 
+	public void resetUpdatedFields() {
+		updated = 0;
+	}
+
 	public boolean isFieldUpdated(@UpdatedField final int field) {
-		if ((field & FIELD_EXTRAS) != 0) checkExtrasUpdate();
 		return (updated & field) != 0;
 	}
 
-	private void checkExtrasUpdate() {
-		if ((updated & FIELD_EXTRAS) == 0 && extras.isChanged())
-			updated |= FIELD_EXTRAS;	// Check extras update on-demand
+	public int countChangedExtras() {
+		return extras.countChanges();
 	}
 
 	private final Notification n;
