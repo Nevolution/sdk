@@ -21,7 +21,9 @@ import android.os.Bundle;
 import com.oasisfeng.android.os.BundleHolder;
 import com.oasisfeng.android.os.IBundle;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,14 +33,13 @@ import java.util.Set;
  */
 public class ChangeTrackingBundleHolder extends BundleHolder {
 
-	public boolean isChanged() {
-		return ! mChangedKeys.isEmpty();	// No need to synchronize
+	public int countChanges() {
+		return mChangedKeys.size();		// No need to synchronize for ArrayList
 	}
 
 	public Set<String> getChangedKeys() {
 		synchronized (mChangedKeys) {
-			@SuppressWarnings("unchecked") final Set<String> clone = (Set<String>) mChangedKeys.clone();
-			return clone;
+			return new HashSet<>(mChangedKeys);
 		}
 	}
 
@@ -59,7 +60,7 @@ public class ChangeTrackingBundleHolder extends BundleHolder {
 
 	public ChangeTrackingBundleHolder(final Bundle bundle) { super(bundle); }
 
-	private final HashSet<String> mChangedKeys = new HashSet<>();
+	private final List<String> mChangedKeys = new ArrayList<>();
 
 	protected static class OnDemandChangeTrackingBundleHolder extends ChangeTrackingBundleHolder {
 

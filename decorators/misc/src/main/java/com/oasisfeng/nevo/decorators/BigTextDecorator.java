@@ -16,18 +16,17 @@
 
 package com.oasisfeng.nevo.decorators;
 
-import android.app.Notification;
 import android.os.RemoteException;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.oasisfeng.android.os.IBundle;
 import com.oasisfeng.nevo.INotification;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.NevoDecoratorService;
 
+import static android.support.v4.app.NotificationCompat.EXTRA_BIG_TEXT;
 import static android.support.v4.app.NotificationCompat.EXTRA_TEXT;
 import static android.support.v4.app.NotificationCompat.EXTRA_TITLE;
+import static android.support.v4.app.NotificationCompat.EXTRA_TITLE_BIG;
 
 /** @author Oasis */
 public class BigTextDecorator extends NevoDecoratorService {
@@ -40,22 +39,13 @@ public class BigTextDecorator extends NevoDecoratorService {
 		final IBundle extras = n.extras();
 		final CharSequence text = extras.getCharSequence(EXTRA_TEXT);
 		if (text == null) return;
-//		mPaint.measureText(text);							// TODO
+// TODO	mPaint.measureText(text);
 		if (text.length() < MIN_TEXT_LENGTH) return;
-		final Notification expanded = new NotificationCompat.BigTextStyle(mDummyBuilder).bigText(text)
-				.setBigContentTitle(extras.getCharSequence(EXTRA_TITLE)).build();
-		n.setBigContentView(expanded.bigContentView);
-		Log.i(TAG, "Expanded the text");
-	}
 
-	@Override public void onCreate() {
-		super.onCreate();
-		mDummyBuilder = new NotificationCompat.Builder(this);
-//		mPaint.setTextSize(textSize);
+		extras.putCharSequence(EXTRA_TITLE_BIG, extras.getCharSequence(EXTRA_TITLE));
+		extras.putCharSequence(EXTRA_BIG_TEXT, text);
+		extras.putString(EXTRA_REBUILD_STYLE, STYLE_BIG_TEXT);
 	}
 
 //	private final TextPaint mPaint = new TextPaint();
-	private NotificationCompat.Builder mDummyBuilder;
-
-	private static final String TAG = "Nevo.BigText";
 }

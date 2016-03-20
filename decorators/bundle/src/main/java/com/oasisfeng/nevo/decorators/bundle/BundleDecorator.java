@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
@@ -52,6 +53,7 @@ import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.NevoDecoratorService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,7 +65,8 @@ import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
  *
  * Created by Oasis on 2015/1/5.
  *
- * TODO: Re-bundle notifications a while after explicit expanding
+ * TODO: Re-bundle notifications a while after expanding
+ * TODO: Show another bundle notification with more notifications if a bundle with more than 4 notifications is swiped.
  * TODO: An option to set the priority (with status-bar icon or not)
  * TODO: An option to configure specific bundle as "unswipeable" (can only be removed explicitly via action)
  */
@@ -73,6 +76,7 @@ public class BundleDecorator extends NevoDecoratorService {
 	private static final String EXTRA_KEYS = "com.oasisfeng.nevo.bundle.extra.KEYS";	// ArrayList<String>
 	private static final String SCHEME_BUNDLE = "bundle";
 	private static final String TAG_PREFIX = "B>";
+	private static final String GROUP_PREFIX = "B>";
 
 	private static final int MIN_NUM_TO_BUNDLE = 2;
 
@@ -94,8 +98,10 @@ public class BundleDecorator extends NevoDecoratorService {
 	}
 
 	@Override protected void apply(final StatusBarNotificationEvo evolved) throws RemoteException {
-		final String bundle = mBundles.queryRuleForNotification(evolved);
-		if (bundle == null || bundle.isEmpty()) return;		// No matched rule or configured to be not bundled (empty for exclusion)
+		String bundle = mBundles.queryRuleForNotification(evolved);
+		if (bundle == null)		// No explicit bundle set, default to app name
+			bundle = getSourceNames(Collections.singleton(evolved.getPackageName()));
+		else if (bundle.isEmpty()) return;		// No matched rule or configured to be not bundled (empty for exclusion)
 		bundle(evolved, bundle);
 	}
 
@@ -110,7 +116,7 @@ public class BundleDecorator extends NevoDecoratorService {
 		mBundles.setNotificationBundle(key, bundle);
 		final INotification n = evolving.notification();
 		try {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) n.setGroup(TAG_PREFIX + bundle);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) n.setGroup(GROUP_PREFIX + bundle);
 			else n.extras().putString("android.support.groupKey", bundle);
 
 			final String token = bundle.intern();
@@ -165,7 +171,7 @@ public class BundleDecorator extends NevoDecoratorService {
 			bundled_pkgs.add(sbn.getPackageName());
 		}
 
-		final Builder builder = new Builder(this).setGroup(TAG_PREFIX + bundle).setGroupSummary(true)
+		final Builder builder = new Builder(this).setGroup(GROUP_PREFIX + bundle).setGroupSummary(true)
 				.setContentTitle(bundle).setSmallIcon(R.drawable.ic_notification_bundle)
 				.setWhen(latest_when).setAutoCancel(false).setNumber(number)/*.setPriority(PRIORITY_MIN)*/;
 		if (bundled_pkgs.size() == 1) {
@@ -192,13 +198,12 @@ public class BundleDecorator extends NevoDecoratorService {
 			notification = builder.build();
 		}
 
-		notification.bigContentView = buildExpandedView(sbns);
-
+		notification.bigContentView = buildExpandedView(sbns, click_pending_intent);
 		return notification;
 	}
 
 	/** Preview the last a few notifications vertically as expanded view of bundle notification. */
-	private RemoteViews buildExpandedView(final List<StatusBarNotificationEvo> sbns) {
+	private @Nullable RemoteViews buildExpandedView(final List<StatusBarNotificationEvo> sbns, final PendingIntent click_pending_intent) {
 		if (sbns.isEmpty()) return null;
 		final RemoteViews expanded = new RemoteViews(getPackageName(), R.layout.bundle_expanded_notification);
 
@@ -209,6 +214,8 @@ public class BundleDecorator extends NevoDecoratorService {
 		for (final StatusBarNotificationEvo sbn : sbns) try {
 			expanded.addView(R.id.bundle_expanded_container, sbn.notification().getContentView());
 		} catch (final RemoteException ignored) {}	// Should not happen
+
+		expanded.setOnClickPendingIntent(R.id.bundle_expanded_container, click_pending_intent);
 		return expanded;
 	}
 

@@ -21,6 +21,7 @@ import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
@@ -110,7 +111,10 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 			if (holder instanceof INotification.Stub) return holder.get();	// Direct fetch for local instance
 			if (notification == null) {
 				try {
+					final long begin = SystemClock.uptimeMillis();
 					notification = holder.get();
+					final long elapse = SystemClock.uptimeMillis() - begin;
+					if (elapse > 1) Log.w(TAG, "Retrieving the whole instance of remote notification spent " + elapse + "ms");
 				} catch (final RuntimeException e) {
 					Log.e(TAG, "Failed to retrieve notification: " + getKey());
 					throw e;
