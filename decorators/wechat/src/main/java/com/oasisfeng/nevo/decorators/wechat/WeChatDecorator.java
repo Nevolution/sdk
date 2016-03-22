@@ -93,7 +93,7 @@ public class WeChatDecorator extends NevoDecoratorService {
 	private int trimAndExtractLeadingCounter(final CharSequence text) {
 		// Parse and remove the leading "[n]" or [n条/則/…]
 		if (text == null || text.length() < 4 || text.charAt(0) != '[') return -1;
-		int text_start = 3, count_end;
+		int text_start = 2, count_end;
 		while (text.charAt(text_start ++) != ']') if (text_start >= text.length()) return -1;
 
 		try {
