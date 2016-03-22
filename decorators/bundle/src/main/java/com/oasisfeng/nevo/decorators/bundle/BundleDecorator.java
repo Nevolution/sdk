@@ -134,35 +134,35 @@ public class BundleDecorator extends NevoDecoratorService {
 	}
 
 	private boolean showAsBundleIfAppropriate(final String bundle) throws RemoteException {
-		final List<String> all_keys = mBundles.getBundledNotificationKeys(bundle);
-		if (all_keys.size() < MIN_NUM_TO_BUNDLE) {
-			Log.d(TAG, "Not showing " + all_keys.size() + " notification(s) as bundle until " + MIN_NUM_TO_BUNDLE + " bundled");
+		final List<String> bundled_keys = mBundles.getBundledNotificationKeys(bundle);
+		if (bundled_keys.size() < MIN_NUM_TO_BUNDLE) {
+			Log.d(TAG, "Not showing " + bundled_keys.size() + " notification(s) as bundle until " + MIN_NUM_TO_BUNDLE + " bundled");
 			return false;
 		}
-		final List<String> keys = all_keys.size() <= 4 ? all_keys : all_keys.subList(all_keys.size() - 4, all_keys.size()); // No more than 4
-
-		final List<StatusBarNotificationEvo> sbns = getMyActiveNotifications(keys);
-		if (sbns.size() != keys.size()) {
-			Log.w(TAG, sbns.size() + " out of " + keys.size() + " bundled notifications are retrieved successfully.");
-			if (sbns.size() < MIN_NUM_TO_BUNDLE) return false;
+		final List<StatusBarNotificationEvo> bundled_sbns = getMyActiveNotifications(bundled_keys);
+		final int num_bundled = bundled_sbns.size();
+		if (num_bundled != bundled_keys.size()) {
+			Log.w(TAG, num_bundled + " out of " + bundled_keys.size() + " bundled notifications are retrieved successfully.");
+			if (num_bundled < MIN_NUM_TO_BUNDLE) return false;
 		}
+		final List<StatusBarNotificationEvo> visible_sbns = num_bundled <= 4 ? bundled_sbns : bundled_sbns.subList(num_bundled - 4, num_bundled);
 
 		// Sort by post time
-		final ImmutableList<StatusBarNotificationEvo> sorted_sbns = FluentIterable.from(sbns).toSortedList(
+		final ImmutableList<StatusBarNotificationEvo> sorted_sbns = FluentIterable.from(visible_sbns).toSortedList(
 				Ordering.natural().reverse().onResultOf(new Function<StatusBarNotificationEvo, Comparable>() { @Override public Comparable apply(final StatusBarNotificationEvo sbn) {
 					return sbn.getPostTime();
 				}}));
 
-		final Notification notification = buildBundleNotification(bundle, all_keys.size()/* total number */, keys, sorted_sbns);
+		final Notification notification = buildBundleNotification(bundle, bundled_keys, sorted_sbns);
 		mNotificationManager.notify(TAG_PREFIX + bundle, 0, notification);
 
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH)	// Cancel notification explicitly if group is not supported.
-			for (final StatusBarNotificationEvo sbn : sbns)
+			for (final StatusBarNotificationEvo sbn : visible_sbns)
 				cancelNotification(sbn.getKey());
 		return true;
 	}
 
-	private Notification buildBundleNotification(final String bundle, final int number, final List<String> bundled_keys, final List<StatusBarNotificationEvo> sbns) throws RemoteException {
+	private Notification buildBundleNotification(final String bundle, final List<String> bundled_keys, final List<StatusBarNotificationEvo> sbns) throws RemoteException {
 		final Set<String> bundled_pkgs = new HashSet<>(sbns.size());
 		long latest_when = 0;
 		for (final StatusBarNotificationEvo sbn : sbns) {
@@ -173,7 +173,7 @@ public class BundleDecorator extends NevoDecoratorService {
 
 		final Builder builder = new Builder(this).setGroup(GROUP_PREFIX + bundle).setGroupSummary(true)
 				.setContentTitle(bundle).setSmallIcon(R.drawable.ic_notification_bundle)
-				.setWhen(latest_when).setAutoCancel(false).setNumber(number)/*.setPriority(PRIORITY_MIN)*/;
+				.setWhen(latest_when).setAutoCancel(false).setNumber(bundled_keys.size())/*.setPriority(PRIORITY_MIN)*/;
 		if (bundled_pkgs.size() == 1) {
 			final IBundle last_extras = sbns.get(0).notification().extras();
 			builder.setContentText(last_extras.getCharSequence(NotificationCompat.EXTRA_TITLE))
