@@ -88,7 +88,7 @@ public final class NotificationHolder extends INotification.Stub {
 		};
 	}
 
-	@Override public Notification get() { return n; }
+	@Override public Notification get() { return n; }	// No suppliers here, caller should be aware of this
 
 	@Override public ChangeTrackingBundleHolder extras() { return extras; }
 
