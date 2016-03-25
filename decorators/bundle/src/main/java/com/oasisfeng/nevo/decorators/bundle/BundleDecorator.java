@@ -28,7 +28,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -59,6 +60,7 @@ import java.util.List;
 import java.util.Set;
 
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 /**
  * Bundle notifications in same category into one "bundle notification"
@@ -73,6 +75,7 @@ import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
 public class BundleDecorator extends NevoDecoratorService {
 
 	static final String ACTION_BUNDLE_EXPAND = "com.oasisfeng.nevo.bundle.action.EXPAND";
+	static final String ACTION_BUNDLE_CLEAR = "com.oasisfeng.nevo.bundle.action.CLEAR";	// For Android 4.x
 	private static final String EXTRA_KEYS = "com.oasisfeng.nevo.bundle.extra.KEYS";	// ArrayList<String>
 	private static final String SCHEME_BUNDLE = "bundle";
 	private static final String TAG_PREFIX = "B>";
@@ -116,7 +119,7 @@ public class BundleDecorator extends NevoDecoratorService {
 		mBundles.setNotificationBundle(key, bundle);
 		final INotification n = evolving.notification();
 		try {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) n.setGroup(GROUP_PREFIX + bundle);
+			if (VERSION.SDK_INT >= VERSION_CODES.KITKAT_WATCH) n.setGroup(GROUP_PREFIX + bundle);
 			else n.extras().putString("android.support.groupKey", bundle);
 
 			final String token = bundle.intern();
@@ -139,7 +142,15 @@ public class BundleDecorator extends NevoDecoratorService {
 			Log.d(TAG, "Not showing " + bundled_keys.size() + " notification(s) as bundle until " + MIN_NUM_TO_BUNDLE + " bundled");
 			return false;
 		}
-		final List<StatusBarNotificationEvo> bundled_sbns = getMyActiveNotifications(bundled_keys);
+		// Grouped notifications still are "active" since Lollipop
+		final List<StatusBarNotificationEvo> bundled_sbns = VERSION.SDK_INT >= LOLLIPOP ? getMyActiveNotifications(bundled_keys)
+				: getNotifications(bundled_keys);
+		final List<String> available_bundled_keys = FluentIterable.from(bundled_sbns).transform(new Function<StatusBarNotificationEvo, String>() { @Override public String apply(final StatusBarNotificationEvo sbn) {
+			return sbn.getKey();
+		}}).toList();
+		if (available_bundled_keys.size() != bundled_keys.size())
+			Log.e(TAG, "Inconsistent bundled keys, expected=" + bundled_keys + ", available=" + available_bundled_keys);
+
 		final int num_bundled = bundled_sbns.size();
 		if (num_bundled != bundled_keys.size()) {
 			Log.w(TAG, num_bundled + " out of " + bundled_keys.size() + " bundled notifications are retrieved successfully.");
@@ -153,12 +164,14 @@ public class BundleDecorator extends NevoDecoratorService {
 					return sbn.getPostTime();
 				}}));
 
-		final Notification notification = buildBundleNotification(bundle, bundled_keys, sorted_sbns);
+		final Notification notification = buildBundleNotification(bundle, available_bundled_keys, sorted_sbns);
 		mNotificationManager.notify(TAG_PREFIX + bundle, 0, notification);
 
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH)	// Cancel notification explicitly if group is not supported.
-			for (final StatusBarNotificationEvo sbn : visible_sbns)
+		if (VERSION.SDK_INT < VERSION_CODES.KITKAT_WATCH)	// Cancel notification explicitly if group is not supported.
+			for (final StatusBarNotificationEvo sbn : visible_sbns) {
 				cancelNotification(sbn.getKey());
+				ignoreNextNotificaitonRemoval(sbn.getKey());	// Ignore the following onNotificationRemoved() to keep it in bundle.
+			}
 		return true;
 	}
 
@@ -184,6 +197,13 @@ public class BundleDecorator extends NevoDecoratorService {
 		final ArrayList<String> bundled_key_list = new ArrayList<>(bundled_keys);
 		extras.putStringArrayList(EXTRA_KEYS, bundled_key_list);
 		extras.putBoolean(NevoConstants.EXTRA_PHANTOM, true);		// Bundle notification should never be evolved or stored.
+
+		if (VERSION.SDK_INT < LOLLIPOP) {	// Use delete intent to clear bundled keys on Android 4.x (no group linkage)
+			final Intent delete_intent = new Intent(ACTION_BUNDLE_CLEAR).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
+					.putStringArrayListExtra(EXTRA_KEYS, bundled_key_list);
+			final PendingIntent delete_pending_intent = PendingIntent.getBroadcast(this, 0, delete_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			builder.setDeleteIntent(delete_pending_intent);
+		}
 
 		// Set on-click pending intent explicitly, to avoid notification drawer collapse when bundle is clicked.
 		final Intent click_intent = new Intent(ACTION_BUNDLE_EXPAND).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
@@ -233,25 +253,37 @@ public class BundleDecorator extends NevoDecoratorService {
 				if (keys == null || keys.isEmpty()) break;
 				Log.d(TAG, "Expanding " + keys.size() + " notifications in bundle: " + bundle);
 
-				for (final String key : keys) try {
-					// The removal of group summary notification will cause all the group children being removed too,
-					// Track the keys of notification being revived to ignore this glitch in onNotificationRemoved().
-					mPendingRevival.add(key);
-					mHandler.removeCallbacks(mResetPendingRevival);
-					mHandler.postDelayed(mResetPendingRevival, 3000);	// Avoid potential leaks
-
+				for (final String key : keys) try {		// The removal of group summary notification will cause all the group children being removed too,
+					ignoreNextNotificaitonRemoval(key);	// We should ignore this glitch in the following onNotificationRemoved().
 					reviveNotification(key);
 				} catch (final RemoteException ignored) {}		// TODO: Try reviving later?
 				// Remove the bundle notification after restoration,
 				mNotificationManager.cancel(TAG_PREFIX + bundle, 0);
 				break;
+			case ACTION_BUNDLE_CLEAR:
+				if (keys == null || keys.isEmpty()) break;
+				Log.d(TAG, "Clearing " + keys.size() + " notifications in bundle " + bundle + ": " + keys);
+				for (final String key : keys)
+					mBundles.setNotificationBundle(key, null);
+				try {
+					showAsBundleIfAppropriate(bundle);    // TODO: Place it in exactly same place as the previous one by sort key.
+				} catch (final RemoteException ignored) {}
+				break;
 			}
 		}
-
-		public Runnable mResetPendingRevival = new Runnable() { @Override public void run() {
-			mPendingRevival.clear();
-		}};
 	};
+
+	/** Remove notification while still keep it in bundle */
+	private void ignoreNextNotificaitonRemoval(final String key) {
+		// Track the keys of notification being revived
+		mPendingRevival.add(key);
+		mHandler.removeCallbacks(mResetPendingRevival);
+		mHandler.postDelayed(mResetPendingRevival, 3000);	// Avoid potential leaks
+	}
+
+	public Runnable mResetPendingRevival = new Runnable() { @Override public void run() {
+		mPendingRevival.clear();
+	}};
 
 	// TODO: Reuse names when update
 	private String getSourceNames(final Set<String> pkgs) {
