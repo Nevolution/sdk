@@ -33,6 +33,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.CallSuper;
+import android.support.annotation.Keep;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -89,20 +90,20 @@ public abstract class NevoDecoratorService extends Service {
 	 * @param evolving the incoming notification evolved by preceding decorators and to be evolved by this decorator,
 	 *                 or an already evolved notification (with or without this decorator).
 	 */
-	protected void apply(final StatusBarNotificationEvo evolving) throws Exception {}
+	@Keep protected void apply(final StatusBarNotificationEvo evolving) throws Exception {}
 
 	/** Override this method to perform initial process. */
 	protected void onConnected() throws Exception {}
 
 	/** Called when notification (no matter decorated or not) from packages with this decorator enabled is removed. */
-	protected void onNotificationRemoved(final String key) throws Exception {}
+	@Keep protected void onNotificationRemoved(final String key) throws Exception {}
 
 	/**
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
 	 *
 	 * If notification payload is not relevant, please consider overriding {@link #onNotificationRemoved(String)} instead.
 	 */
-	protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
+	@Keep protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
 
 	/** Retrieve active notifications posted by the caller UID. */
 	protected final List<StatusBarNotificationEvo> getMyActiveNotifications() throws RemoteException {
