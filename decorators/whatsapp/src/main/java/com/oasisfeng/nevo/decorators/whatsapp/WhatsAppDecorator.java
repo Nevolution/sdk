@@ -17,7 +17,8 @@
 package com.oasisfeng.nevo.decorators.whatsapp;
 
 import android.os.RemoteException;
-import android.support.v4.app.NotificationCompat;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 
 import com.oasisfeng.android.os.IBundle;
 import com.oasisfeng.nevo.INotification;
@@ -27,8 +28,13 @@ import com.oasisfeng.nevo.decorator.NevoDecoratorService;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.graphics.Typeface.BOLD;
 import static android.support.v4.app.NotificationCompat.EXTRA_SUMMARY_TEXT;
+import static android.support.v4.app.NotificationCompat.EXTRA_TEXT;
 import static android.support.v4.app.NotificationCompat.EXTRA_TEXT_LINES;
+import static android.support.v4.app.NotificationCompat.EXTRA_TITLE;
+import static android.support.v4.app.NotificationCompat.EXTRA_TITLE_BIG;
+import static android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
 
 /**
  * App-specific decorator for WhatsApp
@@ -41,56 +47,85 @@ public class WhatsAppDecorator extends NevoDecoratorService {
 		final INotification n = evolving.notification();
 		final IBundle extras = n.extras();
 
+		final CharSequence who, group, message;
 		@SuppressWarnings("unchecked") final List<CharSequence> lines = extras.getCharSequenceArray(EXTRA_TEXT_LINES);
-		if (lines == null || lines.size() <= 1) return;
+		final boolean has_lines = lines != null && ! lines.isEmpty();
+		final CharSequence title = extras.getCharSequence(EXTRA_TITLE);
+		final CharSequence last = has_lines ? lines.get(lines.size() - 1) : extras.getCharSequence(EXTRA_TEXT);
 
-		final CharSequence last = lines.get(lines.size() - 1);
-		final CharSequence[] _p = extract(last);
-		final CharSequence who = _p[0], group = _p[1], message = _p[2];
+		final CharSequence[] last_parts = extract(title, last);
+		who = last_parts[0]; group = last_parts[1]; message = last_parts[2];
 
 		if (group != null) {
-			extras.putCharSequence(NotificationCompat.EXTRA_TITLE, group);
-			extras.putCharSequence(NotificationCompat.EXTRA_TITLE_BIG, group);
-			extras.putCharSequence(NotificationCompat.EXTRA_TEXT, who + ": " + message);
-			evolving.setId(group.toString().hashCode() + 1/* Distinct from direct chat with the same name */);
+			evolving.setId(group.toString().hashCode());
+			evolving.setTag(".Group");
 		} else if (who != null) {
-			extras.putCharSequence(NotificationCompat.EXTRA_TITLE, who);
-			extras.putCharSequence(NotificationCompat.EXTRA_TITLE_BIG, who);
-			extras.putCharSequence(NotificationCompat.EXTRA_TEXT, message);
 			evolving.setId(who.toString().hashCode());
-		}	// No need to alter title and ID for other messages.
+			evolving.setTag(".Direct");
+		} else return;	// Nothing to do for other messages.
+
+		final CharSequence new_title = group != null ? group : who;
+		evolving.setId(new_title.toString().hashCode());
+
+		if (! has_lines) return;
+
+		extras.putCharSequence(EXTRA_TITLE, new_title);
+		extras.putCharSequence(EXTRA_TITLE_BIG, new_title);
+		extras.putCharSequence(EXTRA_TEXT, group != null ? who + ": " + message : message);
 
 		final List<CharSequence> new_lines = new ArrayList<>(lines.size());
 		for (final CharSequence line : lines) {
-			final CharSequence[] parts = extract(line);
+			final CharSequence[] parts = extract(title, line);
 			if (group != null) {			// Group chat, keep messages within the same group.
-				if (group.equals(parts[1])) new_lines.add(parts[0] + ": " + parts[2]);
-			} else if (who != null) {		// Direct chat, keep messages from the same person (excluding group chat)
-				if (who.equals(parts[0]) && parts[1] == null) new_lines.add(parts[2]);
-			} else new_lines.add(line);		// Other messages
+				if (! group.equals(parts[1])) continue;
+				final SpannableStringBuilder new_line = new SpannableStringBuilder();
+				new_line.append(parts[0]).setSpan(new StyleSpan(BOLD), 0, new_line.length(), SPAN_EXCLUSIVE_EXCLUSIVE);
+				new_lines.add(new_line.append(": ").append(parts[2]));
+			} else if (who.equals(parts[0]) && parts[1] == null)
+				new_lines.add(parts[2]);	// Direct chat, keep messages from the same person (excluding group chat)
 		}
 		extras.putCharSequenceArray(EXTRA_TEXT_LINES, new_lines);
 		extras.remove(EXTRA_SUMMARY_TEXT);
 		extras.putString(EXTRA_REBUILD_STYLE, STYLE_INBOX);
-
 		if (new_lines.size() > 1) n.setNumber(new_lines.size());
 	}
 
-	private CharSequence[] extract(final CharSequence line) {
+	/**
+	 * Patterns
+	 *
+	 * 		Title			Line
+	 * 		-----			----
+	 * 	1.	Sender			Message
+	 * 	2.	Sender @ Group	Message
+	 * 	3.	WhatsApp		Sender: Message
+	 * 	4.	Group			Sender: Message
+	 * 	5.	Summary			Sender @ Group: Message
+	 *
+	 * @return CharSequence[] { who, group, message }
+	 */
+	private static CharSequence[] extract(final CharSequence title, final CharSequence line) {
 		final int pos_colon = line.toString().indexOf(':');
-		if (pos_colon < 0) return new CharSequence[] { null, null, line };	// Non-chat message
-		final int pos_message = pos_colon + 1;
-		final CharSequence message = trim(line.subSequence(pos_message, line.length()));
+		if (pos_colon < 0) {	// Pattern 1 or 2
+			final int pos_at = title.toString().indexOf('@');
+			if (pos_at <= 0) return new CharSequence[] { title, null, line };	// Pattern 1
+			final CharSequence who = trim(title.subSequence(0, pos_at));
+			final CharSequence group = trim(title.subSequence(pos_at + 1, title.length()));
+			return new CharSequence[] { who, group, line };						// Pattern 2
+		}	// Pattern 3, 4 or 5
+		final CharSequence message = trim(line.subSequence(pos_colon + 1, line.length()));
 		final CharSequence from = line.subSequence(0, pos_colon), who, group;
 		final int pos_at = from.toString().indexOf('@');
-		if (pos_at > 0) {	// Group chat: "name @ group"
+		if (pos_at <= 0) {
+			group = "WhatsApp".equals(title) ? null : title;
+			return new CharSequence[] { from, group, message };					// Pattern 3 or 4
+		} else {
 			who = trim(from.subSequence(0, pos_at));
 			group = trim(from.subSequence(pos_at + 1, from.length()));
-		} else { group = null; who = from; }
-		return new CharSequence[] { who, group, message };
+			return new CharSequence[] { who, group, message };					// Pattern 5
+		}
 	}
 
-	private CharSequence trim(final CharSequence cs) {
+	private static CharSequence trim(final CharSequence cs) {
 		final int last = cs.length() - 1; int start = 0; int end = last;
 		while ((start <= end) && (cs.charAt(start) <= ' '))
 			start++;
