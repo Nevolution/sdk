@@ -26,6 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build.VERSION;
@@ -36,6 +37,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
@@ -175,23 +177,30 @@ public class BundleDecorator extends NevoDecoratorService {
 		return true;
 	}
 
-	private Notification buildBundleNotification(final String bundle, final List<String> bundled_keys, final List<StatusBarNotificationEvo> sbns) throws RemoteException {
-		final Set<String> bundled_pkgs = new HashSet<>(sbns.size());
-		long latest_when = 0;
-		for (final StatusBarNotificationEvo sbn : sbns) {
-			final long when = sbn.notification().getWhen();
+	private Notification buildBundleNotification(final String bundle, final List<String> bundled_keys,
+												 final List<StatusBarNotificationEvo> visible_sbns) throws RemoteException {
+		final Set<String> bundled_pkgs = new HashSet<>(visible_sbns.size());
+		long latest_when = 0; @ColorInt int shared_color = -1;
+		for (final StatusBarNotificationEvo sbn : visible_sbns) {
+			final INotification n = sbn.notification();
+			final long when = n.getWhen();
 			if (when > latest_when) latest_when = when;
+			final int color = n.getColor();
+			if (shared_color == -1) shared_color = color;
+			else if (color != shared_color) shared_color = Color.TRANSPARENT;	// No shared color
 			bundled_pkgs.add(sbn.getPackageName());
 		}
 
 		final Builder builder = new Builder(this).setGroup(GROUP_PREFIX + bundle).setGroupSummary(true)
-				.setContentTitle(bundle).setSmallIcon(R.drawable.ic_notification_bundle)
-				.setWhen(latest_when).setAutoCancel(false).setNumber(bundled_keys.size())/*.setPriority(PRIORITY_MIN)*/;
+				.setSmallIcon(R.drawable.ic_notification_bundle).setColor(shared_color).setWhen(latest_when)
+				.setAutoCancel(false).setNumber(bundled_keys.size()); //.setPriority(PRIORITY_MIN)
 		if (bundled_pkgs.size() == 1) {
-			final IBundle last_extras = sbns.get(0).notification().extras();
-			builder.setContentText(last_extras.getCharSequence(NotificationCompat.EXTRA_TITLE))
-					.setSubText(last_extras.getCharSequence(NotificationCompat.EXTRA_TEXT));
-		} else builder.setContentText(getSourceNames(bundled_pkgs));
+			final IBundle last_extras = visible_sbns.get(0).notification().extras();
+			builder.setContentTitle(last_extras.getCharSequence(NotificationCompat.EXTRA_TITLE))
+					.setContentText(last_extras.getCharSequence(NotificationCompat.EXTRA_TEXT))
+					.setSubText(last_extras.getCharSequence(NotificationCompat.EXTRA_SUB_TEXT))
+					.setContentInfo(bundle + " · " + bundled_keys.size());
+		} else builder.setContentTitle(bundle).setContentText(getSourceNames(bundled_pkgs));
 
 		final Bundle extras = builder.getExtras();
 		final ArrayList<String> bundled_key_list = new ArrayList<>(bundled_keys);
@@ -218,7 +227,7 @@ public class BundleDecorator extends NevoDecoratorService {
 			notification = builder.build();
 		}
 
-		notification.bigContentView = buildExpandedView(sbns, click_pending_intent);
+		notification.bigContentView = buildExpandedView(visible_sbns, click_pending_intent);
 		return notification;
 	}
 
