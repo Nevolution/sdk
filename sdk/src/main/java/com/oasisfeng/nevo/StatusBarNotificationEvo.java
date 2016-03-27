@@ -198,6 +198,7 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		else id = in.readInt();
 		tag_decorated = in.readInt() != 0;
 		if (tag_decorated) tag = in.readString();
+		updateKey();
 	}
 
 	public static final Parcelable.Creator<StatusBarNotificationEvo> CREATOR = new Parcelable.Creator<StatusBarNotificationEvo>() {
