@@ -43,15 +43,30 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 
 	public static StatusBarNotificationEvo from(final StatusBarNotification sbn) {
 		if (sbn instanceof StatusBarNotificationEvo) return (StatusBarNotificationEvo) sbn;
-		return new StatusBarNotificationEvo(sbn.getPackageName(), null, sbn.getId(), sbn.getTag(),
-				SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime());
+		return new StatusBarNotificationEvo(sbn.getPackageName(), null/* opPkg */, sbn.getId(), sbn.getTag(), SbnCompat.getUid(sbn),
+				0/* initialPid */, 0/* score */, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime());
 	}
 
 	/** For internal use, not public API */
 	public static StatusBarNotificationEvo from(final StatusBarNotification sbn, final NotificationHolder.OnDemandSuppliers suppliers) {
-		if (sbn instanceof StatusBarNotificationEvo) return (StatusBarNotificationEvo) sbn;
+		if (sbn instanceof StatusBarNotificationEvo) {
+			final StatusBarNotificationEvo sbne = (StatusBarNotificationEvo) sbn;
+			final StatusBarNotificationEvo clone = new StatusBarNotificationEvo(sbn.getPackageName(), null/* opPkg */, sbne.getOriginalId(),
+					sbne.getOriginalTag(), SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime(), suppliers);
+			clone.tag = sbne.tag; clone.id = sbne.id; clone.tag_decorated = sbne.tag_decorated;
+			clone.updateKey();
+			return clone;
+		}
 		return new StatusBarNotificationEvo(sbn.getPackageName(), null, sbn.getId(), sbn.getTag(),
 				SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime(), suppliers);
+	}
+
+	/** Clone the data fields only (suppliers, notification cache will not be cloned and holder */
+	@Override public StatusBarNotificationEvo clone() {
+		final StatusBarNotificationEvo clone = from(super.clone());
+		clone.tag = tag; clone.id = id; clone.tag_decorated = tag_decorated;
+		clone.updateKey();
+		return clone;
 	}
 
 	public StatusBarNotificationEvo(final String pkg, final String opPkg, final int id, final String tag,
@@ -97,6 +112,8 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	@Override public int getId() { return id != null ? id : super.getId(); }
 	@Override public String getKey() { return key != null ? key : super.getKey(); }
 	public String getOriginalKey() { return super.getKey(); }
+	private String getOriginalTag() { return super.getTag(); }
+	private int getOriginalId() { return super.getId(); }
 
 	/**
 	 * Beware, calling this method on remote instance will retrieve the whole instance, which is inefficient and slow.

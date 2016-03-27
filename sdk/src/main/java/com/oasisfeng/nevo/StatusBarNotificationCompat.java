@@ -102,7 +102,7 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 		}
 
 		@SuppressLint("NewApi") /** {@link StatusBarNotification#getUser()} is hidden but accessible in API level 18~20 */
-		public static UserHandle userOf(final StatusBarNotification sbn) {
+		static UserHandle userOf(final StatusBarNotification sbn) {
 			return sbn.getUser();
 		}
 

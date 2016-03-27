@@ -155,7 +155,11 @@ public class BundleDecoratorTest extends ServiceTestCase<BundleDecorator> {
 			return sbn;
 		}
 
-		@Override public ParceledListSlice<StatusBarNotificationEvo> getActiveNotifications(final INevoDecorator token) {
+		@Override public List<StatusBarNotificationEvo> getActiveNotifications(final INevoDecorator token, final List<String> keys) {
+			return null;
+		}
+
+		@Override public ParceledListSlice deprecated_getActiveNotifications(final INevoDecorator token) throws RemoteException {
 			return null;
 		}
 

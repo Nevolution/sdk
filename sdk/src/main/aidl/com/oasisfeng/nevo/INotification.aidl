@@ -28,14 +28,17 @@ interface INotification {
     IBundle extras();
 
     RemoteViews getContentView();
+    /** Avoid replacing the content view as a whole. It is inefficient and not decorator-pipeline friendly */
     oneway void setContentView(in RemoteViews views);
 
     boolean hasBigContentView();
     RemoteViews getBigContentView();
+    /** Avoid replacing the big content view as a whole. It is inefficient and not decorator-pipeline friendly */
     oneway void setBigContentView(in RemoteViews views);
 
     boolean hasHeadsUpContentView();
     RemoteViews getHeadsUpContentView();
+    /** Avoid replacing the heads-up content view as a whole. It is inefficient and not decorator-pipeline friendly */
     oneway void setHeadsUpContentView(in RemoteViews views);
 
     int getFlags();

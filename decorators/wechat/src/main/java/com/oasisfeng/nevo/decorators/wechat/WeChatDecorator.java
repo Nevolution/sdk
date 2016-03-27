@@ -16,9 +16,13 @@
 
 package com.oasisfeng.nevo.decorators.wechat;
 
+import android.graphics.Typeface;
 import android.os.RemoteException;
 import android.support.annotation.ColorRes;
 import android.support.v4.app.NotificationCompat;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.Log;
 
 import com.oasisfeng.android.os.IBundle;
@@ -32,6 +36,8 @@ import java.util.List;
 
 /**
  * Example of app-specific decorator
+ *
+ * TODO: Merge lines from history and active if lines from history are less than expected.
  *
  * Created by Oasis on 2015/6/1.
  */
@@ -55,7 +61,7 @@ public class WeChatDecorator extends NevoDecoratorService {
 		if (history.isEmpty()) return;
 
 		final List<CharSequence> lines = new ArrayList<>(KMaxNumLines);
-		CharSequence text = null; int count = 0; final String redundant_prefix = title.toString() + ": ";
+		CharSequence text = null; int count = 0, num_text_with_colon = 0; final String redundant_prefix = title.toString() + ": ";
 		for (final StatusBarNotificationEvo each : history) {
 			final IBundle its_extras = each.notification().extras();
 			final CharSequence its_title = its_extras.getCharSequence(NotificationCompat.EXTRA_TITLE);
@@ -68,18 +74,28 @@ public class WeChatDecorator extends NevoDecoratorService {
 				CharSequence trimmed_text = its_text.subSequence(result >> 16, its_text.length());
 				if (trimmed_text.toString().startsWith(redundant_prefix))	// Remove redundant prefix
 					trimmed_text = trimmed_text.subSequence(redundant_prefix.length(), trimmed_text.length());
+				else if (trimmed_text.toString().indexOf(": ") > 0) num_text_with_colon ++;
 				lines.add(text = trimmed_text);
 			} else {
 				count = 1;
 				lines.add(text = its_text);
+				if (text.toString().indexOf(": ") > 0) num_text_with_colon ++;
 			}
 		}
 		if (lines.isEmpty()) return;
 
-		Collections.reverse(lines);			// Latest first, since bottom lines will be trimmed by InboxStyle.
-
 		extras.putCharSequence(NotificationCompat.EXTRA_TEXT, text);
+
 		if (count > 1) {
+			Collections.reverse(lines);			// Latest first, since bottom lines will be trimmed by InboxStyle.
+			if (num_text_with_colon == lines.size()) for (int i = 0; i < lines.size(); i++) {	// All lines have colon in text
+				final CharSequence line = lines.get(i);											// Let's add bold style to them
+				final int pos_colon = line.toString().indexOf(": ");
+				if (pos_colon <= 0) continue;
+				final SpannableString spanned = SpannableString.valueOf(line);
+				spanned.setSpan(new StyleSpan(Typeface.BOLD), 0, pos_colon, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				lines.set(i, spanned);
+			}
 			n.setNumber(count);
 			extras.putCharSequence(NotificationCompat.EXTRA_TITLE_BIG, title);
 			extras.putCharSequenceArray(NotificationCompat.EXTRA_TEXT_LINES, lines.size() > count ? lines.subList(0, count) : lines);
@@ -93,7 +109,7 @@ public class WeChatDecorator extends NevoDecoratorService {
 	private int trimAndExtractLeadingCounter(final CharSequence text) {
 		// Parse and remove the leading "[n]" or [n条/則/…]
 		if (text == null || text.length() < 4 || text.charAt(0) != '[') return -1;
-		int text_start = 3, count_end;
+		int text_start = 2, count_end;
 		while (text.charAt(text_start ++) != ']') if (text_start >= text.length()) return -1;
 
 		try {
