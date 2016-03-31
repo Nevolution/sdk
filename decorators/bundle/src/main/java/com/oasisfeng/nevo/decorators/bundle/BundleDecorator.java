@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build.VERSION;
@@ -42,6 +43,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -193,13 +196,16 @@ public class BundleDecorator extends NevoDecoratorService {
 
 		final Builder builder = new Builder(this).setGroup(GROUP_PREFIX + bundle).setGroupSummary(true)
 				.setSmallIcon(R.drawable.ic_notification_bundle).setColor(shared_color).setWhen(latest_when)
-				.setAutoCancel(false).setNumber(bundled_keys.size()); //.setPriority(PRIORITY_MIN)
+				.setAutoCancel(false).setNumber(bundled_keys.size()).setLocalOnly(true);
 		if (bundled_pkgs.size() == 1) {
 			final IBundle last_extras = visible_sbns.get(0).notification().extras();
+			final SpannableStringBuilder info = new SpannableStringBuilder(bundle).append(" · ").append(String.valueOf(bundled_keys.size()));
+			info.setSpan(new StyleSpan(Typeface.BOLD), 0, bundle.length(), 0);
+
 			builder.setContentTitle(last_extras.getCharSequence(NotificationCompat.EXTRA_TITLE))
 					.setContentText(last_extras.getCharSequence(NotificationCompat.EXTRA_TEXT))
 					.setSubText(last_extras.getCharSequence(NotificationCompat.EXTRA_SUB_TEXT))
-					.setContentInfo(bundle + " · " + bundled_keys.size());
+					.setContentInfo(info);
 		} else builder.setContentTitle(bundle).setContentText(getSourceNames(bundled_pkgs));
 
 		final Bundle extras = builder.getExtras();
