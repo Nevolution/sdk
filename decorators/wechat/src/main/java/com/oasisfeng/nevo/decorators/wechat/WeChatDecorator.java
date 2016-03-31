@@ -49,6 +49,7 @@ public class WeChatDecorator extends NevoDecoratorService {
 	@Override public void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		final INotification n = evolving.notification();
 		final IBundle extras = n.extras();
+		n.setColor(PRIMARY_COLOR);
 
 		// WeChat use dynamic counter as notification ID, which unfortunately will be reset upon evolving (removal, to be exact) by us,
 		// causing all messages combined into one notification. So we split them by re-coding the notification ID by title.
@@ -101,8 +102,6 @@ public class WeChatDecorator extends NevoDecoratorService {
 			extras.putCharSequenceArray(NotificationCompat.EXTRA_TEXT_LINES, lines.size() > count ? lines.subList(0, count) : lines);
 			extras.putString(EXTRA_REBUILD_STYLE, STYLE_INBOX);
 		}
-
-		n.setColor(PRIMARY_COLOR);
 	}
 
 	/** @return the extracted count in 0xFF range and start position in 0xFF00 range */
