@@ -16,6 +16,8 @@
 
 package com.oasisfeng.nevo.decorators.whatsapp;
 
+import android.app.Notification;
+import android.os.Build;
 import android.os.RemoteException;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
@@ -43,6 +45,8 @@ import static android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
  */
 public class WhatsAppDecorator extends NevoDecoratorService {
 
+	private static final int DEFAULT_COLOR = 0xFF075E54;
+
 	@Override public void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		final INotification n = evolving.notification();
 		final IBundle extras = n.extras();
@@ -56,18 +60,19 @@ public class WhatsAppDecorator extends NevoDecoratorService {
 		final CharSequence[] last_parts = extract(title, last);
 		who = last_parts[0]; group = last_parts[1]; message = last_parts[2];
 
-		if (group != null) {
-			evolving.setId(group.toString().hashCode());
-			evolving.setTag(".Group");
-		} else if (who != null) {
-			evolving.setId(who.toString().hashCode());
-			evolving.setTag(".Direct");
-		} else return;	// Nothing to do for other messages.
+		if (group != null) evolving.setTag(".Group");
+		else if (who != null) evolving.setTag(".Direct");
+		else return;	// Nothing to do for other messages.
 
 		final CharSequence new_title = group != null ? group : who;
 		evolving.setId(new_title.toString().hashCode());
+		if (n.getColor() == 0) n.setColor(DEFAULT_COLOR);	// Fix the missing color in some notifications
 
 		if (! has_lines) return;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
+			n.removeFlags(Notification.FLAG_GROUP_SUMMARY);
+		else extras.remove("android.support.isGroupSummary");
 
 		extras.putCharSequence(EXTRA_TITLE, new_title);
 		extras.putCharSequence(EXTRA_TITLE_BIG, new_title);
