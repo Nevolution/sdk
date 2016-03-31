@@ -103,8 +103,7 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 		final Notification mirror; final String pkg = evolving.getPackageName();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			final Notification.Builder b = new Notification.Builder(createPackageContext(pkg, 0))
-					.setContentTitle(n.extras().getCharSequence(NotificationCompat.EXTRA_TITLE))
-					.setLargeIcon(n.getLargeIcon()).setSmallIcon(fixIconPkg(n.getSmallIcon(), pkg));
+					.setContentTitle(n.extras().getCharSequence(NotificationCompat.EXTRA_TITLE));
 			for (final NotificationCompat.Action action : actions)
 				b.addAction(new Action.Builder(Icon.createWithResource(pkg, action.getIcon()),
 						action.getTitle(), action.getActionIntent()).build());
@@ -122,7 +121,7 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 	}
 
 	/** @return continue or not */
-	private boolean findClickable(final ViewGroup views, final Predicate<View> callback) {
+	private static boolean findClickable(final ViewGroup views, final Predicate<View> callback) {
 		for (int i = 0; i < views.getChildCount(); i ++) {
 			final View view = views.getChildAt(i);
 			if (view instanceof ViewGroup) {
@@ -134,7 +133,7 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 	}
 
 	/** Tiny hack to convert IntentSender to PendingIntent */
-	PendingIntent getPendingIntent(final IntentSender sender) {
+	private static PendingIntent getPendingIntent(final IntentSender sender) {
 		final Parcel parcel = Parcel.obtain();
 		try {
 			parcel.setDataPosition(0);

@@ -16,9 +16,7 @@
 
 package com.oasisfeng.nevo;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
-import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.v4.app.NotificationCompat;
@@ -166,29 +164,6 @@ public final class NotificationHolder extends INotification.Stub {
 	@Override public void setVibrate(final long[] vibrate) {
 		n.vibrate = vibrate;
 		updated |= FIELD_VIBRATE;
-	}
-
-	@TargetApi(Build.VERSION_CODES.M)
-	@Override public Icon getSmallIcon() { return n.getSmallIcon(); }
-	@Override public void setSmallIcon(final Icon icon) {
-		try {
-			final Field Notification_mSmallIcon = Notification.class.getDeclaredField("mSmallIcon");
-			Notification_mSmallIcon.setAccessible(true);
-			Notification_mSmallIcon.set(n, icon);
-		} catch (final NoSuchFieldException e) {
-			Log.w(TAG, "Incompatible ROM: No field Notification.mSmallIcon");
-		} catch (final IllegalAccessException ignored) {}
-	}
-	@TargetApi(Build.VERSION_CODES.M)
-	@Override public Icon getLargeIcon() { return n.getLargeIcon(); }
-	@Override public void setLargeIcon(final Icon icon) {
-		try {
-			final Field Notification_mLargeIcon = Notification.class.getDeclaredField("mLargeIcon");
-			Notification_mLargeIcon.setAccessible(true);
-			Notification_mLargeIcon.set(n, icon);
-		} catch (final NoSuchFieldException e) {
-			Log.w(TAG, "Incompatible ROM: No field Notification.mLargeIcon");
-		} catch (final IllegalAccessException ignored) {}
 	}
 
 	private static final String KEY_GROUP = "android.support.groupKey";

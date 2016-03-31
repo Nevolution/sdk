@@ -62,13 +62,4 @@ interface INotification {
 
     long[] getVibrate();
     oneway void setVibrate(in long[] vibrate);
-
-    /** For Android 6.0+ */
-    Icon getSmallIcon();
-    /** For Android 6.0+ */
-    oneway void setSmallIcon(in Icon icon);
-    /** For Android 6.0+ */
-    Icon getLargeIcon();
-    /** For Android 6.0+ */
-    oneway void setLargeIcon(in Icon icon);
 }
