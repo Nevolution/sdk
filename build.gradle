@@ -2,6 +2,7 @@ buildscript {
     repositories {
         jcenter()
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
 
@@ -20,12 +21,13 @@ allprojects {
 
 subprojects {
     ext.compileSdkVersion = 23
-    ext.buildToolsVersion = '23.0.2'
-    ext.supportLibrariesVersion = '23.1.1'
+    ext.buildToolsVersion = '23.0.3'
+    ext.supportLibrariesVersion = '23.2.1'
 }
 
 configure(subprojects.findAll { it.name.startsWith("decorators-") }) {
     apply plugin:'com.android.application'
+
     android {
         defaultConfig.manifestPlaceholders = [ permission: "com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE" ]
 
@@ -41,6 +43,6 @@ configure(subprojects.findAll { it.name.startsWith("decorators-") }) {
 
     dependencies {
         debugCompile project(':sdk')
-        releaseCompile 'com.oasisfeng.nevo:sdk:0.9.0'
+        releaseCompile 'com.oasisfeng.nevo:sdk:0.9.1'
     }
 }
