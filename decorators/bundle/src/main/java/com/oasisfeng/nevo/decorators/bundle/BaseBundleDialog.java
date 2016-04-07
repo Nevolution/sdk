@@ -124,8 +124,10 @@ public abstract class BaseBundleDialog extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        getActivity().finish();
-        getActivity().overridePendingTransition(0, 0);
+        final Activity activity = getActivity();
+        if (activity == null) return;
+        activity.overridePendingTransition(0, 0);
+        activity.finish();
     }
 
     protected void setBundleRule(String pkg, String title, String bundle) {
