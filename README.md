@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/oasisfeng/nevolution.svg?branch=master)](https://travis-ci.org/oasisfeng/nevolution)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-[![Get it on Google Play](https://play.google.com/intl/en_us/badges/images/generic/en-play-badge-border.png)](https://play.google.com/store/apps/details?id=com.oasisfeng.nevo&referrer=utm_source%3Dgithub%26utm_medium%3Dreadme%26utm_content%3Dbadge)
+<a href='https://play.google.com/store/apps/details?id=com.oasisfeng.nevo&referrer=utm_source%3Dgithub%26utm_medium%3Dreadme%26utm_content%3Dbadge'><img height='60' width='185' alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png'/></a>
 
 About
 -------
