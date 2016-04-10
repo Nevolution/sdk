@@ -309,7 +309,7 @@ public class BundleDecorator extends NevoDecoratorService {
 				final ApplicationInfo app_info = pm.getApplicationInfo(pkg, GET_UNINSTALLED_PACKAGES);
 				names.append(", ").append(app_info.loadLabel(pm));
 			} catch (final NameNotFoundException ignored) {}          // TODO: Packages from other user profiles?
-		return names.substring(2);
+		return names.length() > 2 ? names.substring(2) : "";
 	}
 
 	@Override public void onCreate() {
