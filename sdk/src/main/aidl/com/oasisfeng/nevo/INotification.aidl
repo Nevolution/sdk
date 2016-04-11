@@ -20,6 +20,7 @@ import android.graphics.drawable.Icon;
 import android.widget.RemoteViews;
 import java.util.List;
 import com.oasisfeng.android.os.IBundle;
+import android.app.Notification.Action;
 
 interface INotification {
 
@@ -62,4 +63,6 @@ interface INotification {
 
     long[] getVibrate();
     oneway void setVibrate(in long[] vibrate);
+
+    Action[] getActions();
 }

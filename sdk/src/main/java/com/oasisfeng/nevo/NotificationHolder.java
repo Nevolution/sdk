@@ -16,6 +16,7 @@
 
 package com.oasisfeng.nevo;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.os.Build;
 import android.support.annotation.IntDef;
@@ -159,6 +160,11 @@ public final class NotificationHolder extends INotification.Stub {
 		n.priority = priority;
 		updated |= FIELD_PRIORITY;
 	}
+
+    @SuppressLint("NewApi")
+    @Override public Notification.Action[] getActions() {
+        return n.actions;
+    }
 
 	@Override public long[] getVibrate() { return n.vibrate; }
 	@Override public void setVibrate(final long[] vibrate) {
