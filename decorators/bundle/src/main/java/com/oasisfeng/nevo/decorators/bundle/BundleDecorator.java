@@ -39,6 +39,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
@@ -52,6 +53,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
+import com.oasisfeng.android.graphics.drawable.IconCompat;
 import com.oasisfeng.android.os.IBundle;
 import com.oasisfeng.nevo.INotification;
 import com.oasisfeng.nevo.NevoConstants;
@@ -182,22 +184,29 @@ public class BundleDecorator extends NevoDecoratorService {
 
 	private Notification buildBundleNotification(final String bundle, final List<String> bundled_keys,
 												 final List<StatusBarNotificationEvo> visible_sbns) throws RemoteException {
-		final Set<String> bundled_pkgs = new HashSet<>(visible_sbns.size());
-		long latest_when = 0; @ColorInt int shared_color = -1;
+		final HashSet<String> bundled_pkgs = new HashSet<>(visible_sbns.size());
+		long latest_when = 0; @ColorInt int shared_color = -1; @DrawableRes int shared_icon = -1;
 		for (final StatusBarNotificationEvo sbn : visible_sbns) {
 			final INotification n = sbn.notification();
 			final long when = n.getWhen();
 			if (when > latest_when) latest_when = when;
+
 			final int color = n.getColor();
 			if (shared_color == -1) shared_color = color;
 			else if (color != shared_color) shared_color = Color.TRANSPARENT;	// No shared color
+
+			final @DrawableRes int icon = n.extras().getInt(NotificationCompat.EXTRA_SMALL_ICON, -1);
+			if (shared_icon == -1) shared_icon = icon;
+			else if (icon != shared_icon) shared_icon = 0;
+
 			bundled_pkgs.add(sbn.getPackageName());
 		}
+		final String shared_pkg = bundled_pkgs.size() == 1 ? bundled_pkgs.iterator().next() : null;
 
 		final Builder builder = new Builder(this).setGroup(GROUP_PREFIX + bundle).setGroupSummary(true)
 				.setSmallIcon(R.drawable.ic_notification_bundle).setColor(shared_color).setWhen(latest_when)
 				.setAutoCancel(false).setNumber(bundled_keys.size()).setLocalOnly(true);
-		if (bundled_pkgs.size() == 1) {
+		if (shared_pkg != null) {
 			final IBundle last_extras = visible_sbns.get(0).notification().extras();
 			final SpannableStringBuilder info = new SpannableStringBuilder(bundle).append(" · ").append(String.valueOf(bundled_keys.size()));
 			info.setSpan(new StyleSpan(Typeface.BOLD), 0, bundle.length(), 0);
@@ -211,6 +220,8 @@ public class BundleDecorator extends NevoDecoratorService {
 		final Bundle extras = builder.getExtras();
 		final ArrayList<String> bundled_key_list = new ArrayList<>(bundled_keys);
 		extras.putStringArrayList(EXTRA_KEYS, bundled_key_list);
+		if (bundled_pkgs.size() == 1 && shared_icon != 0)
+			extras.putParcelable(NevoConstants.EXTRA_ICON, IconCompat.createWithResource(shared_pkg, shared_icon));
 		extras.putBoolean(NevoConstants.EXTRA_PHANTOM, true);		// Bundle notification should never be evolved or stored.
 
 		if (VERSION.SDK_INT < LOLLIPOP) {	// Use delete intent to clear bundled keys on Android 4.x (no group linkage)
@@ -296,7 +307,7 @@ public class BundleDecorator extends NevoDecoratorService {
 		mHandler.postDelayed(mResetPendingRevival, 3000);	// Avoid potential leaks
 	}
 
-	public Runnable mResetPendingRevival = new Runnable() { @Override public void run() {
+	private final Runnable mResetPendingRevival = new Runnable() { @Override public void run() {
 		mPendingRevival.clear();
 	}};
 
