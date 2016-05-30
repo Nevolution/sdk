@@ -31,6 +31,9 @@ public class NevoConstants {
 	/** Mark the notification being posted to be ignored by Nevolution, thus always untouched. */
 	public static final String EXTRA_PHANTOM = "nevo.phantom";
 
+	/** For internal decorator only. */
+	public static final String EXTRA_ICON = "nevo.icon";
+
 	/**
 	 * The component name of the decorator.
 	 * This is one of the arguments passed to decorator settings activity and action activity.
