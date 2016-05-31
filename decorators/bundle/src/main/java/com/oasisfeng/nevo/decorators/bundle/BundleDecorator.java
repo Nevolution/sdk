@@ -26,7 +26,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Binder;
@@ -44,7 +43,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.graphics.ColorUtils;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -193,7 +195,7 @@ public class BundleDecorator extends NevoDecoratorService {
 
 			final int color = n.getColor();
 			if (shared_color == -1) shared_color = color;
-			else if (color != shared_color) shared_color = Color.TRANSPARENT;	// No shared color
+			else if (color != shared_color) shared_color = NotificationCompat.COLOR_DEFAULT;	// No shared color
 
 			final @DrawableRes int icon = n.extras().getInt(NotificationCompat.EXTRA_SMALL_ICON, -1);
 			if (shared_icon == -1) shared_icon = icon;
@@ -204,8 +206,22 @@ public class BundleDecorator extends NevoDecoratorService {
 		final String shared_pkg = bundled_pkgs.size() == 1 ? bundled_pkgs.iterator().next() : null;
 
 		final Builder builder = new Builder(this).setGroup(GROUP_PREFIX + bundle).setGroupSummary(true)
-				.setSmallIcon(R.drawable.ic_notification_bundle).setColor(shared_color).setWhen(latest_when)
-				.setAutoCancel(false).setNumber(bundled_keys.size()).setLocalOnly(true);
+				.setSmallIcon(R.drawable.ic_notification_bundle).setColor(shared_color).setLocalOnly(true);
+
+		// Sufficient for notification bundle on Android N
+		if ("N".equals(VERSION.CODENAME)) {
+			final CharSequence sub_text;
+			if (shared_color != NotificationCompat.COLOR_DEFAULT) {
+				final SpannableString colored_sub_text = SpannableString.valueOf(bundle);
+				final float[] hsl = new float[3]; ColorUtils.colorToHSL(shared_color, hsl);
+				hsl[1] = 0.94f; hsl[2] = Math.min(hsl[2] * 0.6f, 0.31f);	// TODO: Correct this
+				final int fg_color = ColorUtils.HSLToColor(hsl);
+				colored_sub_text.setSpan(new ForegroundColorSpan(fg_color), 0, bundle.length(), 0);
+				sub_text = colored_sub_text;
+			} else sub_text = bundle;
+			return builder.setSubText(sub_text).build();
+		} else builder.setWhen(latest_when).setAutoCancel(false).setNumber(bundled_keys.size());
+
 		if (shared_pkg != null) {
 			final IBundle last_extras = visible_sbns.get(0).notification().extras();
 			final SpannableStringBuilder info = new SpannableStringBuilder(bundle).append(" · ").append(String.valueOf(bundled_keys.size()));
@@ -231,7 +247,7 @@ public class BundleDecorator extends NevoDecoratorService {
 			builder.setDeleteIntent(delete_pending_intent);
 		}
 
-		// Set on-click pending intent explicitly, to avoid notification drawer collapse when bundle is clicked.
+		// Set on-click pending intent explicitly, to avoid notification drawer collapsing when bundle is clicked.
 		final Intent click_intent = new Intent(ACTION_BUNDLE_EXPAND).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
 				.putStringArrayListExtra(EXTRA_KEYS, bundled_key_list);
 		final PendingIntent click_pending_intent = PendingIntent.getBroadcast(this, 0, click_intent, PendingIntent.FLAG_UPDATE_CURRENT);
