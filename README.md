@@ -6,6 +6,8 @@
 About
 -------
 
+[![Join the chat at https://gitter.im/oasisfeng/nevolution](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/oasisfeng/nevolution?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Nevolution is an open platform for Android to evolve the notification experience of existing apps, in a creative **developer-independent** way via community-driven plug-ins, without the direct involvement of the original app developer.
 
 
