@@ -27,7 +27,7 @@
 
         <service
             android:name=".CallVibratorDecorator"
-            android:permission="${permission}"
+            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
             android:process=":service"
             android:label="@string/decorator_callvibrator_title"
             android:description="@string/decorator_callvibrator_description">

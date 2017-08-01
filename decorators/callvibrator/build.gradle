@@ -1,7 +1,11 @@
-if (! project.plugins.hasPlugin("com.android.library")) apply plugin: 'com.android.application'
-else android { publishNonDefault true }
+apply plugin: 'com.android.feature'
 
 android {
     compileSdkVersion this.compileSdkVersion
     buildToolsVersion this.buildToolsVersion
+}
+
+dependencies {
+    debugCompile project(':sdk')
+    releaseCompile 'com.oasisfeng.nevo:sdk:0.9.1'
 }

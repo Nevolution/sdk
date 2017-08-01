@@ -24,7 +24,7 @@
     <application android:label="[Nevo] WhatsApp">
 
         <service android:name=".WhatsAppDecorator"
-                 android:permission="${permission}"
+                 android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
                  android:process=":service"
                  android:label="@string/decorator_whatsapp_title"
                  android:description="@string/decorator_whatsapp_description">

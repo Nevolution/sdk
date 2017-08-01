@@ -25,7 +25,7 @@
 
         <service
             android:name=".ElasticInboxDecorator"
-            android:permission="${permission}"
+            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
             android:process=":service"
             android:label="@string/decorator_elastic_inbox_title"
             android:description="@string/decorator_elastic_inbox_description">
@@ -36,7 +36,7 @@
 
         <service
             android:name=".StackDecorator"
-            android:permission="${permission}"
+            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
             android:process=":service"
             android:label="@string/decorator_stack_title"
             android:description="@string/decorator_stack_description">

@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha9'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -16,33 +16,12 @@ if (file('local.gradle').exists()) apply from: 'local.gradle'
 allprojects {
     repositories {
         jcenter()
+        google()
     }
 }
 
 subprojects {
-    ext.compileSdkVersion = 23
-    ext.buildToolsVersion = '23.0.2'
-    ext.supportLibrariesVersion = '23.2.1'
-}
-
-configure(subprojects.findAll { it.name.startsWith("decorators-") }) {
-    apply plugin:'com.android.application'
-
-    android {
-        defaultConfig.manifestPlaceholders = [ permission: "com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE" ]
-
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_7
-            targetCompatibility JavaVersion.VERSION_1_7
-        }
-
-        lintOptions {
-            abortOnError false
-        }
-    }
-
-    dependencies {
-        debugCompile project(':sdk')
-        releaseCompile 'com.oasisfeng.nevo:sdk:0.9.1'
-    }
+    ext.compileSdkVersion = 25
+    ext.buildToolsVersion = '26.0.0'
+    ext.supportLibrariesVersion = '26.0.0'
 }
