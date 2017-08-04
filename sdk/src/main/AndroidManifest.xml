@@ -16,7 +16,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.oasisfeng.nevo.sdk" >
 
-    <uses-sdk android:minSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="19" />
 
     <application>
         <meta-data android:name="com.oasisfeng.nevo.sdk.version" android:value="@integer/nevo_sdk_version" />
