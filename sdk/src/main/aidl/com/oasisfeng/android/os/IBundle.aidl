@@ -65,8 +65,8 @@ interface IBundle {
 
 	boolean containsKey(String key);
 	/**
-	 * Unlike {@link android.os.Bundle#getBundle(String)}, this method never returns null.
-	 * There is no equivalent API to {@link android.os.Bundle#putBundle(String, Bundle)}, use the instance returned here instead.
+	 * Like {@link android.os.Bundle#getBundle(String)}, this method returns null if no bundle for the given key.
+	 * There is no equivalent API to {@link android.os.Bundle#putBundle(String, Bundle)}, use {@link #mergeBundle(String, Bundle)} instead.
 	 */
 	IBundle getBundle(String key);
 
@@ -82,4 +82,7 @@ interface IBundle {
 	List/*<Parcelable>*/ getParcelableArrayList(String key);
 	/** @return Map&lt;Integer, Parcelable&gt; instead of SparseArray since the latter is not supported by AIDL */
 	Map/*<Integer, Parcelable>*/ getSparseParcelableArray(String key);
+
+	/** Put addtional entries into the existent bundle of the given key, or just put the bundle if no existent one. */
+	oneway void mergeBundle(String key, in Bundle addition);
 }

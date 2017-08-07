@@ -50,30 +50,11 @@ public class ChangeTrackingBundleHolder extends BundleHolder {
 	}
 
 	@Override public IBundle getBundle(final String key) {
-		final Bundle bundle, parent;
-		synchronized (local) {
-			bundle = local.getBundle(key);
-			parent = local;
-		}
-		return bundle != null ? new ChangeTrackingBundleHolder(bundle) : new OnDemandChangeTrackingBundleHolder(parent, key);
+		final Bundle bundle = local.getBundle(key);
+		return bundle != null ? new ChangeTrackingBundleHolder(bundle) : null;
 	}
 
 	public ChangeTrackingBundleHolder(final Bundle bundle) { super(bundle); }
 
 	private final List<String> mChangedKeys = new ArrayList<>();
-
-	protected static class OnDemandChangeTrackingBundleHolder extends ChangeTrackingBundleHolder {
-
-		public OnDemandChangeTrackingBundleHolder(final Bundle parent, final String key) {
-			super(new Bundle(parent.getClassLoader()));
-			mOnDemandDelegate = new OnDemandBundleHolder(parent, key);
-		}
-
-		@Override protected void onChanged(final String key, final Object value) {
-			super.onChanged(key, value);
-			mOnDemandDelegate.onChanged(key, value);
-		}
-
-		private final OnDemandBundleHolder mOnDemandDelegate;
-	}
 }

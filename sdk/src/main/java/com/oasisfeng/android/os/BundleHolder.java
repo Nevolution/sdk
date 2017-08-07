@@ -198,7 +198,19 @@ public class BundleHolder extends IBundle.Stub {
 
 	@Override public IBundle getBundle(final String key) {
 		final Bundle bundle; synchronized (local) { bundle = local.getBundle(key); }
-		return bundle != null ? new BundleHolder(bundle) : new OnDemandBundleHolder(local, key);
+		return bundle != null ? new BundleHolder(bundle) : null;
+	}
+
+	@Override public void mergeBundle(final String key, final Bundle addition) {
+		final Bundle bundle = local.getBundle(key);
+		if (bundle == null) {
+			local.putBundle(key, addition);
+			onChanged(key, addition);
+		} else {
+			bundle.putAll(addition);
+			onChanged(key, bundle);
+		}
+
 	}
 
 	protected static class OnDemandBundleHolder extends BundleHolder {
