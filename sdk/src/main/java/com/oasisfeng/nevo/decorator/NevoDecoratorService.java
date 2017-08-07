@@ -58,6 +58,9 @@ public abstract class NevoDecoratorService extends Service {
 	/** The action to bind {@link NevoDecoratorService} */
 	public static final String ACTION_DECORATOR_SERVICE = "com.oasisfeng.nevo.Decorator";
 
+	/** Optional meta-data key within the &lt;service&gt; tag, to indicate the target packages (separated by comma) of the app-specific decorator */
+	public static final String META_KEY_PACKAGES = "packages";
+
 	/**
 	 * Add this extra to indicate that the big content view of the evolving notification should be rebuilt with this style,
 	 * usually after the specific extras for built-in style of big content view are altered.
