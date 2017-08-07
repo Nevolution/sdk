@@ -77,6 +77,7 @@ public abstract class NevoDecoratorService extends Service {
 	public static final String STYLE_INBOX = "android.app.Notification$InboxStyle";
 	public static final String STYLE_BIG_PICTURE = "android.app.Notification$BigPictureStyle";
 	public static final String STYLE_MEDIA = "android.app.Notification$MediaStyle";
+	public static final String STYLE_MESSAGING = "android.app.Notification$MessagingStyle";
 
 	/**
 	 * Apply this decorator to the notification. <b>Implementation should be idempotent</b>,
