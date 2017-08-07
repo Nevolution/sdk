@@ -17,6 +17,7 @@
 package com.oasisfeng.nevo;
 
 import android.os.Bundle;
+import android.support.annotation.RestrictTo;
 
 import com.oasisfeng.android.os.BundleHolder;
 import com.oasisfeng.android.os.IBundle;
@@ -26,14 +27,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+
 /**
  * Bundle holder with change tracking capability.
  *
  * Created by Oasis on 2015/9/10.
  */
+@RestrictTo(LIBRARY_GROUP)
 public class ChangeTrackingBundleHolder extends BundleHolder {
 
-	public int countChanges() {
+	int countChanges() {
 		return mChangedKeys.size();		// No need to synchronize for ArrayList
 	}
 

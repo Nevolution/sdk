@@ -35,6 +35,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Keep;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
@@ -45,6 +46,7 @@ import java.util.List;
 
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 /**
  * Interface for notification decorator.
@@ -190,12 +192,13 @@ public abstract class NevoDecoratorService extends Service {
 	private INevoController mController;
 	private int mFlags;
 
-	/** Internal flag */ static final int FLAG_DECORATION_AWARE = 0x1;
-	/** Internal flag */ static final int FLAG_REMOVAL_AWARE_KEY_ONLY = 0x2;
-	/** Internal flag */ static final int FLAG_REMOVAL_AWARE = 0x4;
-	/** Internal flag */ static final int FLAG_INCLUDE_NO_CLEAR = 0x8;
-	/** Internal extra */ static final String EXTRA_TAG_OVERRIDE = "nevo.tag.override";
-	/** Internal extra */ static final String EXTRA_ID_OVERRIDE = "nevo.id.override";
+	@RestrictTo(LIBRARY_GROUP) static final int FLAG_DECORATION_AWARE = 0x1;
+	@RestrictTo(LIBRARY_GROUP) static final int FLAG_REMOVAL_AWARE_KEY_ONLY = 0x2;
+	@RestrictTo(LIBRARY_GROUP) static final int FLAG_REMOVAL_AWARE = 0x4;
+	@RestrictTo(LIBRARY_GROUP) static final int FLAG_INCLUDE_NO_CLEAR = 0x8;
+	@RestrictTo(LIBRARY_GROUP) static final String EXTRA_TAG_OVERRIDE = "nevo.tag.override";
+	@RestrictTo(LIBRARY_GROUP) static final String EXTRA_ID_OVERRIDE = "nevo.id.override";
+
 	protected final String TAG = "Nevo.Decorator[" + shorten(getClass().getSimpleName()) + "]";
 
 	private class INevoDecoratorWrapper extends INevoDecorator.Stub {

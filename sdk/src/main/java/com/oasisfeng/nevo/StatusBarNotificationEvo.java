@@ -25,8 +25,11 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 /**
  * Ease the code across Nevolution with following features:
@@ -47,7 +50,7 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 				0/* initialPid */, 0/* score */, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime());
 	}
 
-	/** For internal use, not public API */
+	@RestrictTo(LIBRARY_GROUP)
 	public static StatusBarNotificationEvo from(final StatusBarNotification sbn, final NotificationHolder.OnDemandSuppliers suppliers) {
 		if (sbn instanceof StatusBarNotificationEvo) {
 			final StatusBarNotificationEvo sbne = (StatusBarNotificationEvo) sbn;

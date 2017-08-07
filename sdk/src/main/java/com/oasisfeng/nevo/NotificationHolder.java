@@ -19,6 +19,7 @@ package com.oasisfeng.nevo;
 import android.app.Notification;
 import android.os.Build;
 import android.support.annotation.IntDef;
+import android.support.annotation.RestrictTo;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -28,12 +29,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+
 /**
  * Wrapper for a Notification object that allows transfer across a one-way binder
  * without sending large amounts of data over a one-way transaction.
  */
+@RestrictTo(LIBRARY_GROUP)
 public final class NotificationHolder extends INotification.Stub {
 
+	@RestrictTo(LIBRARY_GROUP)
 	public interface OnDemandSuppliers {
 		RemoteViews getContentView(Notification n);
 		/** @return whether the content view is changed */
@@ -218,7 +223,7 @@ public final class NotificationHolder extends INotification.Stub {
 
 	static final String TAG = "Nevo.Holder";
 
-	static class Impl20 {
+	@RestrictTo(LIBRARY_GROUP) static class Impl20 {
 
 		static void setGroup(final Notification n, final String group) {
 			if (Notification_mGroupKey != null) try {
