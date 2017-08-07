@@ -16,7 +16,6 @@
 
 package com.oasisfeng.nevo;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.os.Build;
 import android.support.annotation.IntDef;
@@ -27,6 +26,7 @@ import android.widget.RemoteViews;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 /**
  * Wrapper for a Notification object that allows transfer across a one-way binder
@@ -48,7 +48,7 @@ public final class NotificationHolder extends INotification.Stub {
 		boolean setHeadsUpContentView(Notification n, RemoteViews views);
 	}
 
-	public NotificationHolder(final Notification notification, final OnDemandSuppliers suppliers) {
+	NotificationHolder(final Notification notification, final OnDemandSuppliers suppliers) {
 		n = notification;
 		extras = new ChangeTrackingBundleHolder(NotificationCompat.getExtras(n));
 		this.suppliers = suppliers;
@@ -161,10 +161,14 @@ public final class NotificationHolder extends INotification.Stub {
 		updated |= FIELD_PRIORITY;
 	}
 
-    @SuppressLint("NewApi")
-    @Override public Notification.Action[] getActions() {
-        return n.actions;
-    }
+    @Override public Notification.Action[] getActions() { return n.actions; }
+    @Override public void addAction(final Notification.Action action) {
+		if (n.actions != null) {
+			final int length = n.actions.length;
+			n.actions = Arrays.copyOf(n.actions, length + 1);
+			n.actions[length] = action;
+		} else n.actions = new Notification.Action[] { action };
+	}
 
 	@Override public long[] getVibrate() { return n.vibrate; }
 	@Override public void setVibrate(final long[] vibrate) {

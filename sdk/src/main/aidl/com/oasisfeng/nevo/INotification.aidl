@@ -65,4 +65,5 @@ interface INotification {
     oneway void setVibrate(in long[] vibrate);
 
     Action[] getActions();
+    oneway void addAction(in Action action);
 }
