@@ -112,12 +112,12 @@ public abstract class NevoDecoratorService extends Service {
 	@Keep protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
 
 	/** Retrieve active notifications posted by the caller UID. */
-	protected final List<StatusBarNotificationEvo> getMyActiveNotifications() throws RemoteException {
+	protected List<StatusBarNotificationEvo> getMyActiveNotifications() throws RemoteException {
 		return getMyActiveNotifications(null);
 	}
 
 	/** Retrieve active notifications with the specified keys, posted by the caller UID. */
-	protected final List<StatusBarNotificationEvo> getMyActiveNotifications(final List<String> keys) throws RemoteException {
+	protected List<StatusBarNotificationEvo> getMyActiveNotifications(final List<String> keys) throws RemoteException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! (mController instanceof Binder)) {
 			final StatusBarNotification[] notifications = ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).getActiveNotifications();
 			final List<StatusBarNotificationEvo> transformed = new ArrayList<>(notifications.length);
@@ -134,7 +134,7 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	@SuppressWarnings("unchecked") protected final List<StatusBarNotificationEvo> getArchivedNotifications(final String key, final int limit) throws RemoteException {
+	@SuppressWarnings("unchecked") protected List<StatusBarNotificationEvo> getArchivedNotifications(final String key, final int limit) throws RemoteException {
 		return mController.getArchivedNotifications(mWrapper, key, limit).getList();
 	}
 
@@ -145,7 +145,7 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	@SuppressWarnings("unchecked") protected final List<StatusBarNotificationEvo> getNotifications(final List<String> keys) throws RemoteException {
+	@SuppressWarnings("unchecked") protected List<StatusBarNotificationEvo> getNotifications(final List<String> keys) throws RemoteException {
 		return mController.getNotifications(mWrapper, keys).getList();
 	}
 
@@ -154,7 +154,7 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected final void cancelNotification(final String key) throws RemoteException {
+	protected void cancelNotification(final String key) throws RemoteException {
 		mController.cancelNotification(mWrapper, key);
 	}
 
@@ -164,7 +164,7 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected final void reviveNotification(final String key) throws RemoteException {
+	protected void reviveNotification(final String key) throws RemoteException {
 		mController.reviveNotification(mWrapper, key);
 	}
 
