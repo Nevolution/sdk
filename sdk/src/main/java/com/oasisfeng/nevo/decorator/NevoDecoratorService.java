@@ -168,6 +168,18 @@ public abstract class NevoDecoratorService extends Service {
 		mController.reviveNotification(mWrapper, key);
 	}
 
+	/**
+	 * Recast a past (either still active or already removed) notification asynchronously,
+	 * which will then go through the decorators (including this one) as if just posted.
+	 *
+	 * Decorator permission restriction applies.
+	 *
+	 * @param fillInExtras additional extras to fill in the notification being recast.
+	 */
+	protected void recastNotification(final String key, final @Nullable Bundle fillInExtras) throws RemoteException {
+		mController.recastNotification(mWrapper, key, fillInExtras);
+	}
+
 	@CallSuper @Override public IBinder onBind(final Intent intent) {
 		for (Class<?> clazz = getClass(); clazz != NevoDecoratorService.class; clazz = clazz.getSuperclass()) {
 			try {

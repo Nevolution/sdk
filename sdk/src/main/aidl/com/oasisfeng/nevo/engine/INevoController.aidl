@@ -28,4 +28,5 @@ interface INevoController {
     oneway void cancelNotification(in INevoDecorator token, String key);
     oneway void reviveNotification(in INevoDecorator token, String key);
 	List<StatusBarNotificationEvo> getActiveNotifications(in INevoDecorator token, in List<String> keys);
+	oneway void recastNotification(in INevoDecorator token, String key, in Bundle fillIn);
 }
