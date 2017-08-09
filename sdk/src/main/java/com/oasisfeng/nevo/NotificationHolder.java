@@ -21,6 +21,7 @@ import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.annotation.RestrictTo;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -169,6 +170,8 @@ public final class NotificationHolder extends INotification.Stub {
     @Override public Notification.Action[] getActions() { return n.actions; }
     @Override public void addAction(final Notification.Action action) {
 		if (n.actions != null) {
+			for (final Notification.Action existent_action : n.actions)
+				if (TextUtils.equals(existent_action.title, action.title)) return;		// De-dup
 			final int length = n.actions.length;
 			n.actions = Arrays.copyOf(n.actions, length + 1);
 			n.actions[length] = action;
