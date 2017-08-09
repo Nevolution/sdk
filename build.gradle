@@ -1,10 +1,11 @@
 buildscript {
     repositories {
         jcenter()
+        maven { url "https://maven.google.com" }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha9'
+        classpath 'com.android.tools.build:gradle:3.0.0-beta1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -16,12 +17,13 @@ if (file('local.gradle').exists()) apply from: 'local.gradle'
 allprojects {
     repositories {
         jcenter()
-        google()
+        maven { url "https://maven.google.com" }
     }
 }
 
 subprojects {
     ext.compileSdkVersion = 25
-    ext.buildToolsVersion = '26.0.0'
-    ext.supportLibrariesVersion = '26.0.0'
+    ext.buildToolsVersion = '25.0.3'
+    ext.supportLibrariesVersion = '25.3.1'
+    ext.nevoSdkVersion = '0.9.1'
 }

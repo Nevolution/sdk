@@ -1,4 +1,4 @@
-apply plugin: 'com.android.feature'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion this.compileSdkVersion
@@ -6,8 +6,8 @@ android {
 }
 
 dependencies {
-    debugCompile project(':sdk')
-    releaseCompile 'com.oasisfeng.nevo:sdk:0.9.1'
+    debugImplementation project(':sdk')
+    releaseImplementation 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
 
     implementation 'com.android.support:recyclerview-v7:' + supportLibrariesVersion
     implementation 'com.android.support:palette-v7:' + supportLibrariesVersion

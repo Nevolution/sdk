@@ -1,8 +1,8 @@
-apply plugin: 'com.android.feature'
+apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion this.compileSdkVersion
+    buildToolsVersion this.buildToolsVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
