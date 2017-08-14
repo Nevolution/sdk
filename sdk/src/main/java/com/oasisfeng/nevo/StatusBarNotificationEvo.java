@@ -120,8 +120,8 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	@Override public int getId() { return id != null ? id : super.getId(); }
 	@Override public String getKey() { return key != null ? key : super.getKey(); }
 	public String getOriginalKey() { return super.getKey(); }
-	private String getOriginalTag() { return super.getTag(); }
-	private int getOriginalId() { return super.getId(); }
+	public String getOriginalTag() { return super.getTag(); }
+	public int getOriginalId() { return super.getId(); }
 
 	/**
 	 * Beware, calling this method on remote instance will retrieve the whole instance, which is inefficient and slow.
