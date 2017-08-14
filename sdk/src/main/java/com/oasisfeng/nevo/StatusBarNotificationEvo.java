@@ -99,9 +99,14 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	}
 
 	public StatusBarNotificationEvo setId(final int id) {
-		if (this.id != null && id == this.id) return this;
-		if (id == super.getId()) this.id = null;	// Equal to the original ID, clear the decorated value
-		else this.id = id;
+		if (this.id != null) {		// Previously overridden already
+			if (id == this.id) return this;
+			if (id == super.getId()) this.id = null;	// Equal to the original ID, reset the overridden value
+			else this.id = id;
+		} else {	// No overridden value yet
+			if (id == super.getId()) return this;
+			this.id = id;
+		}
 		updateKey();
 		return this;
 	}
