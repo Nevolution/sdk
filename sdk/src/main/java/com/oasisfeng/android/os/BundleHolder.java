@@ -213,6 +213,11 @@ public class BundleHolder extends IBundle.Stub {
 
 	}
 
+	public void putAll(final Bundle addition) {
+		local.putAll(addition);
+		for (final String key : addition.keySet()) onChanged(key, addition.get(key));
+	}
+
 	protected static class OnDemandBundleHolder extends BundleHolder {
 
 		private final Bundle mParent;
