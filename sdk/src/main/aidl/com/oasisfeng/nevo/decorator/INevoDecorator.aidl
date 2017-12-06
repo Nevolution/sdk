@@ -24,7 +24,7 @@ import com.oasisfeng.nevo.engine.INevoController;
 interface INevoDecorator {
 
     int onConnected(in INevoController controller, in Bundle options);
-    void apply(in StatusBarNotificationEvo evolved, in Bundle options);
+    void apply(inout StatusBarNotificationEvo evolved, in Bundle options);
     oneway void onNotificationRemoved(in String key, in Bundle options);
     oneway void onNotificationRemovedLight(in StatusBarNotificationEvo notification, in Bundle options);
 }

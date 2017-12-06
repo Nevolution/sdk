@@ -168,19 +168,27 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		} catch (final RemoteException e) { throw new IllegalStateException(e); }
 	}
 
+	/** Tell {@link #writeToParcel(Parcel, int)} to perform incremental write-back. */
+	@RestrictTo(LIBRARY_GROUP) public void setIncrementalWriteToParcel() {
+		mIncrementalWriteToParcel = true;
+	}
+
 	/** Write all fields except the Notification which is passed as IPC holder */
 	@Override public void writeToParcel(final Parcel out, final int flags) {
-		out.writeInt(PARCEL_MAGIC);
-		out.writeString(getPackageName());
-		out.writeInt(super.getId());
-		if (super.getTag() != null) {
-			out.writeInt(1);
-			out.writeString(super.getTag());
-		} else out.writeInt(0);
-		out.writeInt(SbnCompat.getUid(this));
-		getUser().writeToParcel(out, flags);
-		out.writeLong(getPostTime());
-		out.writeStrongInterface(notification == null ? holder : new NotificationHolder(notification));	// The local copy of notification is "dirty" (possibly modified), hence needs to be updated.
+		if ((flags & PARCELABLE_WRITE_RETURN_VALUE) == 0 || ! mIncrementalWriteToParcel) {
+			out.writeInt(PARCEL_MAGIC);
+			out.writeString(getPackageName());
+			out.writeInt(super.getId());
+			if (super.getTag() != null) {
+				out.writeInt(1);
+				out.writeString(super.getTag());
+			} else out.writeInt(0);
+			out.writeInt(SbnCompat.getUid(this));
+			getUser().writeToParcel(out, flags);
+			out.writeLong(getPostTime());
+			out.writeStrongInterface(notification == null ? holder : new NotificationHolder(notification));	// The local copy of notification is "dirty" (possibly modified), hence needs to be updated.
+		} else out.writeInt(PARCEL_MAGIC_REPLY);
+		// Shared between full write and incremental write-back.
 		if (id != null) {
 			out.writeInt(1);
 			out.writeInt(id);
@@ -191,6 +199,15 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		} else out.writeInt(0);
 	}
 
+	public void readFromParcel(final Parcel reply) {
+		if (reply.readInt() != PARCEL_MAGIC_REPLY) throw new IllegalArgumentException();
+		if (reply.readInt() == 0) id = null;
+		else id = reply.readInt();
+		tag_decorated = reply.readInt() != 0;
+		if (tag_decorated) tag = reply.readString();
+		updateKey();
+	}
+
     // Parcel written by plain StatusBarNotification
 	private StatusBarNotificationEvo(final Parcel in, final @Nullable INotification holder) {
 		super(in);
@@ -198,7 +215,7 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		this.holder = holder != null ? holder : new NotificationHolder(getNotification());
 	}
 
-	private StatusBarNotificationEvo(final Parcel in) {
+	private StatusBarNotificationEvo(final Parcel in) {		// PARCEL_MAGIC is already read in createFromParcel()
 		super(in.readString(), null, in.readInt(), in.readInt() != 0 ? in.readString() : null, in.readInt(), 0, 0,
 				NULL_NOTIFICATION, UserHandle.readFromParcel(in), in.readLong());
 		holder = INotification.Stub.asInterface(in.readStrongBinder());
@@ -245,8 +262,10 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
     private final INotification holder;
 	private transient String key;
 	private transient @Nullable Notification notification;	// Cache of remote notification to avoid expensive duplicate fetch.
+	private boolean mIncrementalWriteToParcel;
 
-    private static final int PARCEL_MAGIC = "NEVO".hashCode();  // TODO: Are they really magic enough?
+	private static final int PARCEL_MAGIC = "NEVO".hashCode();  // TODO: Are they really magic enough?
+	private static final int PARCEL_MAGIC_REPLY = "NEVO.REPLY".hashCode();
 	private static final Notification NULL_NOTIFICATION = new Notification();	// Must be placed before VOID to avoid NPE.
 	private static final String TAG = "Nevo.Sbn";
 }

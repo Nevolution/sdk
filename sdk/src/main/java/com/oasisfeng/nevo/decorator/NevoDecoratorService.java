@@ -226,6 +226,7 @@ public abstract class NevoDecoratorService extends Service {
 				final String tag = evolving.getTag(); final int id = evolving.getId();
 				if (! equals(tag, original_tag)) evolving.notification().extras().putString(EXTRA_TAG_OVERRIDE, tag);
 				if (id != original_id) evolving.notification().extras().putInt(EXTRA_ID_OVERRIDE, id);
+				evolving.setIncrementalWriteToParcel();
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running apply()", t);
 				throw asParcelableException(t);
