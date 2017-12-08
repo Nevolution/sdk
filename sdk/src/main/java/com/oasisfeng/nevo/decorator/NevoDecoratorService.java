@@ -101,15 +101,31 @@ public abstract class NevoDecoratorService extends Service {
 	/** Override this method to perform initial process. */
 	protected void onConnected() throws Exception {}
 
-	/** Called when notification (no matter decorated or not) from packages with this decorator enabled is removed. */
-	@Keep protected void onNotificationRemoved(final String key) throws Exception {}
+	/** @deprecated Override {@link #onNotificationRemoved(String, int)} instead */
+	@Keep @Deprecated protected void onNotificationRemoved(final String key) throws Exception {}
+
+	/**
+	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
+	 *
+	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}
+	 */
+	@Keep protected void onNotificationRemoved(final String key, @SuppressWarnings("unused") final int reason) throws Exception {
+		//noinspection deprecation
+		onNotificationRemoved(key);
+	}
+
+	/** @deprecated Override {@link #onNotificationRemoved(StatusBarNotificationEvo, int)} instead */
+	@Keep @Deprecated protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
 
 	/**
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
 	 *
 	 * If notification payload is not relevant, please consider overriding {@link #onNotificationRemoved(String)} instead.
 	 */
-	@Keep protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
+	@Keep protected void onNotificationRemoved(final StatusBarNotificationEvo notification, @SuppressWarnings("unused") final int reason) throws Exception {
+		//noinspection deprecation
+		onNotificationRemoved(notification);
+	}
 
 	/** Retrieve active notifications posted by the caller UID. */
 	protected List<StatusBarNotificationEvo> getMyActiveNotifications() throws RemoteException {
@@ -189,7 +205,13 @@ public abstract class NevoDecoratorService extends Service {
 				if (getClass().getDeclaredMethod("onNotificationRemoved", String.class) != null) mFlags |= FLAG_REMOVAL_AWARE_KEY_ONLY;
 			} catch (final NoSuchMethodException ignored) {}
 			try {
+				if (getClass().getDeclaredMethod("onNotificationRemoved", String.class, int.class) != null) mFlags |= FLAG_REMOVAL_AWARE_KEY_ONLY;
+			} catch (final NoSuchMethodException ignored) {}
+			try {
 				if (getClass().getDeclaredMethod("onNotificationRemoved", StatusBarNotificationEvo.class) != null) mFlags |= FLAG_REMOVAL_AWARE;
+			} catch (final NoSuchMethodException ignored) {}
+			try {
+				if (getClass().getDeclaredMethod("onNotificationRemoved", StatusBarNotificationEvo.class, int.class) != null) mFlags |= FLAG_REMOVAL_AWARE;
 			} catch (final NoSuchMethodException ignored) {}
 		}
 		return mWrapper == null ? mWrapper = new INevoDecoratorWrapper() : mWrapper;
@@ -210,6 +232,7 @@ public abstract class NevoDecoratorService extends Service {
 	@RestrictTo(LIBRARY_GROUP) static final int FLAG_INCLUDE_NO_CLEAR = 0x8;
 	@RestrictTo(LIBRARY_GROUP) static final String EXTRA_TAG_OVERRIDE = "nevo.tag.override";
 	@RestrictTo(LIBRARY_GROUP) static final String EXTRA_ID_OVERRIDE = "nevo.id.override";
+	@RestrictTo(LIBRARY_GROUP) static final String KEY_REASON = "reason";
 
 	protected final String TAG = "Nevo.Decorator[" + shorten(getClass().getSimpleName()) + "]";
 
@@ -236,7 +259,7 @@ public abstract class NevoDecoratorService extends Service {
 		@Override public void onNotificationRemoved(final String key, final @Nullable Bundle options) {
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
 			try {
-				NevoDecoratorService.this.onNotificationRemoved(key);
+				NevoDecoratorService.this.onNotificationRemoved(key, options != null ? options.getInt(KEY_REASON): 0);
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running onNotificationRemoved()", t);
 				throw asParcelableException(t);
