@@ -17,6 +17,7 @@
 package com.oasisfeng.nevo;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.annotation.RestrictTo;
@@ -88,6 +89,7 @@ public final class NotificationHolder extends INotification.Stub {
 			}
 			@Override public boolean setHeadsUpContentView(final Notification n, final RemoteViews views) {
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false;
+				//noinspection deprecation
 				n.headsUpContentView = views; return true;
 			}
 		};
@@ -129,6 +131,9 @@ public final class NotificationHolder extends INotification.Stub {
 
 	@Override public int getNumber() { return n.number; }
 	@Override public void setNumber(final int number) { n.number = number; updated |= FIELD_NUMBER; }
+
+	@Override public void setContentIntent(final PendingIntent intent) { n.contentIntent = intent; }
+	@Override public void setDeleteIntent(final PendingIntent intent) { n.deleteIntent = intent; }
 
 	@Override public int getColor() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) return n.color;

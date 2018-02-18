@@ -66,4 +66,7 @@ interface INotification {
 
     Action[] getActions();
     oneway void addAction(in Action action);
+
+    oneway void setContentIntent(in PendingIntent intent);
+    oneway void setDeleteIntent(in PendingIntent intent);
 }
