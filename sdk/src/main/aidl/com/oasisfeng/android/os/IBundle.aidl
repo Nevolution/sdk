@@ -20,28 +20,28 @@ import com.oasisfeng.android.os.ParcelableReference;
 
 interface IBundle {
 
-	oneway void clear();
-	oneway void remove(String key);
+	void clear();
+	void remove(String key);
 
-	oneway void putBoolean(String key, boolean value);
-	oneway void putInt(String key, int value);
-	oneway void putLong(String key, long value);
-	oneway void putDouble(String key, double value);
-	oneway void putBooleanArray(String key, in boolean[] value);
-	oneway void putIntArray(String key, in int[] value);
-	oneway void putLongArray(String key, in long[] value);
-	oneway void putDoubleArray(String key, in double[] value);
-	oneway void putParcelable(String key, in ParcelableReference value);
+	void putBoolean(String key, boolean value);
+	void putInt(String key, int value);
+	void putLong(String key, long value);
+	void putDouble(String key, double value);
+	void putBooleanArray(String key, in boolean[] value);
+	void putIntArray(String key, in int[] value);
+	void putLongArray(String key, in long[] value);
+	void putDoubleArray(String key, in double[] value);
+	void putParcelable(String key, in ParcelableReference value);
 
-	oneway void putString(String key, String value);
-	oneway void putStringArray(String key, in String[] value);
-	oneway void putStringArrayList(String key, in List<String> value);
+	void putString(String key, String value);
+	void putStringArray(String key, in String[] value);
+	void putStringArrayList(String key, in List<String> value);
 
-	oneway void putCharSequence(String key, in CharSequence value);
+	void putCharSequence(String key, in CharSequence value);
 	/** @param value in List&lt;CharSequence&gt; instead of CharSequence[] since the latter is not supported by AIDL */
-	oneway void putCharSequenceArray(String key, in List/*<CharSequence>*/ value);
+	void putCharSequenceArray(String key, in List/*<CharSequence>*/ value);
 	/** @param value in ArrayList&lt;CharSequence&gt */
-	oneway void putCharSequenceArrayList(String key, in List/*<CharSequence>*/ value);
+	void putCharSequenceArrayList(String key, in List/*<CharSequence>*/ value);
 
 	boolean getBoolean(String key, boolean defaultValue);
 	int getInt(String key, int defaultValue);
@@ -71,11 +71,11 @@ interface IBundle {
 	IBundle getBundle(String key);
 
 	/** @param value in List&lt;Parcelable&gt; instead of Parcelable[] since the latter is not supported by AIDL */
-	oneway void putParcelableArray(String key, in List/*<Parcelable>*/ value);
+	void putParcelableArray(String key, in List/*<Parcelable>*/ value);
 	/** @param value in ArrayList&lt;Parcelable&gt; */
-	oneway void putParcelableArrayList(String key, in List/*<Parcelable>*/ value);
+	void putParcelableArrayList(String key, in List/*<Parcelable>*/ value);
 	/** @param value in Map&lt;Integer, Parcelable&gt; instead of SparseArray&lt;Parcelable&gt; since the latter is not supported by AIDL */
-	oneway void putSparseParcelableArray(String key, in Map/*<Integer, Parcelable>*/ value);
+	void putSparseParcelableArray(String key, in Map/*<Integer, Parcelable>*/ value);
 	/** @return List&lt;Parcelable&gt; instead of Parcelable[] since the latter is not supported by AIDL */
 	List/*<Parcelable>*/ getParcelableArray(String key);
 	/** @return List&lt;Parcelable&gt; */
@@ -84,5 +84,5 @@ interface IBundle {
 	Map/*<Integer, Parcelable>*/ getSparseParcelableArray(String key);
 
 	/** Put addtional entries into the existent bundle of the given key, or just put the bundle if no existent one. */
-	oneway void mergeBundle(String key, in Bundle addition);
+	void mergeBundle(String key, in Bundle addition);
 }
