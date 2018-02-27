@@ -17,5 +17,5 @@
 
 <resources>
     <string name="decorator_callvibrator_title">Call Vibration</string>
-    <string name="decorator_callvibrator_description">Vibrate when outgoing call is answered.</string>
+    <string name="decorator_callvibrator_description">Vibrate when outgoing call is answered.\n(No visual effects)</string>
 </resources>

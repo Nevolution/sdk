@@ -19,13 +19,14 @@ package com.oasisfeng.nevo.decorators.callvibrator;
 import android.app.Notification;
 import android.os.RemoteException;
 import android.os.Vibrator;
+import android.telephony.TelephonyManager;
 
 import com.oasisfeng.android.os.IBundle;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.NevoDecoratorService;
 
 /**
- * App-specific decorator - Vibrator when call is answered
+ * App-specific decorator - Vibrator when outgoing call is answered
  *
  * Created by Oasis on 2016/2/9.
  */
@@ -36,10 +37,13 @@ public class CallVibratorDecorator extends NevoDecoratorService {
 
 	@Override public void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		if (! evolving.isOngoing()) return;
-		if (! evolving.getKey().equals(mOngoingKey)) {
-			mOngoingKey = evolving.getKey();
+		final TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		if (tm == null) return;
+		if (tm.getCallState() == TelephonyManager.CALL_STATE_RINGING) {
+			mIncomingCall = true;
 			return;
-		}
+		} else if (mIncomingCall) return;
+
 		// The on-going notification is being updated in place, now check the chronometer.
 		final IBundle extras = evolving.notification().extras();
 		if (! extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER, false)) return;
@@ -47,12 +51,12 @@ public class CallVibratorDecorator extends NevoDecoratorService {
 		if (evolving.notification().getWhen() < System.currentTimeMillis() - MAX_DELAY_TO_VIBRATE) return;
 
 		final Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		vibrator.vibrate(VIBRATOR_DURATION);
+		if (vibrator != null) vibrator.vibrate(VIBRATOR_DURATION);
 	}
 
-	@Override protected void onNotificationRemoved(final String key) throws Exception {
-		if (key.equals(mOngoingKey)) mOngoingKey = null;
+	@Override protected void onNotificationRemoved(final String key, final int reason) {
+		mIncomingCall = false;
 	}
 
-	private String mOngoingKey;
+	private boolean mIncomingCall;
 }
