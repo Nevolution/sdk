@@ -20,14 +20,16 @@ import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -49,6 +51,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.M;
+
 /**
  * Convert custom content view with playback actions into standard {@link android.app.Notification.MediaStyle}
  *
@@ -56,7 +61,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class MediaPlayerDecorator extends NevoDecoratorService {
 
-	@Override protected void apply(final StatusBarNotificationEvo evolving) throws Exception {
+	@Override protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		if (evolving.isClearable()) return;		// Just sticky notification, to reduce the overhead.
 		final INotification n = evolving.notification();
 		RemoteViews content_view = n.getBigContentView();	// Prefer big content view since it usually contains more actions
@@ -101,15 +106,19 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 		}});
 
 		final Notification mirror; final String pkg = evolving.getPackageName();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			final Notification.Builder b = new Notification.Builder(createPackageContext(pkg, 0))
+		final Context packageContext;
+		try {
+			packageContext = createPackageContext(pkg, 0);
+		} catch (final PackageManager.NameNotFoundException e) { return; }
+		if (SDK_INT >= M) {
+			final Notification.Builder b = new Notification.Builder(packageContext)
 					.setContentTitle(n.extras().getCharSequence(NotificationCompat.EXTRA_TITLE));
 			for (final NotificationCompat.Action action : actions)
 				b.addAction(new Action.Builder(Icon.createWithResource(pkg, action.getIcon()),
 						action.getTitle(), action.getActionIntent()).build());
 			mirror = b.build();
 		} else {
-			final NotificationCompat.Builder b = new NotificationCompat.Builder(createPackageContext(pkg, 0))
+			final NotificationCompat.Builder b = new NotificationCompat.Builder(packageContext)
 					.setContentTitle(n.extras().getCharSequence(NotificationCompat.EXTRA_TITLE))
 					.setLargeIcon(n.extras().getParcelable(NotificationCompat.EXTRA_LARGE_ICON).<Bitmap>get())
 					.setSmallIcon(android.R.drawable.ic_media_play);
@@ -152,8 +161,7 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 		} catch (final IllegalAccessException e) { return 0; }	// Should never happen
 	}
 
-	@TargetApi(Build.VERSION_CODES.M)
-	private Icon fixIconPkg(final Icon icon, final String pkg) {
+	@TargetApi(M) private Icon fixIconPkg(final Icon icon, final String pkg) {
 		if (Icon_getType != null && Icon_mString1 != null) try {
 			final int type = (Integer) Icon_getType.invoke(icon);
 			if (type == 2) Icon_mString1.set(icon, pkg);
@@ -176,7 +184,7 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 		}
 		ImageView_mResource = field;
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+		if (SDK_INT >= M) {
 			Method method = null;
 			try {
 				method = Icon.class.getMethod("getType");

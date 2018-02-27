@@ -92,7 +92,7 @@ public class BundleDecorator extends NevoDecoratorService {
 
 	private static final int MIN_NUM_TO_BUNDLE = 2;
 
-	@Override protected void onConnected() throws Exception {
+	@Override protected void onConnected() throws RemoteException {
 		super.onConnected();
 		Log.i(TAG, "Retrieving active bundles...");
 		for (final StatusBarNotificationEvo existent : getMyActiveNotifications()) {
@@ -117,8 +117,8 @@ public class BundleDecorator extends NevoDecoratorService {
 		bundle(evolved, bundle);
 	}
 
-	@Override protected void onNotificationRemoved(final String key) throws RemoteException {
-		if (mPendingRevival.remove(key)) return;		// This removal is caused by the glitch before revival.
+	@Override protected void onNotificationRemoved(final String key, final int reason) {
+		if (mPendingRevival.remove(key)) return;				// This removal is caused by the glitch before revival.
 		mBundles.setNotificationBundle(key, null);		// Remove it from bundle since it should not be shown in bundle any more.
 	}
 

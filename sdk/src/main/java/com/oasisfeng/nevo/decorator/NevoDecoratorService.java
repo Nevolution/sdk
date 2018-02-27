@@ -96,33 +96,33 @@ public abstract class NevoDecoratorService extends Service {
 	 * @param evolving the incoming notification evolved by preceding decorators and to be evolved by this decorator,
 	 *                 or an already evolved notification (with or without this decorator).
 	 */
-	@Keep protected void apply(final StatusBarNotificationEvo evolving) throws Exception {}
+	@Keep protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {}
 
 	/** Override this method to perform initial process. */
-	protected void onConnected() throws Exception {}
+	protected void onConnected() throws RemoteException {}
 
 	/** @deprecated Override {@link #onNotificationRemoved(String, int)} instead */
-	@Keep @Deprecated protected void onNotificationRemoved(final String key) throws Exception {}
+	@Keep @Deprecated protected void onNotificationRemoved(final String key) throws RemoteException {}
 
 	/**
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
 	 *
 	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}
 	 */
-	@Keep protected void onNotificationRemoved(final String key, @SuppressWarnings("unused") final int reason) throws Exception {
+	@Keep protected void onNotificationRemoved(final String key, @SuppressWarnings("unused") final int reason) throws RemoteException {
 		//noinspection deprecation
 		onNotificationRemoved(key);
 	}
 
 	/** @deprecated Override {@link #onNotificationRemoved(StatusBarNotificationEvo, int)} instead */
-	@Keep @Deprecated protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws Exception {}
+	@Keep @Deprecated protected void onNotificationRemoved(final StatusBarNotificationEvo notification) throws RemoteException {}
 
 	/**
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
 	 *
 	 * If notification payload is not relevant, please consider overriding {@link #onNotificationRemoved(String)} instead.
 	 */
-	@Keep protected void onNotificationRemoved(final StatusBarNotificationEvo notification, @SuppressWarnings("unused") final int reason) throws Exception {
+	@Keep protected void onNotificationRemoved(final StatusBarNotificationEvo notification, @SuppressWarnings("unused") final int reason) throws RemoteException {
 		//noinspection deprecation
 		onNotificationRemoved(notification);
 	}
@@ -198,23 +198,19 @@ public abstract class NevoDecoratorService extends Service {
 
 	@CallSuper @Override public IBinder onBind(final Intent intent) {
 		for (Class<?> clazz = getClass(); clazz != NevoDecoratorService.class; clazz = clazz.getSuperclass()) {
-			try {
-				if (clazz.getDeclaredMethod("apply", StatusBarNotificationEvo.class) != null) mFlags |= FLAG_DECORATION_AWARE;
-			} catch (final NoSuchMethodException ignored) {}
-			try {
-				if (getClass().getDeclaredMethod("onNotificationRemoved", String.class) != null) mFlags |= FLAG_REMOVAL_AWARE_KEY_ONLY;
-			} catch (final NoSuchMethodException ignored) {}
-			try {
-				if (getClass().getDeclaredMethod("onNotificationRemoved", String.class, int.class) != null) mFlags |= FLAG_REMOVAL_AWARE_KEY_ONLY;
-			} catch (final NoSuchMethodException ignored) {}
-			try {
-				if (getClass().getDeclaredMethod("onNotificationRemoved", StatusBarNotificationEvo.class) != null) mFlags |= FLAG_REMOVAL_AWARE;
-			} catch (final NoSuchMethodException ignored) {}
-			try {
-				if (getClass().getDeclaredMethod("onNotificationRemoved", StatusBarNotificationEvo.class, int.class) != null) mFlags |= FLAG_REMOVAL_AWARE;
-			} catch (final NoSuchMethodException ignored) {}
+			detectDerivedMethod(FLAG_DECORATION_AWARE, clazz, "apply", StatusBarNotificationEvo.class);
+			detectDerivedMethod(FLAG_REMOVAL_AWARE_KEY_ONLY, clazz, "onNotificationRemoved", String.class);
+			detectDerivedMethod(FLAG_REMOVAL_AWARE_KEY_ONLY, clazz, "onNotificationRemoved", String.class, int.class);
+			detectDerivedMethod(FLAG_REMOVAL_AWARE, clazz, "onNotificationRemoved", StatusBarNotificationEvo.class);
+			detectDerivedMethod(FLAG_REMOVAL_AWARE, clazz, "onNotificationRemoved", StatusBarNotificationEvo.class, int.class);
 		}
 		return mWrapper == null ? mWrapper = new INevoDecoratorWrapper() : mWrapper;
+	}
+
+	private void detectDerivedMethod(final int flag, final Class<?> clazz, final String name, final Class<?>... parameter_types) {
+		if ((mFlags & flag) == 0) try {
+			if (clazz.getDeclaredMethod(name, parameter_types) != null) mFlags |= flag;
+		} catch (final NoSuchMethodException ignored) {}
 	}
 
 	private static String shorten(final String name) {
@@ -259,7 +255,7 @@ public abstract class NevoDecoratorService extends Service {
 		@Override public void onNotificationRemoved(final String key, final @Nullable Bundle options) {
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
 			try {
-				NevoDecoratorService.this.onNotificationRemoved(key, options != null ? options.getInt(KEY_REASON): 0);
+				NevoDecoratorService.this.onNotificationRemoved(key, options != null ? options.getInt(KEY_REASON) : 0);
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running onNotificationRemoved()", t);
 				throw asParcelableException(t);
@@ -269,7 +265,7 @@ public abstract class NevoDecoratorService extends Service {
 		@Override public void onNotificationRemovedLight(final StatusBarNotificationEvo notification, final @Nullable Bundle options) {
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
 			try {
-				NevoDecoratorService.this.onNotificationRemoved(notification);
+				NevoDecoratorService.this.onNotificationRemoved(notification, options != null ? options.getInt(KEY_REASON) : 0);
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running onNotificationRemoved()", t);
 				throw asParcelableException(t);

@@ -1,6 +1,7 @@
 package com.oasisfeng.nevo.decorators;
 
 import android.content.res.Resources;
+import android.os.RemoteException;
 import android.support.annotation.IdRes;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -24,7 +25,7 @@ public class ElasticInboxDecorator extends NevoDecoratorService {
 	private static final int MAX_INBOX_ENTRIES = 7;
 	private static final int MAX_TOTAL_LINES = 10;
 
-	@Override protected void apply(final StatusBarNotificationEvo evolving) throws Exception {
+	@Override protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		final INotification n = evolving.notification();
 		if (! n.hasBigContentView()) return;
 		@SuppressWarnings("unchecked") final List<CharSequence> lines = n.extras().getCharSequenceArray(EXTRA_TEXT_LINES);
