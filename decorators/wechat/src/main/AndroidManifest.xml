@@ -14,20 +14,18 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.oasisfeng.nevo.decorators.wechat" android:versionCode="1" android:versionName="1.0">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.oasisfeng.nevo.decorators.wechat"
+          android:versionCode="1" android:versionName="1.0">
 
-    <uses-sdk
-        android:minSdkVersion="19"
-        android:targetSdkVersion="23" />
+    <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="27" />
 
     <application android:label="[Nevo] WeChat">
 
-        <service
-            android:name=".WeChatDecorator"
-            android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
-            android:process=":service"
-            android:label="@string/decorator_wechat_title"
-            android:description="@string/decorator_wechat_description">
+        <service android:name=".WeChatDecorator"
+                 android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
+                 android:process=":service"
+                 android:label="@string/decorator_wechat_title"
+                 android:description="@string/decorator_wechat_description">
             <intent-filter android:priority="5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
             </intent-filter>

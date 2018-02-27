@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion this.compileSdkVersion
-    buildToolsVersion this.buildToolsVersion
 }
 
 dependencies {
