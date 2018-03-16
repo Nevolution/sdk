@@ -67,11 +67,6 @@
             <intent-filter android:priority="-50">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
             </intent-filter>
-            <!-- The meta-data "NevoSettingsPreference" is an simple way to build preference settings page for your decorator.
-                 Nevolution main app will parse your preference xml and generate corresponding settings page,
-                 like android.accounts.AccountAuthenticator in android account manager setting. see http://stackoverflow.com/questions/10658330/show-settings-under-accounts-sync-menu-for-android-app
-                 More details like getting preference value will be added to wiki in the future. -->
-            <meta-data android:name="NevoSettingsPreference" android:resource="@xml/decorator_settings_preference" />
         </service>
 
     </application>
