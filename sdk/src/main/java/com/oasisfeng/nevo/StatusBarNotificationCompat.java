@@ -88,9 +88,8 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 				final String key = sbnc.getKey();
 				if (key != null) return key;				// May actually be null when called by the constructor
 			}
-			if (SDK_INT >= KITKAT_WATCH) return StatusBarNotificationCompat20.getKey(sbn);
+			return StatusBarNotificationCompat20.getKey(sbn);
 			// Use the exact same format as Android SDK 20+: userId | pkg | id | tag | uid
-			return buildKey(sbn);
 		}
 
 		static String buildKey(final StatusBarNotification sbn) {
