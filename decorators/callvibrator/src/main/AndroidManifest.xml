@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.oasisfeng.nevo.decorators.callvibrator" android:versionCode="1" android:versionName="1.0">
 
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="27" />
@@ -26,13 +26,14 @@
         <service
             android:name=".CallVibratorDecorator"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
-            android:process=":service"
-            android:label="@string/decorator_callvibrator_title"
-            android:description="@string/decorator_callvibrator_description">
+            android:process="com.oasisfeng.nevo.decorators"
+            android:isolatedProcess="true"
+            android:label="@string/decorator_call_vibrator_title"
+            android:description="@string/decorator_call_vibrator_description">
             <intent-filter android:priority="5">
                 <action android:name="com.oasisfeng.nevo.Decorator" />
             </intent-filter>
-            <meta-data android:name="packages" android:value="com.android.dialer|com.google.android.dialer" />
+            <meta-data android:name="packages" android:value="com.android.dialer | com.google.android.dialer" />
         </service>
 
     </application>

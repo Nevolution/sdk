@@ -24,7 +24,8 @@
         <service
             android:name=".ElasticInboxDecorator"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
-            android:process=":service"
+            android:isolatedProcess="true"
+            android:process="com.oasisfeng.nevo.decorators"
             android:label="@string/decorator_elastic_inbox_title"
             android:description="@string/decorator_elastic_inbox_description">
             <intent-filter android:priority="-10">
@@ -35,7 +36,8 @@
         <service
             android:name=".StackDecorator"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
-            android:process=":service"
+            android:isolatedProcess="true"
+            android:process="com.oasisfeng.nevo.decorators"
             android:label="@string/decorator_stack_title"
             android:description="@string/decorator_stack_description">
             <intent-filter android:priority="-5">
@@ -46,7 +48,8 @@
         <service
             android:name=".BigTextDecorator"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
-            android:process=":service"
+            android:isolatedProcess="true"
+            android:process="com.oasisfeng.nevo.decorators"
             android:label="@string/decorator_big_text_title"
             android:description="@string/decorator_big_text_description">
             <intent-filter android:priority="-20">
@@ -57,7 +60,8 @@
         <service
             android:name=".NoHeadsUpDecorator"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
-            android:process=":service"
+            android:isolatedProcess="true"
+            android:process="com.oasisfeng.nevo.decorators"
             android:label="@string/decorator_heads_up_clear_title"
             android:description="@string/decorator_heads_up_clear_description">
             <intent-filter android:priority="-50">
