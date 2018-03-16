@@ -16,6 +16,9 @@
   -->
 
 <resources>
-    <string name="decorator_wechat_title">WeChat Tweaks</string>
-    <string name="decorator_wechat_description">Expand the conversation notification with recent messages.</string>
+    <string name="app_name">[Nevo] WeChat Modernized</string>
+    <string name="decorator_wechat_title">WeChat Modernized</string>
+    <string name="decorator_wechat_description">Enhance WeChat notifications with expandable conversation, direct reply, swipe to mark read and more.</string>
+    <string name="self_display_name">You</string>
+    <string name="action_reply">Reply</string>
 </resources>

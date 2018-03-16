@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">[Nevo] 微信通知 - 现代简约风</string>
+    <string name="decorator_wechat_title">微信通知 - 现代简约风</string>
+    <string name="decorator_wechat_description">为微信通知带来符合当代 Android 的最佳体验：可展开的会话样式、直接回复、划除即已读等高级特性.</string>
+    <string name="self_display_name">你</string>
+    <string name="action_reply">回复</string>
+</resources>
