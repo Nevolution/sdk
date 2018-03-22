@@ -18,7 +18,6 @@ package com.oasisfeng.nevo;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.annotation.RestrictTo;
 import android.support.v4.app.NotificationCompat;
@@ -31,6 +30,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.N;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 /**
@@ -136,11 +137,16 @@ public final class NotificationHolder extends INotification.Stub {
 		updated |= FIELD_FLAGS;
 	}
 
-	@Override public String getGroup() { return NotificationCompat.getGroup(n); }
+	@Override public String getGroup() {
+		if (SDK_INT >= N && n.extras.containsKey(KEY_GROUP)) return n.extras.getString(KEY_GROUP);
+		else return NotificationCompat.getGroup(n);
+	}
+
 	@Override public void setGroup(final String group) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
-			Impl20.setGroup(n, group);
-		else NotificationCompat.getExtras(n).putString(KEY_GROUP, group);
+		if (SDK_INT >= N) n.extras.putString(KEY_GROUP, group);
+		else if (Notification_mGroupKey != null) try {
+			Notification_mGroupKey.set(n, group);
+		} catch (IllegalAccessException | IllegalArgumentException ignored) {}	// Should never happen
 		updated |= FIELD_GROUP;
 	}
 
@@ -183,7 +189,7 @@ public final class NotificationHolder extends INotification.Stub {
 
 	@Retention(RetentionPolicy.SOURCE) @IntDef(value = { FIELD_CONTENT_VIEW, FIELD_BIG_CONTENT_VIEW, FIELD_HEADS_UP_CONTENT_VIEW,
 			FIELD_NUMBER, FIELD_WHEN, FIELD_COLOR, FIELD_FLAGS, FIELD_GROUP, FIELD_PRIORITY, FIELD_VIBRATE }, flag = true)
-	public @interface UpdatedField {}
+	@interface UpdatedField {}
 
 	public @UpdatedField int getUpdatedFields() {
 		return updated;
@@ -206,29 +212,20 @@ public final class NotificationHolder extends INotification.Stub {
 	private final OnDemandSuppliers suppliers;
 	private @UpdatedField int updated;
 
-	static final String TAG = "Nevo.Holder";
+	private static final String TAG = "Nevo.Holder";
 
-	@RestrictTo(LIBRARY_GROUP) static class Impl20 {
-
-		static void setGroup(final Notification n, final String group) {
-			if (Notification_mGroupKey != null) try {
-				Notification_mGroupKey.set(n, group);
-			} catch (IllegalAccessException | IllegalArgumentException ignored) {}	// Should never happen
+	private static final Field Notification_mGroupKey;
+	static {
+		Field f = null;
+		if (SDK_INT < N) try {		// Use StatusBarNotification.setOverrideGroupKey() on Android N+
+			f = Notification.class.getDeclaredField("mGroupKey");
+			if (f.getType() != String.class) {
+				Log.e(TAG, "Incompatible ROM: Unexpected field type - " + f);
+				f = null;
+			} else f.setAccessible(true);
+		} catch (final NoSuchFieldException e) {
+			Log.e(TAG, "Incompatible ROM: No field Notification.mGroupKey");
 		}
-
-		private static final Field Notification_mGroupKey;
-		static {
-			Field f = null;
-			try {
-				f = Notification.class.getDeclaredField("mGroupKey");
-				if (f.getType() != String.class) {
-					Log.e(TAG, "Incompatible ROM: Unexpected field type - " + f);
-					f = null;
-				} else f.setAccessible(true);
-			} catch (final NoSuchFieldException e) {
-				Log.e(TAG, "Incompatible ROM: No field Notification.mGroupKey");
-			}
-			Notification_mGroupKey = f;
-		}
+		Notification_mGroupKey = f;
 	}
 }
