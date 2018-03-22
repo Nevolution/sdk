@@ -32,43 +32,43 @@ interface INotification {
     boolean hasCustomContentView();
     RemoteViews getCustomContentView();
     /** Whenever possible, avoid custom content view. It is inefficient and not decorator-pipeline friendly */
-    oneway void setCustomContentView(in RemoteViews views);
+    void setCustomContentView(in RemoteViews views);
 
     boolean hasCustomBigContentView();
     RemoteViews getCustomBigContentView();
     /** Whenever possible, avoid custom big content view. It is inefficient and not decorator-pipeline friendly */
-    oneway void setCustomBigContentView(in RemoteViews views);
+    void setCustomBigContentView(in RemoteViews views);
 
     boolean hasCustomHeadsUpContentView();
     RemoteViews getCustomHeadsUpContentView();
     /** Whenever possible, avoid custom heads-up content view. It is inefficient and not decorator-pipeline friendly */
-    oneway void setCustomHeadsUpContentView(in RemoteViews views);
+    void setCustomHeadsUpContentView(in RemoteViews views);
 
     int getFlags();
-    oneway void addFlags(int flags);
-    oneway void removeFlags(int flags);
+    void addFlags(int flags);
+    void removeFlags(int flags);
 
     long getWhen();
-    oneway void setWhen(long when);
+    void setWhen(long when);
 
     int getNumber();
-    oneway void setNumber(int number);
+    void setNumber(int number);
 
     int getColor();
-    oneway void setColor(int color);
+    void setColor(int color);
 
     String getGroup();
-    oneway void setGroup(String group);
+    void setGroup(String group);
 
     int getPriority();
-    oneway void setPriority(int priority);
+    void setPriority(int priority);
 
     long[] getVibrate();
-    oneway void setVibrate(in long[] vibrate);
+    void setVibrate(in long[] vibrate);
 
     Action[] getActions();
-    oneway void addAction(in Action action);
+    void addAction(in Action action);
 
-    oneway void setContentIntent(in PendingIntent intent);
-    oneway void setDeleteIntent(in PendingIntent intent);
+    void setContentIntent(in PendingIntent intent);
+    void setDeleteIntent(in PendingIntent intent);
 }
