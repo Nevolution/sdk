@@ -64,8 +64,8 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 	@Override protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		if (evolving.isClearable()) return;		// Just sticky notification, to reduce the overhead.
 		final INotification n = evolving.notification();
-		RemoteViews content_view = n.getBigContentView();	// Prefer big content view since it usually contains more actions
-		if (content_view == null) content_view = n.getContentView();
+		RemoteViews content_view = n.getCustomBigContentView();	// Prefer big content view since it usually contains more actions
+		if (content_view == null) content_view = n.getCustomContentView();		// FIXME: Not work any more.
 		if (content_view == null) return;
 		final AtomicReference<IntentSender> sender_holder = new AtomicReference<>();
 		final View views = content_view.apply(new ContextWrapper(this) {

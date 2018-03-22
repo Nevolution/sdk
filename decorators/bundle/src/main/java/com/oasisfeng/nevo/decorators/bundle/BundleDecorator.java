@@ -274,7 +274,7 @@ public class BundleDecorator extends NevoDecoratorService {
 		expanded.removeAllViews(R.id.bundle_expanded_container);
 
 		for (final StatusBarNotificationEvo sbn : sbns) try {
-			expanded.addView(R.id.bundle_expanded_container, sbn.notification().getContentView());
+			expanded.addView(R.id.bundle_expanded_container, sbn.notification().getCustomContentView());
 		} catch (final RemoteException ignored) {}	// Should not happen
 
 		expanded.setOnClickPendingIntent(R.id.bundle_expanded_container, click_pending_intent);

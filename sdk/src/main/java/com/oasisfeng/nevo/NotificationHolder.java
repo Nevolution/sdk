@@ -42,6 +42,7 @@ public final class NotificationHolder extends INotification.Stub {
 
 	@RestrictTo(LIBRARY_GROUP)
 	public interface OnDemandSuppliers {
+		boolean hasContentView(Notification n);
 		RemoteViews getContentView(Notification n);
 		/** @return whether the content view is changed */
 		boolean setContentView(Notification n, RemoteViews views);
@@ -57,41 +58,23 @@ public final class NotificationHolder extends INotification.Stub {
 
 	NotificationHolder(final Notification notification, final OnDemandSuppliers suppliers) {
 		n = notification;
-		extras = new ChangeTrackingBundleHolder(NotificationCompat.getExtras(n));
+		extras = new ChangeTrackingBundleHolder(n.extras);
 		this.suppliers = suppliers;
 	}
 
-	public NotificationHolder(final Notification notification) {
+	NotificationHolder(final Notification notification) {
 		n = notification;
-		extras = new ChangeTrackingBundleHolder(NotificationCompat.getExtras(n));
+		extras = new ChangeTrackingBundleHolder(n.extras);
 		suppliers = new OnDemandSuppliers() {
-			@Override public RemoteViews getContentView(final Notification n) {
-				return n.contentView;
-			}
-			@Override public boolean setContentView(final Notification n, final RemoteViews views) {
-				n.contentView = views; return true;
-			}
-			@Override public boolean hasBigContentView(final Notification n) {
-				return n.bigContentView != null;
-			}
-			@Override public RemoteViews getBigContentView(final Notification n) {
-				return n.bigContentView;
-			}
-			@Override public boolean setBigContentView(final Notification n, final RemoteViews views) {
-				n.bigContentView = views; return true;
-			}
-			@Override public boolean hasHeadsUpContentView(final Notification n) {
-				return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && n.headsUpContentView != null;
-			}
-			@Override public RemoteViews getHeadsUpContentView(final Notification n) {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) return n.headsUpContentView;
-				return null;
-			}
-			@Override public boolean setHeadsUpContentView(final Notification n, final RemoteViews views) {
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false;
-				//noinspection deprecation
-				n.headsUpContentView = views; return true;
-			}
+			@Override public boolean hasContentView(final Notification n) { return n.contentView != null; }
+			@Override public RemoteViews getContentView(final Notification n) { return n.contentView; }
+			@Override public boolean setContentView(final Notification n, final RemoteViews views) { n.contentView = views; return true; }
+			@Override public boolean hasBigContentView(final Notification n) { return n.bigContentView != null; }
+			@Override public RemoteViews getBigContentView(final Notification n) { return n.bigContentView; }
+			@Override public boolean setBigContentView(final Notification n, final RemoteViews views) { n.bigContentView = views; return true; }
+			@Override public boolean hasHeadsUpContentView(final Notification n) { return n.headsUpContentView != null; }
+			@Override public RemoteViews getHeadsUpContentView(final Notification n) { return n.headsUpContentView; }
+			@Override public boolean setHeadsUpContentView(final Notification n, final RemoteViews views) { n.headsUpContentView = views; return true; }
 		};
 	}
 
@@ -99,30 +82,33 @@ public final class NotificationHolder extends INotification.Stub {
 
 	@Override public ChangeTrackingBundleHolder extras() { return extras; }
 
-	@Override public RemoteViews getContentView() {
+	@Override public boolean hasCustomContentView() {
+		return suppliers.hasContentView(n);
+	}
+	@Override public RemoteViews getCustomContentView() {
 		return suppliers.getContentView(n);
 	}
-	@Override public void setContentView(final RemoteViews views) {
+	@Override public void setCustomContentView(final RemoteViews views) {
 		if (suppliers.setContentView(n, views)) updated |= FIELD_CONTENT_VIEW;
 	}
 
-	@Override public boolean hasBigContentView() {
+	@Override public boolean hasCustomBigContentView() {
 		return suppliers.hasBigContentView(n);
 	}
-	@Override public RemoteViews getBigContentView() {
+	@Override public RemoteViews getCustomBigContentView() {
 		return suppliers.getBigContentView(n);
 	}
-	@Override public void setBigContentView(final RemoteViews views) {
+	@Override public void setCustomBigContentView(final RemoteViews views) {
 		if (suppliers.setBigContentView(n, views)) updated |= FIELD_BIG_CONTENT_VIEW;
 	}
 
-	@Override public boolean hasHeadsUpContentView() {
+	@Override public boolean hasCustomHeadsUpContentView() {
 		return suppliers.hasHeadsUpContentView(n);
 	}
-	@Override public RemoteViews getHeadsUpContentView() {
+	@Override public RemoteViews getCustomHeadsUpContentView() {
 		return suppliers.getHeadsUpContentView(n);
 	}
-	@Override public void setHeadsUpContentView(final RemoteViews views) {
+	@Override public void setCustomHeadsUpContentView(final RemoteViews views) {
 		if (suppliers.setHeadsUpContentView(n, views)) updated |= FIELD_HEADS_UP_CONTENT_VIEW;
 	}
 
@@ -135,16 +121,8 @@ public final class NotificationHolder extends INotification.Stub {
 	@Override public void setContentIntent(final PendingIntent intent) { n.contentIntent = intent; }
 	@Override public void setDeleteIntent(final PendingIntent intent) { n.deleteIntent = intent; }
 
-	@Override public int getColor() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) return n.color;
-		else return 0;
-	}
-	@Override public void setColor(final int color) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			n.color = color;
-			updated |= FIELD_COLOR;
-		}
-	}
+	@Override public int getColor() { return n.color; }
+	@Override public void setColor(final int color) { n.color = color; updated |= FIELD_COLOR; }
 
 	@Override public int getFlags() { return n.flags; }
 	@Override public void addFlags(final int flags) {
@@ -189,10 +167,9 @@ public final class NotificationHolder extends INotification.Stub {
 		updated |= FIELD_VIBRATE;
 	}
 
-	private static final String KEY_GROUP = "android.support.groupKey";
+	@RestrictTo(LIBRARY_GROUP) public static final String KEY_GROUP = "android.support.groupKey";
 
-	/* Updated field will no longer reflect the changes in extras, use getExtrasChangeCount() instead.
-	public static final int FIELD_EXTRAS = 1; */
+	/* Updated field will no longer reflect the changes in extras, use getExtrasChangeCount() instead. */
 	public static final int FIELD_CONTENT_VIEW = 1 << 1;
 	public static final int FIELD_BIG_CONTENT_VIEW = 1 << 2;
 	public static final int FIELD_HEADS_UP_CONTENT_VIEW = 1 << 3;

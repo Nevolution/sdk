@@ -27,12 +27,12 @@ public class ElasticInboxDecorator extends NevoDecoratorService {
 
 	@Override protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
 		final INotification n = evolving.notification();
-		if (! n.hasBigContentView()) return;
+		if (! n.hasCustomBigContentView()) return;
 		@SuppressWarnings("unchecked") final List<CharSequence> lines = n.extras().getCharSequenceArray(EXTRA_TEXT_LINES);
 		if (lines == null || lines.isEmpty()) return;
 		final int num_lines_left = MAX_TOTAL_LINES - lines.size();
 		if (num_lines_left <= 0) return;
-		final RemoteViews inbox = n.getBigContentView();
+		final RemoteViews inbox = n.getCustomBigContentView();		// FIXME: This does not work any more
 		if (inbox == null) return;
 
 		final int num_entries = Math.min(lines.size(), MAX_INBOX_ENTRIES);
@@ -53,7 +53,7 @@ public class ElasticInboxDecorator extends NevoDecoratorService {
 			log_buffer.append(max_lines).append('/');
 		}
 		if (! updated) return;
-		n.setBigContentView(inbox);
+		n.setCustomBigContentView(inbox);
 		Log.d(TAG, log_buffer.substring(0, log_buffer.length() - 1));
 	}
 

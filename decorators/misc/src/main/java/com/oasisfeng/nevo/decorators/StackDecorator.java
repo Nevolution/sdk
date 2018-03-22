@@ -85,7 +85,7 @@ public class StackDecorator extends NevoDecoratorService {
 		evolved_extras.putCharSequence(NotificationCompat.EXTRA_TITLE_BIG, title);
 		evolved_extras.putCharSequenceArray(EXTRA_TEXT_LINES, lines);
 
-		evolved_n.setBigContentView(buildBigContentView(evolved.getPackageName(), title, lines));
+		evolved_n.setCustomBigContentView(buildBigContentView(evolved.getPackageName(), title, lines));
 	}
 
 	private RemoteViews buildBigContentView(final String pkg, final CharSequence title, final List<CharSequence> lines) {
@@ -96,6 +96,6 @@ public class StackDecorator extends NevoDecoratorService {
 		final InboxStyle inbox = new NotificationCompat.InboxStyle(builder).setBigContentTitle(title);
 		for (final CharSequence line : lines) inbox.addLine(line);
 
-		return inbox.build().bigContentView;
+		return inbox.build().bigContentView;		// FIXME: Not work if targeting Android N+
 	}
 }

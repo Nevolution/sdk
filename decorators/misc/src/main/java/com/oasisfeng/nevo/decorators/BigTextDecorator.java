@@ -35,7 +35,7 @@ public class BigTextDecorator extends NevoDecoratorService {
 
 	@Override public void apply(final StatusBarNotificationEvo evolved) throws RemoteException {
 		final INotification n = evolved.notification();
-		if (n.hasBigContentView()) return;
+		if (n.hasCustomBigContentView()) return;
 		final IBundle extras = n.extras();
 		final CharSequence text = extras.getCharSequence(EXTRA_TEXT);
 		if (text == null) return;

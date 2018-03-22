@@ -24,23 +24,25 @@ import android.app.Notification.Action;
 
 interface INotification {
 
+	/** @Deprecated Never use this method to retrieve the whole notification instance, use other methods to get and modify properties instead. */
     Notification get();
 
     IBundle extras();
 
-    RemoteViews getContentView();
-    /** Avoid replacing the content view as a whole. It is inefficient and not decorator-pipeline friendly */
-    oneway void setContentView(in RemoteViews views);
+    boolean hasCustomContentView();
+    RemoteViews getCustomContentView();
+    /** Whenever possible, avoid custom content view. It is inefficient and not decorator-pipeline friendly */
+    oneway void setCustomContentView(in RemoteViews views);
 
-    boolean hasBigContentView();
-    RemoteViews getBigContentView();
-    /** Avoid replacing the big content view as a whole. It is inefficient and not decorator-pipeline friendly */
-    oneway void setBigContentView(in RemoteViews views);
+    boolean hasCustomBigContentView();
+    RemoteViews getCustomBigContentView();
+    /** Whenever possible, avoid custom big content view. It is inefficient and not decorator-pipeline friendly */
+    oneway void setCustomBigContentView(in RemoteViews views);
 
-    boolean hasHeadsUpContentView();
-    RemoteViews getHeadsUpContentView();
-    /** Avoid replacing the heads-up content view as a whole. It is inefficient and not decorator-pipeline friendly */
-    oneway void setHeadsUpContentView(in RemoteViews views);
+    boolean hasCustomHeadsUpContentView();
+    RemoteViews getCustomHeadsUpContentView();
+    /** Whenever possible, avoid custom heads-up content view. It is inefficient and not decorator-pipeline friendly */
+    oneway void setCustomHeadsUpContentView(in RemoteViews views);
 
     int getFlags();
     oneway void addFlags(int flags);
