@@ -23,17 +23,12 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.KITKAT_WATCH;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 /**
@@ -56,8 +51,8 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 	@Override public String getKey() { return key; }
 	@Override public String getGroupKey() { return groupKey; }
 
-	@RequiresApi(KITKAT_WATCH) private String getBaseKey() { return super.getKey(); }
-	@RequiresApi(LOLLIPOP) private String getBaseGroupKey() { return super.getGroupKey(); }
+	private String getBaseKey() { return super.getKey(); }
+	private String getBaseGroupKey() { return super.getGroupKey(); }
 
 	/** {@link StatusBarNotification#getUser()} is hidden but accessible in API level 18~20 */
 	@RestrictTo(LIBRARY_GROUP) @Override public UserHandle getUser() {
@@ -79,17 +74,14 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 	private static final String TAG = "SbnCompat";
 
 	/** Shortcut for cleaner code */
-	@RestrictTo(LIBRARY_GROUP)
-	public static class SbnCompat {
+	@RestrictTo(LIBRARY_GROUP) public static class SbnCompat {
 
 		public static String keyOf(final StatusBarNotification sbn) {
-			if (sbn instanceof StatusBarNotificationCompat) {
-				final StatusBarNotificationCompat sbnc = (StatusBarNotificationCompat) sbn;
-				final String key = sbnc.getKey();
-				if (key != null) return key;				// May actually be null when called by the constructor
-			}
-			return StatusBarNotificationCompat20.getKey(sbn);
-			// Use the exact same format as Android SDK 20+: userId | pkg | id | tag | uid
+			if (! (sbn instanceof StatusBarNotificationCompat)) return sbn.getKey();
+			final StatusBarNotificationCompat sbnc = (StatusBarNotificationCompat) sbn;
+			final String key = sbnc.getKey();
+			if (key != null) return key;				// May actually be null when called by the constructor
+			return ((StatusBarNotificationCompat) sbn).getBaseKey();
 		}
 
 		static String buildKey(final StatusBarNotification sbn) {
@@ -101,15 +93,10 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 		}
 
 		public static String groupKeyOf(final StatusBarNotification sbn) {
-			if (sbn instanceof StatusBarNotificationCompat) {
-				final String group_key = ((StatusBarNotificationCompat) sbn).groupKey;
-				if (group_key != null) return group_key;	// May actually be null when called by the constructor
-			}
-			if (SDK_INT >= LOLLIPOP) return StatusBarNotificationCompat21.getGroupKey(sbn);
-			final String group = NotificationCompat.getGroup(sbn.getNotification());
-			final String sortKey = NotificationCompat.getSortKey(sbn.getNotification());
-			if (group == null && sortKey == null) return keyOf(sbn);        // a group of one
-			return sbn.getPackageName() + "|" + (group == null ? "p:" + sbn.getNotification().priority : "g:" + group);
+			if (! (sbn instanceof StatusBarNotificationCompat)) return sbn.getGroupKey();
+			final String group_key = ((StatusBarNotificationCompat) sbn).groupKey;
+			if (group_key != null) return group_key;	// May actually be null when called by the constructor
+			return ((StatusBarNotificationCompat) sbn).getBaseGroupKey();
 		}
 
 		/** {@link StatusBarNotification#getUser()} is hidden but accessible in API level 18~20 */
@@ -140,26 +127,6 @@ public class StatusBarNotificationCompat extends StatusBarNotification {
 				field.setAccessible(true);
 			} catch (final NoSuchFieldException ignored) {}
 			sFieldUid = field;
-		}
-	}
-
-	@RequiresApi(KITKAT_WATCH)
-	private static class StatusBarNotificationCompat20 {
-
-		private static String getKey(final StatusBarNotification sbn) {
-			if (sbn instanceof StatusBarNotificationCompat)
-				return ((StatusBarNotificationCompat) sbn).getBaseKey();
-			return sbn.getKey();
-		}
-	}
-
-	@RequiresApi(LOLLIPOP)
-	private static class StatusBarNotificationCompat21 {
-
-		private static String getGroupKey(final StatusBarNotification sbn) {
-			if (sbn instanceof StatusBarNotificationCompat)
-				return ((StatusBarNotificationCompat) sbn).getBaseGroupKey();
-			return sbn.getGroupKey();
 		}
 	}
 }
