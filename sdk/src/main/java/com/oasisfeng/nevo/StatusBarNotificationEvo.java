@@ -26,7 +26,6 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
@@ -50,20 +49,6 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 				0/* initialPid */, 0/* score */, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime());
 	}
 
-	@RestrictTo(LIBRARY_GROUP)
-	public static StatusBarNotificationEvo from(final StatusBarNotification sbn, final NotificationHolder.OnDemandSuppliers suppliers) {
-		if (sbn instanceof StatusBarNotificationEvo) {
-			final StatusBarNotificationEvo sbne = (StatusBarNotificationEvo) sbn;
-			final StatusBarNotificationEvo clone = new StatusBarNotificationEvo(sbn.getPackageName(), null/* opPkg */, sbne.getOriginalId(),
-					sbne.getOriginalTag(), SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime(), suppliers);
-			clone.tag = sbne.tag; clone.id = sbne.id; clone.tag_decorated = sbne.tag_decorated;
-			clone.updateKey();
-			return clone;
-		}
-		return new StatusBarNotificationEvo(sbn.getPackageName(), null, sbn.getId(), sbn.getTag(),
-				SbnCompat.getUid(sbn), 0, 0, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime(), suppliers);
-	}
-
 	/** Clone the data fields only (suppliers, notification cache will not be cloned and holder */
 	@Override public StatusBarNotificationEvo clone() {
 		final StatusBarNotificationEvo clone = from(super.clone());
@@ -77,14 +62,6 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 									final Notification notification, final UserHandle user, final long postTime) {
 		super(pkg, opPkg, id, tag, uid, initialPid, score, notification, user, postTime);
 		holder = new NotificationHolder(notification);
-	}
-
-	private StatusBarNotificationEvo(final String pkg, final String opPkg, final int id, final String tag,
-									final int uid, final int initialPid, final int score,
-									final Notification notification, final UserHandle user, final long postTime,
-									final NotificationHolder.OnDemandSuppliers suppliers) {
-		super(pkg, opPkg, id, tag, uid, initialPid, score, notification, user, postTime);
-		holder = new NotificationHolder(notification, suppliers);
 	}
 
 	public StatusBarNotificationEvo setTag(final @Nullable String tag) {
@@ -134,19 +111,18 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		try {
 			if (holder == null) return super.getNotification();	// holder is null only if called by super constructor StatusBarNotification().
 			if (holder instanceof INotification.Stub) return holder.get();	// Direct fetch for local instance
-			if (notification == null) {
-				try {
-					final long begin = SystemClock.uptimeMillis();
-					notification = holder.get();
-					final long elapse = SystemClock.uptimeMillis() - begin;
-					if (elapse > 1) Log.w(TAG, "Retrieving the whole instance of remote notification spent " + elapse + "ms");
-				} catch (final RuntimeException e) {
-					Log.e(TAG, "Failed to retrieve notification: " + getKey());
-					throw e;
-				}
-				NotificationCompat.getExtras(notification).setClassLoader(StatusBarNotificationEvo.class.getClassLoader());	// For our parcelable classes
+			if (notification == null) try {
+				final long begin = SystemClock.uptimeMillis();
+				notification = holder.get();
+				final long elapse = SystemClock.uptimeMillis() - begin;
+				Log.w(TAG, "Retrieving the whole instance of remote notification spent " + elapse + "ms");
+				if (notification != null)
+					notification.extras.setClassLoader(StatusBarNotificationEvo.class.getClassLoader());    // For our parcelable classes
+			} catch (final RuntimeException e) {
+				Log.e(TAG, "Failed to retrieve notification: " + getKey());
+				throw e;
 			}
-		} catch (final RemoteException e) { throw new IllegalStateException(e); }
+		} catch (final RemoteException e) { throw new RuntimeException(e); }
 		return notification;
 	}
 

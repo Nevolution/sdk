@@ -32,6 +32,7 @@ import java.util.List;
 
 import static android.graphics.Typeface.BOLD;
 import static android.support.v4.app.NotificationCompat.EXTRA_SUMMARY_TEXT;
+import static android.support.v4.app.NotificationCompat.EXTRA_TEMPLATE;
 import static android.support.v4.app.NotificationCompat.EXTRA_TEXT;
 import static android.support.v4.app.NotificationCompat.EXTRA_TEXT_LINES;
 import static android.support.v4.app.NotificationCompat.EXTRA_TITLE;
@@ -91,7 +92,7 @@ public class WhatsAppDecorator extends NevoDecoratorService {
 		}
 		extras.putCharSequenceArray(EXTRA_TEXT_LINES, new_lines);
 		extras.remove(EXTRA_SUMMARY_TEXT);
-		extras.putString(EXTRA_REBUILD_STYLE, STYLE_INBOX);
+		extras.putString(EXTRA_TEMPLATE, TEMPLATE_INBOX);
 		if (new_lines.size() > 1) n.setNumber(new_lines.size());
 	}
 

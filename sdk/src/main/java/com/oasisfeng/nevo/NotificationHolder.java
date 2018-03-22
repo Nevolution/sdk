@@ -41,77 +41,26 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 @RestrictTo(LIBRARY_GROUP)
 public final class NotificationHolder extends INotification.Stub {
 
-	@RestrictTo(LIBRARY_GROUP)
-	public interface OnDemandSuppliers {
-		boolean hasContentView(Notification n);
-		RemoteViews getContentView(Notification n);
-		/** @return whether the content view is changed */
-		boolean setContentView(Notification n, RemoteViews views);
-		boolean hasBigContentView(Notification n);
-		RemoteViews getBigContentView(Notification n);
-		/** @return whether the big content view is changed */
-		boolean setBigContentView(Notification n, RemoteViews views);
-		boolean hasHeadsUpContentView(Notification n);
-		RemoteViews getHeadsUpContentView(Notification n);
-		/** @return whether the heads-up content view is changed */
-		boolean setHeadsUpContentView(Notification n, RemoteViews views);
-	}
-
-	NotificationHolder(final Notification notification, final OnDemandSuppliers suppliers) {
-		n = notification;
-		extras = new ChangeTrackingBundleHolder(n.extras);
-		this.suppliers = suppliers;
-	}
-
 	NotificationHolder(final Notification notification) {
 		n = notification;
 		extras = new ChangeTrackingBundleHolder(n.extras);
-		suppliers = new OnDemandSuppliers() {
-			@Override public boolean hasContentView(final Notification n) { return n.contentView != null; }
-			@Override public RemoteViews getContentView(final Notification n) { return n.contentView; }
-			@Override public boolean setContentView(final Notification n, final RemoteViews views) { n.contentView = views; return true; }
-			@Override public boolean hasBigContentView(final Notification n) { return n.bigContentView != null; }
-			@Override public RemoteViews getBigContentView(final Notification n) { return n.bigContentView; }
-			@Override public boolean setBigContentView(final Notification n, final RemoteViews views) { n.bigContentView = views; return true; }
-			@Override public boolean hasHeadsUpContentView(final Notification n) { return n.headsUpContentView != null; }
-			@Override public RemoteViews getHeadsUpContentView(final Notification n) { return n.headsUpContentView; }
-			@Override public boolean setHeadsUpContentView(final Notification n, final RemoteViews views) { n.headsUpContentView = views; return true; }
-		};
 	}
 
 	@Override public Notification get() { return n; }	// No suppliers here, caller should be aware of this
 
 	@Override public ChangeTrackingBundleHolder extras() { return extras; }
 
-	@Override public boolean hasCustomContentView() {
-		return suppliers.hasContentView(n);
-	}
-	@Override public RemoteViews getCustomContentView() {
-		return suppliers.getContentView(n);
-	}
-	@Override public void setCustomContentView(final RemoteViews views) {
-		if (suppliers.setContentView(n, views)) updated |= FIELD_CONTENT_VIEW;
-	}
+	@Override public boolean hasCustomContentView() { return n.contentView != null; }
+	@Override public RemoteViews getCustomContentView() { return n.contentView; }
+	@Override public void setCustomContentView(final RemoteViews views) { n.contentView = views; updated |= FIELD_CONTENT_VIEW; }
 
-	@Override public boolean hasCustomBigContentView() {
-		return suppliers.hasBigContentView(n);
-	}
-	@Override public RemoteViews getCustomBigContentView() {
-		return suppliers.getBigContentView(n);
-	}
-	@Override public void setCustomBigContentView(final RemoteViews views) {
-		if (suppliers.setBigContentView(n, views)) updated |= FIELD_BIG_CONTENT_VIEW;
-	}
+	@Override public boolean hasCustomBigContentView() { return n.bigContentView != null; }
+	@Override public RemoteViews getCustomBigContentView() { return n.bigContentView; }
+	@Override public void setCustomBigContentView(final RemoteViews views) { n.bigContentView = views; updated |= FIELD_BIG_CONTENT_VIEW; }
 
-	@Override public boolean hasCustomHeadsUpContentView() {
-		return suppliers.hasHeadsUpContentView(n);
-	}
-	@Override public RemoteViews getCustomHeadsUpContentView() {
-		return suppliers.getHeadsUpContentView(n);
-	}
-	@Override public void setCustomHeadsUpContentView(final RemoteViews views) {
-		if (suppliers.setHeadsUpContentView(n, views)) updated |= FIELD_HEADS_UP_CONTENT_VIEW;
-	}
+	@Override public boolean hasCustomHeadsUpContentView() { return n.headsUpContentView != null; }
+	@Override public RemoteViews getCustomHeadsUpContentView() { return n.headsUpContentView; }
+	@Override public void setCustomHeadsUpContentView(final RemoteViews views) { n.headsUpContentView = views; updated |= FIELD_HEADS_UP_CONTENT_VIEW; }
 
 	@Override public long getWhen() { return n.when; }
 	@Override public void setWhen(final long when) { n.when = when; updated |= FIELD_WHEN; }
@@ -173,7 +122,7 @@ public final class NotificationHolder extends INotification.Stub {
 		updated |= FIELD_VIBRATE;
 	}
 
-	@RestrictTo(LIBRARY_GROUP) public static final String KEY_GROUP = "android.support.groupKey";
+	public static final String KEY_GROUP = "android.support.groupKey";
 
 	/* Updated field will no longer reflect the changes in extras, use getExtrasChangeCount() instead. */
 	public static final int FIELD_CONTENT_VIEW = 1 << 1;
@@ -199,17 +148,12 @@ public final class NotificationHolder extends INotification.Stub {
 		updated = 0;
 	}
 
-	public boolean isFieldUpdated(@UpdatedField final int field) {
-		return (updated & field) != 0;
-	}
-
 	public int countChangedExtras() {
 		return extras.countChanges();
 	}
 
 	private final Notification n;
 	private final ChangeTrackingBundleHolder extras;
-	private final OnDemandSuppliers suppliers;
 	private @UpdatedField int updated;
 
 	private static final String TAG = "Nevo.Holder";
@@ -217,7 +161,7 @@ public final class NotificationHolder extends INotification.Stub {
 	private static final Field Notification_mGroupKey;
 	static {
 		Field f = null;
-		if (SDK_INT < N) try {		// Use StatusBarNotification.setOverrideGroupKey() on Android N+
+		if (SDK_INT < N) try {	//noinspection JavaReflectionMemberAccess, StatusBarNotification.setOverrideGroupKey() is used on Android N+
 			f = Notification.class.getDeclaredField("mGroupKey");
 			if (f.getType() != String.class) {
 				Log.e(TAG, "Incompatible ROM: Unexpected field type - " + f);

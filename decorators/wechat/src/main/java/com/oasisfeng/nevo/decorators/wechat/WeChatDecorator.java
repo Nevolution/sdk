@@ -119,7 +119,7 @@ public class WeChatDecorator extends NevoDecoratorService {
 			else Log.w(TAG, "Unsupported extra \"" + key + "\": " + value);
 		}
 		extras.putCharSequence(NotificationCompat.EXTRA_CONVERSATION_TITLE, title);
-		extras.putString(EXTRA_REBUILD_STYLE, STYLE_MESSAGING);
+		extras.putString(NotificationCompat.EXTRA_TEMPLATE, TEMPLATE_MESSAGING);
 	}
 
 	private @Nullable MessagingStyle buildMessagingFromCarExtender(final String key, final INotification n, final IBundle car_extender, final IBundle extras) throws RemoteException {

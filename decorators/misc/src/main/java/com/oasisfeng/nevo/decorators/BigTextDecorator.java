@@ -17,6 +17,7 @@
 package com.oasisfeng.nevo.decorators;
 
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 
 import com.oasisfeng.android.os.IBundle;
 import com.oasisfeng.nevo.INotification;
@@ -44,7 +45,7 @@ public class BigTextDecorator extends NevoDecoratorService {
 
 		extras.putCharSequence(EXTRA_TITLE_BIG, extras.getCharSequence(EXTRA_TITLE));
 		extras.putCharSequence(EXTRA_BIG_TEXT, text);
-		extras.putString(EXTRA_REBUILD_STYLE, STYLE_BIG_TEXT);
+		extras.putString(NotificationCompat.EXTRA_TEMPLATE, TEMPLATE_BIG_TEXT);
 	}
 
 //	private final TextPaint mPaint = new TextPaint();

@@ -63,26 +63,12 @@ public abstract class NevoDecoratorService extends Service {
 	/** Optional meta-data key within the &lt;service&gt; tag, to indicate the target packages (separated by comma) of the app-specific decorator */
 	public static final String META_KEY_PACKAGES = "packages";
 
-	/**
-	 * Add this extra to indicate that the big content view of the evolving notification should be rebuilt with this style,
-	 * usually after the specific extras for built-in style of big content view are altered.
-	 *
-	 * <p>Don't check this key in extras, since it will be removed during decoration.</p>
-	 *
-	 * <p>The string value is the class name of the big content style to be rebuilt with. Only the Android built-in styles are supported.
-	 *
-	 * @see #STYLE_BIG_TEXT
-	 * @see #STYLE_INBOX
-	 * @see #STYLE_BIG_PICTURE
-	 * @see #STYLE_MEDIA
-	 */
-	public static final String EXTRA_REBUILD_STYLE = "nevo.rebuild.style";
-
-	public static final String STYLE_BIG_TEXT = "android.app.Notification$BigTextStyle";
-	public static final String STYLE_INBOX = "android.app.Notification$InboxStyle";
-	public static final String STYLE_BIG_PICTURE = "android.app.Notification$BigPictureStyle";
-	public static final String STYLE_MEDIA = "android.app.Notification$MediaStyle";
-	public static final String STYLE_MESSAGING = "android.app.Notification$MessagingStyle";
+	/** Valid constant values for {@link android.support.v4.app.NotificationCompat#EXTRA_TEMPLATE} */
+	public static final String TEMPLATE_BIG_TEXT	= "android.app.Notification$BigTextStyle";
+	public static final String TEMPLATE_INBOX		= "android.app.Notification$InboxStyle";
+	public static final String TEMPLATE_BIG_PICTURE	= "android.app.Notification$BigPictureStyle";
+	public static final String TEMPLATE_MEDIA		= "android.app.Notification$MediaStyle";
+	public static final String TEMPLATE_MESSAGING	= "android.app.Notification$MessagingStyle";
 
 	/**
 	 * Apply this decorator to the notification. <b>Implementation should be idempotent</b>,
