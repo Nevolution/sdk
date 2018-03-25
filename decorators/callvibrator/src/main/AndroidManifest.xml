@@ -27,7 +27,6 @@
             android:name=".CallVibratorDecorator"
             android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE"
             android:process="com.oasisfeng.nevo.decorators"
-            android:isolatedProcess="true"
             android:label="@string/decorator_call_vibrator_title"
             android:description="@string/decorator_call_vibrator_description">
             <intent-filter android:priority="5">
