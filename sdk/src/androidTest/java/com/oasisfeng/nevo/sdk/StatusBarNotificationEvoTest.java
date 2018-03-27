@@ -19,19 +19,16 @@ package com.oasisfeng.nevo.sdk;
 import android.app.Notification;
 import android.os.*;
 import android.os.Process;
+import android.test.AndroidTestCase;
 
-import com.oasisfeng.nevo.StatusBarNotificationCompat.SbnCompat;
 import com.oasisfeng.nevo.StatusBarNotificationEvo;
 
-public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTest {
-
-	public void testCreatorAndHelpers() { super.testCreatorAndHelpers(); }
-	public void testParcel() { super.testParcel(); }
+public class StatusBarNotificationEvoTest extends AndroidTestCase {
 
 	public void testTagOverride() {
 		// Override tag (non-null initially)
 		StatusBarNotificationEvo sbne = create("pkg", "TAG"/* initially non-null */, 1, Process.myUserHandle(), 12, n(), System.currentTimeMillis());
-		String key = SbnCompat.keyOf(sbne);
+		String key = sbne.getKey();
 		assertEquals("TAG", sbne.getTag());
 		pupAndVerify(sbne);
 
@@ -57,7 +54,7 @@ public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTes
 
 		// Override tag (null initially)
 		sbne = create("pkg", null/* initially null */, 1, Process.myUserHandle(), 12, n(), System.currentTimeMillis());
-		key = SbnCompat.keyOf(sbne);
+		key = sbne.getKey();
 		assertNull(sbne.getTag());
 		pupAndVerify(sbne);
 
@@ -80,7 +77,7 @@ public class StatusBarNotificationEvoTest extends StatusBarNotificationCompatTes
 	public void testIdOverride() {
 		// Override id
 		final StatusBarNotificationEvo sbne = create("pkg", "TAG", - 1, Process.myUserHandle(), 12, n(), System.currentTimeMillis());
-		final String key = SbnCompat.keyOf(sbne);
+		final String key = sbne.getKey();
 		assertEquals(- 1, sbne.getId());
 		sbne.setId(0);
 		assertEquals(0, sbne.getId());

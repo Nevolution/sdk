@@ -28,6 +28,11 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.N;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 /**
@@ -41,12 +46,12 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
  *
  * Created by Oasis on 2015/1/18.
  */
-public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
+public class StatusBarNotificationEvo extends StatusBarNotification {
 
 	public static StatusBarNotificationEvo from(final StatusBarNotification sbn) {
 		if (sbn instanceof StatusBarNotificationEvo) return (StatusBarNotificationEvo) sbn;
-		return new StatusBarNotificationEvo(sbn.getPackageName(), null/* opPkg */, sbn.getId(), sbn.getTag(), SbnCompat.getUid(sbn),
-				0/* initialPid */, 0/* score */, sbn.getNotification(), SbnCompat.userOf(sbn), sbn.getPostTime());
+		return new StatusBarNotificationEvo(sbn.getPackageName(), null, sbn.getId(), sbn.getTag(), getUid(sbn),
+				0, 0, sbn.getNotification(), sbn.getUser(), sbn.getPostTime());
 	}
 
 	/** Clone the data fields only (suppliers, notification cache will not be cloned and holder */
@@ -89,8 +94,12 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	}
 
 	private void updateKey() {
-		if (! tag_decorated && id == null) key = null;
-		else key = SbnCompat.buildKey(this);
+		if (tag_decorated || id != null) {		// Initial PID and score has no contribution to generated key.
+			final StatusBarNotification sbn = new StatusBarNotification(getPackageName(), null, getId(), getTag(),
+					getUid(this), 0, 0, super.getNotification(), getUser(), getPostTime());
+			if (SDK_INT >= N) sbn.setOverrideGroupKey(getOverrideGroupKey());
+			key = sbn.getKey();
+		} else key = null;
 	}
 
 	@Override public String getTag() { return tag_decorated ? tag : super.getTag(); }
@@ -144,6 +153,30 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 		} catch (final RemoteException e) { throw new IllegalStateException(e); }
 	}
 
+	@RestrictTo(LIBRARY_GROUP) static int getUid(final StatusBarNotification sbn) {
+		if (sMethodGetUid != null)
+			try { return (int) sMethodGetUid.invoke(sbn); } catch (final Exception ignored) {}
+		if (sFieldUid != null)
+			try { return (int) sFieldUid.get(sbn); } catch (final IllegalAccessException ignored) {}
+		// TODO: PackageManager.getPackageUid()
+		Log.e(TAG, "Incompatible ROM: StatusBarNotification");
+		return 0;
+	}
+	private static final @Nullable Method sMethodGetUid;
+	private static final @Nullable Field sFieldUid;
+	static {
+		Method method = null; Field field = null;
+		try {
+			method = StatusBarNotification.class.getMethod("getUid");
+		} catch (final NoSuchMethodException ignored) {}
+		sMethodGetUid = method;
+		if (method == null) try {       // If no such method, try accessing the field
+			field = StatusBarNotification.class.getDeclaredField("uid");
+			field.setAccessible(true);
+		} catch (final NoSuchFieldException ignored) {}
+		sFieldUid = field;
+	}
+
 	/** Tell {@link #writeToParcel(Parcel, int)} to perform incremental write-back. */
 	@RestrictTo(LIBRARY_GROUP) public void setIncrementalWriteToParcel() {
 		mIncrementalWriteToParcel = true;
@@ -159,7 +192,7 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 				out.writeInt(1);
 				out.writeString(super.getTag());
 			} else out.writeInt(0);
-			out.writeInt(SbnCompat.getUid(this));
+			out.writeInt(getUid(this));
 			getUser().writeToParcel(out, flags);
 			out.writeLong(getPostTime());
 			out.writeStrongInterface(notification == null ? holder : new NotificationHolder(notification));	// The local copy of notification is "dirty" (possibly modified), hence needs to be updated.
@@ -243,5 +276,5 @@ public class StatusBarNotificationEvo extends StatusBarNotificationCompat {
 	private static final int PARCEL_MAGIC = "NEVO".hashCode();  // TODO: Are they really magic enough?
 	private static final int PARCEL_MAGIC_REPLY = "NEVO.REPLY".hashCode();
 	private static final Notification NULL_NOTIFICATION = new Notification();	// Must be placed before VOID to avoid NPE.
-	private static final String TAG = "Nevo.Sbn";
+	private static final String TAG = "Nevo.SBNE";
 }
