@@ -27,10 +27,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,7 +55,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
-import com.oasisfeng.android.graphics.drawable.IconCompat;
 import com.oasisfeng.android.os.IBundle;
 import com.oasisfeng.nevo.INotification;
 import com.oasisfeng.nevo.NevoConstants;
@@ -69,7 +68,6 @@ import java.util.List;
 import java.util.Set;
 
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 /**
  * Bundle notifications in same category into one "bundle notification"
@@ -128,8 +126,7 @@ public class BundleDecorator extends NevoDecoratorService {
 		mBundles.setNotificationBundle(key, bundle);
 		final INotification n = evolving.notification();
 		try {
-			if (VERSION.SDK_INT >= VERSION_CODES.KITKAT_WATCH) n.setGroup(GROUP_PREFIX + bundle);
-			else n.extras().putString("android.support.groupKey", bundle);
+			n.setGroup(GROUP_PREFIX + bundle);
 
 			final String token = bundle.intern();
 			mHandler.removeCallbacksAndMessages(token);
@@ -152,8 +149,7 @@ public class BundleDecorator extends NevoDecoratorService {
 			return false;
 		}
 		// Grouped notifications still are "active" since Lollipop
-		final List<StatusBarNotificationEvo> bundled_sbns = VERSION.SDK_INT >= LOLLIPOP ? getMyActiveNotifications(bundled_keys)
-				: getNotifications(bundled_keys);
+		final List<StatusBarNotificationEvo> bundled_sbns = getMyActiveNotifications(bundled_keys);
 		final List<String> available_bundled_keys = FluentIterable.from(bundled_sbns).transform(new Function<StatusBarNotificationEvo, String>() { @Override public String apply(final StatusBarNotificationEvo sbn) {
 			return sbn.getKey();
 		}}).toList();
@@ -176,11 +172,6 @@ public class BundleDecorator extends NevoDecoratorService {
 		final Notification notification = buildBundleNotification(bundle, available_bundled_keys, sorted_sbns);
 		mNotificationManager.notify(TAG_PREFIX + bundle, 0, notification);
 
-		if (VERSION.SDK_INT < VERSION_CODES.KITKAT_WATCH)	// Cancel notification explicitly if group is not supported.
-			for (final StatusBarNotificationEvo sbn : visible_sbns) {
-				cancelNotification(sbn.getKey());
-				ignoreNextNotificaitonRemoval(sbn.getKey());	// Ignore the following onNotificationRemoved() to keep it in bundle.
-			}
 		return true;
 	}
 
@@ -237,15 +228,8 @@ public class BundleDecorator extends NevoDecoratorService {
 		final ArrayList<String> bundled_key_list = new ArrayList<>(bundled_keys);
 		extras.putStringArrayList(EXTRA_KEYS, bundled_key_list);
 		if (bundled_pkgs.size() == 1 && shared_icon != 0)
-			extras.putParcelable(NevoConstants.EXTRA_ICON, IconCompat.createWithResource(shared_pkg, shared_icon));
+			extras.putParcelable(NevoConstants.EXTRA_ICON, Icon.createWithResource(shared_pkg, shared_icon));
 		extras.putBoolean(NevoConstants.EXTRA_PHANTOM, true);		// Bundle notification should never be evolved or stored.
-
-		if (VERSION.SDK_INT < LOLLIPOP) {	// Use delete intent to clear bundled keys on Android 4.x (no group linkage)
-			final Intent delete_intent = new Intent(ACTION_BUNDLE_CLEAR).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))
-					.putStringArrayListExtra(EXTRA_KEYS, bundled_key_list);
-			final PendingIntent delete_pending_intent = PendingIntent.getBroadcast(this, 0, delete_intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			builder.setDeleteIntent(delete_pending_intent);
-		}
 
 		// Set on-click pending intent explicitly, to avoid notification drawer collapsing when bundle is clicked.
 		final Intent click_intent = new Intent(ACTION_BUNDLE_EXPAND).setData(Uri.fromParts(SCHEME_BUNDLE, bundle, null))

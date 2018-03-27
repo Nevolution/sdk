@@ -21,12 +21,15 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 import com.oasisfeng.android.os.ParcelCompat;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 /**
  * Transfer a large list of Parcelable objects across an IPC.  Splits into
@@ -38,10 +41,10 @@ import java.util.List;
  * a different result if the class name encoded in the Parcelable is a Base type.
  * See b/17671747.
  */
-public class ParceledListSlice<T extends Parcelable> implements Parcelable {
+@RestrictTo(LIBRARY) public class ParceledListSlice<T extends Parcelable> implements Parcelable {
 
-	private static String TAG = "ParceledListSlice";
-	private static boolean DEBUG = false;
+	private static final String TAG = "ParceledListSlice";
+	private static final boolean DEBUG = false;
 
 	/*
 	 * TODO get this number from somewhere else. For now set it to a quarter of
