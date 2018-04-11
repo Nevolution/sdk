@@ -17,15 +17,12 @@
 package com.oasisfeng.nevo.decorators.whatsapp;
 
 import android.app.Notification;
-import android.os.Build;
-import android.os.RemoteException;
+import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
 
-import com.oasisfeng.android.os.IBundle;
-import com.oasisfeng.nevo.INotification;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
+import com.oasisfeng.nevo.sdk.NevoDecoratorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +45,15 @@ public class WhatsAppDecorator extends NevoDecoratorService {
 
 	private static final int DEFAULT_COLOR = 0xFF075E54;
 
-	@Override public void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
-		final INotification n = evolving.notification();
-		final IBundle extras = n.extras();
+	@Override public void apply(final MutableStatusBarNotification evolving) {
+		final Notification n = evolving.getNotification();
+		final Bundle extras = n.extras;
 
 		final CharSequence who, group, message;
-		@SuppressWarnings("unchecked") final List<CharSequence> lines = extras.getCharSequenceArray(EXTRA_TEXT_LINES);
-		final boolean has_lines = lines != null && ! lines.isEmpty();
+		final CharSequence[] lines = extras.getCharSequenceArray(EXTRA_TEXT_LINES);
+		final boolean has_lines = lines != null && lines.length > 0;
 		final CharSequence title = extras.getCharSequence(EXTRA_TITLE);
-		final CharSequence last = has_lines ? lines.get(lines.size() - 1) : extras.getCharSequence(EXTRA_TEXT);
+		final CharSequence last = has_lines ? lines[lines.length - 1] : extras.getCharSequence(EXTRA_TEXT);
 
 		final CharSequence[] last_parts = extract(title, last);
 		who = last_parts[0]; group = last_parts[1]; message = last_parts[2];
@@ -67,19 +64,17 @@ public class WhatsAppDecorator extends NevoDecoratorService {
 
 		final CharSequence new_title = group != null ? group : who;
 		evolving.setId(new_title.toString().hashCode());
-		if (n.getColor() == 0) n.setColor(DEFAULT_COLOR);	// Fix the missing color in some notifications
+		if (n.color == 0) n.color = DEFAULT_COLOR;	// Fix the missing color in some notifications
 
 		if (! has_lines) return;
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
-			n.removeFlags(Notification.FLAG_GROUP_SUMMARY);
-		else extras.remove("android.support.isGroupSummary");
+		n.flags &= ~ Notification.FLAG_GROUP_SUMMARY;
 
 		extras.putCharSequence(EXTRA_TITLE, new_title);
 		extras.putCharSequence(EXTRA_TITLE_BIG, new_title);
 		extras.putCharSequence(EXTRA_TEXT, group != null ? who + ": " + message : message);
 
-		final List<CharSequence> new_lines = new ArrayList<>(lines.size());
+		final List<CharSequence> new_lines = new ArrayList<>(lines.length);
 		for (final CharSequence line : lines) {
 			final CharSequence[] parts = extract(title, line);
 			if (group != null) {			// Group chat, keep messages within the same group.
@@ -90,10 +85,10 @@ public class WhatsAppDecorator extends NevoDecoratorService {
 			} else if (who.equals(parts[0]) && parts[1] == null)
 				new_lines.add(parts[2]);	// Direct chat, keep messages from the same person (excluding group chat)
 		}
-		extras.putCharSequenceArray(EXTRA_TEXT_LINES, new_lines);
+		extras.putCharSequenceArray(EXTRA_TEXT_LINES, new_lines.toArray(new CharSequence[new_lines.size()]));
 		extras.remove(EXTRA_SUMMARY_TEXT);
 		extras.putString(EXTRA_TEMPLATE, TEMPLATE_INBOX);
-		if (new_lines.size() > 1) n.setNumber(new_lines.size());
+		if (new_lines.size() > 1) n.number = new_lines.size();
 	}
 
 	/**
@@ -122,7 +117,7 @@ public class WhatsAppDecorator extends NevoDecoratorService {
 		final CharSequence from = line.subSequence(0, pos_colon), who, group;
 		final int pos_at = from.toString().indexOf('@');
 		if (pos_at <= 0) {
-			group = "WhatsApp".equals(title) ? null : title;
+			group = "WhatsApp".equals(title.toString()) ? null : title;
 			return new CharSequence[] { from, group, message };					// Pattern 3 or 4
 		} else {
 			who = trim(from.subSequence(0, pos_at));

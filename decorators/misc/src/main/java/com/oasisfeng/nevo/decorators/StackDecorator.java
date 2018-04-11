@@ -16,10 +16,11 @@
 
 package com.oasisfeng.nevo.decorators;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.os.RemoteException;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationCompat.InboxStyle;
@@ -28,10 +29,8 @@ import android.text.Spanned;
 import android.text.style.StyleSpan;
 import android.widget.RemoteViews;
 
-import com.oasisfeng.android.os.IBundle;
-import com.oasisfeng.nevo.INotification;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
+import com.oasisfeng.nevo.sdk.NevoDecoratorService;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,22 +49,22 @@ public class StackDecorator extends NevoDecoratorService {
 	private static final int KMaxNumLines = 10;
 	private static final long KMinIntervalToShowTimestamp = 10 * 60_000;
 
-	@Override public void apply(final StatusBarNotificationEvo evolved) throws RemoteException {
-		final Collection<StatusBarNotificationEvo> history = getArchivedNotifications(evolved.getKey(), KMaxNumLines);
+	@Override public void apply(final MutableStatusBarNotification evolved) {
+		final Collection<MutableStatusBarNotification> history = getArchivedNotifications(evolved.getKey(), KMaxNumLines);
 		if (history.size() <= 1) return;
-		final INotification evolved_n = evolved.notification();
-		final IBundle evolved_extras = evolved_n.extras();
+		final Notification evolved_n = evolved.getNotification();
+		final Bundle evolved_extras = evolved_n.extras;
 		if (evolved_extras.containsKey(EXTRA_TEXT_LINES)) return;	// Never stack already inbox-styled notification.
 
 		final Calendar calendar = Calendar.getInstance(); final List<CharSequence> lines = new ArrayList<>(KMaxNumLines);
 		long previous_when = 0;
-		final long latest_when = evolved_n.getWhen();
-		for (final StatusBarNotificationEvo sbn : history) {
-			final INotification n = sbn.notification();
-			final CharSequence text = n.extras().getCharSequence(NotificationCompat.EXTRA_TEXT);
+		final long latest_when = evolved_n.when;
+		for (final MutableStatusBarNotification sbn : history) {
+			final Notification n = sbn.getNotification();
+			final CharSequence text = n.extras.getCharSequence(NotificationCompat.EXTRA_TEXT);
 			if (text == null) continue;
 
-			final long when = n.getWhen();
+			final long when = n.when;
 			if (when == latest_when || Math.abs(when - previous_when) <= KMinIntervalToShowTimestamp) lines.add(text);
 			else {		// Add time-stamp
 				final SpannableStringBuilder line = new SpannableStringBuilder();
@@ -83,9 +82,9 @@ public class StackDecorator extends NevoDecoratorService {
 
 		final CharSequence title = evolved_extras.getCharSequence(NotificationCompat.EXTRA_TITLE);
 		evolved_extras.putCharSequence(NotificationCompat.EXTRA_TITLE_BIG, title);
-		evolved_extras.putCharSequenceArray(EXTRA_TEXT_LINES, lines);
+		evolved_extras.putCharSequenceArray(EXTRA_TEXT_LINES, lines.toArray(new CharSequence[lines.size()]));
 
-		evolved_n.setCustomBigContentView(buildBigContentView(evolved.getPackageName(), title, lines));
+		evolved_n.bigContentView = buildBigContentView(evolved.getPackageName(), title, lines);
 	}
 
 	private RemoteViews buildBigContentView(final String pkg, final CharSequence title, final List<CharSequence> lines) {

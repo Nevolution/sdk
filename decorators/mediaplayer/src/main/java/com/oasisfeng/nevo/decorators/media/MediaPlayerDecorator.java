@@ -29,7 +29,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -40,9 +39,8 @@ import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
-import com.oasisfeng.nevo.INotification;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
+import com.oasisfeng.nevo.sdk.NevoDecoratorService;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -61,11 +59,11 @@ import static android.os.Build.VERSION_CODES.M;
  */
 public class MediaPlayerDecorator extends NevoDecoratorService {
 
-	@Override protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
+	@Override protected void apply(final MutableStatusBarNotification evolving) {
 		if (evolving.isClearable()) return;		// Just sticky notification, to reduce the overhead.
-		final INotification n = evolving.notification();
-		RemoteViews content_view = n.getCustomBigContentView();	// Prefer big content view since it usually contains more actions
-		if (content_view == null) content_view = n.getCustomContentView();		// FIXME: Not work any more.
+		final Notification n = evolving.getNotification();
+		RemoteViews content_view = n.bigContentView;	// Prefer big content view since it usually contains more actions
+		if (content_view == null) content_view = n.contentView;		// FIXME: Not work any more on Android N+
 		if (content_view == null) return;
 		final AtomicReference<IntentSender> sender_holder = new AtomicReference<>();
 		final View views = content_view.apply(new ContextWrapper(this) {
@@ -112,15 +110,15 @@ public class MediaPlayerDecorator extends NevoDecoratorService {
 		} catch (final PackageManager.NameNotFoundException e) { return; }
 		if (SDK_INT >= M) {
 			final Notification.Builder b = new Notification.Builder(packageContext)
-					.setContentTitle(n.extras().getCharSequence(NotificationCompat.EXTRA_TITLE));
+					.setContentTitle(n.extras.getCharSequence(NotificationCompat.EXTRA_TITLE));
 			for (final NotificationCompat.Action action : actions)
 				b.addAction(new Action.Builder(Icon.createWithResource(pkg, action.getIcon()),
 						action.getTitle(), action.getActionIntent()).build());
 			mirror = b.build();
 		} else {
 			final NotificationCompat.Builder b = new NotificationCompat.Builder(packageContext)
-					.setContentTitle(n.extras().getCharSequence(NotificationCompat.EXTRA_TITLE))
-					.setLargeIcon(n.extras().getParcelable(NotificationCompat.EXTRA_LARGE_ICON).<Bitmap>get())
+					.setContentTitle(n.extras.getCharSequence(NotificationCompat.EXTRA_TITLE))
+					.setLargeIcon(n.extras.<Bitmap>getParcelable(NotificationCompat.EXTRA_LARGE_ICON))
 					.setSmallIcon(android.R.drawable.ic_media_play);
 			for (final NotificationCompat.Action action : actions) b.addAction(action);
 			mirror = b.build();

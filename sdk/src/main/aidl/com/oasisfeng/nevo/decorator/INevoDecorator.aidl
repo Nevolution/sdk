@@ -17,14 +17,14 @@
 package com.oasisfeng.nevo.decorator;
 
 import android.service.notification.StatusBarNotification;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.engine.INevoController;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
 
 /** The internal interface for decorator service */
 interface INevoDecorator {
 
     int onConnected(in INevoController controller, in Bundle options);
-    void apply(inout StatusBarNotificationEvo evolved, in Bundle options);
+    void apply(inout MutableStatusBarNotification evolved, in Bundle options);
     oneway void onNotificationRemoved(in String key, in Bundle options);
-    oneway void onNotificationRemovedLight(in StatusBarNotificationEvo notification, in Bundle options);
+    oneway void onNotificationRemovedLight(in StatusBarNotification notification, in Bundle options);
 }

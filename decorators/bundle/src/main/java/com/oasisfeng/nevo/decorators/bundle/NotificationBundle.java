@@ -18,7 +18,6 @@ package com.oasisfeng.nevo.decorators.bundle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.ArrayMap;
@@ -29,7 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,8 +55,8 @@ public class NotificationBundle extends INotificationBundle.Stub {
 		// TODO: Refresh the
 	}
 
-	@Override public String queryRuleForNotification(final StatusBarNotificationEvo sbn) throws RemoteException {
-		final CharSequence title = sbn.notification().extras().getCharSequence(NotificationCompat.EXTRA_TITLE);
+	@Override public String queryRuleForNotification(final MutableStatusBarNotification sbn) {
+		final CharSequence title = sbn.getNotification().extras.getCharSequence(NotificationCompat.EXTRA_TITLE);
 		return queryRule(sbn.getPackageName(), title == null ? null : title.toString());
 	}
 

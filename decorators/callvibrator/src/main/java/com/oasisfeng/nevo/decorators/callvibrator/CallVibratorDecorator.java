@@ -17,13 +17,12 @@
 package com.oasisfeng.nevo.decorators.callvibrator;
 
 import android.app.Notification;
-import android.os.RemoteException;
+import android.os.Bundle;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 
-import com.oasisfeng.android.os.IBundle;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
+import com.oasisfeng.nevo.sdk.NevoDecoratorService;
 
 /**
  * App-specific decorator - Vibrator when outgoing call is answered
@@ -35,7 +34,7 @@ public class CallVibratorDecorator extends NevoDecoratorService {
 	private static final long VIBRATOR_DURATION = 500;
 	private static final long MAX_DELAY_TO_VIBRATE = 2000;
 
-	@Override public void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
+	@Override public void apply(final MutableStatusBarNotification evolving) {
 		if (! evolving.isOngoing()) return;
 		final TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		if (tm == null) return;
@@ -45,10 +44,10 @@ public class CallVibratorDecorator extends NevoDecoratorService {
 		} else if (mIncomingCall) return;
 
 		// The on-going notification is being updated in place, now check the chronometer.
-		final IBundle extras = evolving.notification().extras();
+		final Bundle extras = evolving.getNotification().extras;
 		if (! extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER, false)) return;
 		// Ensure the chronometer starting time is just now.
-		if (evolving.notification().getWhen() < System.currentTimeMillis() - MAX_DELAY_TO_VIBRATE) return;
+		if (evolving.getNotification().when < System.currentTimeMillis() - MAX_DELAY_TO_VIBRATE) return;
 
 		final Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 		if (vibrator != null) vibrator.vibrate(VIBRATOR_DURATION);

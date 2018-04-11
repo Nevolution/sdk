@@ -1,16 +1,13 @@
 package com.oasisfeng.nevo.decorators;
 
+import android.app.Notification;
 import android.content.res.Resources;
-import android.os.RemoteException;
 import android.support.annotation.IdRes;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.oasisfeng.nevo.INotification;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
-
-import java.util.List;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
+import com.oasisfeng.nevo.sdk.NevoDecoratorService;
 
 import static android.support.v4.app.NotificationCompat.EXTRA_TEXT_LINES;
 
@@ -20,25 +17,26 @@ import static android.support.v4.app.NotificationCompat.EXTRA_TEXT_LINES;
  *
  * Created by Oasis on 2016/3/8.
  */
+// FIXME: This implementation no longer works on Android N, migrate to BigTextStyle instead.
 public class ElasticInboxDecorator extends NevoDecoratorService {
 
 	private static final int MAX_INBOX_ENTRIES = 7;
 	private static final int MAX_TOTAL_LINES = 10;
 
-	@Override protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
-		final INotification n = evolving.notification();
-		if (! n.hasCustomBigContentView()) return;
-		@SuppressWarnings("unchecked") final List<CharSequence> lines = n.extras().getCharSequenceArray(EXTRA_TEXT_LINES);
-		if (lines == null || lines.isEmpty()) return;
-		final int num_lines_left = MAX_TOTAL_LINES - lines.size();
+	@Override protected void apply(final MutableStatusBarNotification evolving) {
+		final Notification n = evolving.getNotification();
+		if (n.bigContentView == null) return;
+		@SuppressWarnings("unchecked") final CharSequence[] lines = n.extras.getCharSequenceArray(EXTRA_TEXT_LINES);
+		if (lines == null || lines.length == 0) return;
+		final int num_lines_left = MAX_TOTAL_LINES - lines.length;
 		if (num_lines_left <= 0) return;
-		final RemoteViews inbox = n.getCustomBigContentView();		// FIXME: This does not work any more
+		final RemoteViews inbox = n.bigContentView;
 		if (inbox == null) return;
 
-		final int num_entries = Math.min(lines.size(), MAX_INBOX_ENTRIES);
+		final int num_entries = Math.min(lines.length, MAX_INBOX_ENTRIES);
 		final int[] line_length = new int[num_entries];
 		int length_sum = 0;
-		for (int i = 0; i < num_entries; i ++) length_sum += line_length[i] = lines.get(i).length();
+		for (int i = 0; i < num_entries; i ++) length_sum += line_length[i] = lines[i].length();
 		final StringBuilder log_buffer = new StringBuilder(32).append("Assign: ");
 		boolean updated = false;
 		for (int i = 0; i < num_entries; i ++) {
@@ -53,7 +51,7 @@ public class ElasticInboxDecorator extends NevoDecoratorService {
 			log_buffer.append(max_lines).append('/');
 		}
 		if (! updated) return;
-		n.setCustomBigContentView(inbox);
+		n.bigContentView = inbox;
 		Log.d(TAG, log_buffer.substring(0, log_buffer.length() - 1));
 	}
 

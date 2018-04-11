@@ -22,9 +22,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.test.ServiceTestCase;
 
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
 import com.oasisfeng.nevo.decorator.INevoDecorator;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
 
 public class NevoDecoratorServiceTest extends ServiceTestCase<NevoDecoratorServiceTest.TestNevoDecoratorService> {
 
@@ -32,9 +30,11 @@ public class NevoDecoratorServiceTest extends ServiceTestCase<NevoDecoratorServi
 		final IBinder binder = bindService(new Intent()/* Not used */);
 		assertNotNull(binder);
 		final INevoDecorator decorator = INevoDecorator.Stub.asInterface(binder);
-		final StatusBarNotificationEvo sbne = new StatusBarNotificationEvo("", null, 0, null, 0, 0, 0, new Notification(), android.os.Process.myUserHandle(), 0);
+		final MutableStatusBarNotification sbn = new MutableStatusBarNotification("", null, 0, null, 0, 0,
+				TestUtils.mutable(new Notification()), android.os.Process.myUserHandle(), 0);
 		try {
-			decorator.apply(sbne, null);
+			decorator.onConnected(null, null);
+			decorator.apply(sbn, null);
 			fail("No exception thrown");
 		} catch (final RemoteException e) {
 			fail("Unexpected exception: " + e);
@@ -47,7 +47,7 @@ public class NevoDecoratorServiceTest extends ServiceTestCase<NevoDecoratorServi
 
 	public static class TestNevoDecoratorService extends NevoDecoratorService {
 
-		@Override protected void apply(final StatusBarNotificationEvo evolved) {
+		@Override protected void apply(final MutableStatusBarNotification evolved) {
 			throw new NullPointerException();
 		}
 	}

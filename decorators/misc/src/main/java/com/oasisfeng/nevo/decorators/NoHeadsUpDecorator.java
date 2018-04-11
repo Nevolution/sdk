@@ -16,10 +16,8 @@
 
 package com.oasisfeng.nevo.decorators;
 
-import android.os.RemoteException;
-
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
+import com.oasisfeng.nevo.sdk.NevoDecoratorService;
 
 /**
  * Disable heads-up notification
@@ -33,7 +31,7 @@ public class NoHeadsUpDecorator extends NevoDecoratorService {
 	/** @see android.app.Notification */
 	private static final int HEADS_UP_NEVER = 0;
 
-	@Override protected void apply(final StatusBarNotificationEvo evolving) throws RemoteException {
-		evolving.notification().extras().putInt(EXTRA_AS_HEADS_UP, HEADS_UP_NEVER);
+	@Override protected void apply(final MutableStatusBarNotification evolving) {
+		evolving.getNotification().extras.putInt(EXTRA_AS_HEADS_UP, HEADS_UP_NEVER);
 	}
 }

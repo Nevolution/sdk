@@ -16,7 +16,7 @@
 
 package com.oasisfeng.nevo.decorators.bundle;
 
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
 
 interface INotificationBundle {
 
@@ -29,7 +29,7 @@ interface INotificationBundle {
     oneway void setRule(String pkg, String title, String bundle);
 
 	/** Query matched bundle for the given notification, according to the configured rules */
-	String queryRuleForNotification(in StatusBarNotificationEvo sbn);
+	String queryRuleForNotification(in MutableStatusBarNotification sbn);
 
 	/**
 	 * Query matched bundle for the given package and title, according to the configured rules.

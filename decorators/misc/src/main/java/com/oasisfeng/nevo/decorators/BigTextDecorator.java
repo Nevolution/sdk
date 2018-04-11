@@ -16,13 +16,12 @@
 
 package com.oasisfeng.nevo.decorators;
 
-import android.os.RemoteException;
+import android.app.Notification;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
-import com.oasisfeng.android.os.IBundle;
-import com.oasisfeng.nevo.INotification;
-import com.oasisfeng.nevo.StatusBarNotificationEvo;
-import com.oasisfeng.nevo.decorator.NevoDecoratorService;
+import com.oasisfeng.nevo.sdk.MutableStatusBarNotification;
+import com.oasisfeng.nevo.sdk.NevoDecoratorService;
 
 import static android.support.v4.app.NotificationCompat.EXTRA_BIG_TEXT;
 import static android.support.v4.app.NotificationCompat.EXTRA_TEXT;
@@ -34,19 +33,16 @@ public class BigTextDecorator extends NevoDecoratorService {
 
 	private static final int MIN_TEXT_LENGTH = 20;
 
-	@Override public void apply(final StatusBarNotificationEvo evolved) throws RemoteException {
-		final INotification n = evolved.notification();
-		if (n.hasCustomBigContentView()) return;
-		final IBundle extras = n.extras();
+	@Override public void apply(final MutableStatusBarNotification evolved) {
+		final Notification n = evolved.getNotification();
+		if (n.bigContentView != null) return;
+		final Bundle extras = n.extras;
 		final CharSequence text = extras.getCharSequence(EXTRA_TEXT);
 		if (text == null) return;
-// TODO	mPaint.measureText(text);
 		if (text.length() < MIN_TEXT_LENGTH) return;
 
 		extras.putCharSequence(EXTRA_TITLE_BIG, extras.getCharSequence(EXTRA_TITLE));
 		extras.putCharSequence(EXTRA_BIG_TEXT, text);
 		extras.putString(NotificationCompat.EXTRA_TEMPLATE, TEMPLATE_BIG_TEXT);
 	}
-
-//	private final TextPaint mPaint = new TextPaint();
 }

@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-package com.oasisfeng.nevo;
+package com.oasisfeng.nevo.sdk;
 
-/**
- * Constants
- *
- * Created by Richard on 2015/4/12.
- */
-public class NevoConstants {
-
-	/** Mark the notification being posted to be ignored by Nevolution, thus always untouched. */
-	public static final String EXTRA_PHANTOM = "nevo.phantom";
-
-	/** For internal decorator only. */
-	@Deprecated public static final String EXTRA_ICON = "nevo.icon";
-}
+parcelable MutableStatusBarNotification;
