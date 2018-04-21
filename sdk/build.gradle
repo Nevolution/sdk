@@ -1,7 +1,15 @@
 apply plugin: 'com.android.library'
 
+version = "0.9.1"
+group = "com.oasisfeng.nevo"
+
 android {
     compileSdkVersion 27
+
+    buildTypes {
+        debug   { resValue("string", "nevo_sdk_version", "${version}") }
+        release { resValue("string", "nevo_sdk_version", "${version}") }
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

@@ -19,7 +19,7 @@
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="27" /> <!-- targetSdkVersion is only used by androidTest build -->
 
     <application>
-        <meta-data android:name="com.oasisfeng.nevo.sdk.version" android:value="@integer/nevo_sdk_version" />
+        <meta-data android:name="com.oasisfeng.nevo.sdk.version" android:value="@string/nevo_sdk_version" />
     </application>
 
 </manifest>

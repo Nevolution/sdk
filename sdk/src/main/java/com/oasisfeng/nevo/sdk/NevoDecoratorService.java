@@ -174,6 +174,16 @@ public abstract class NevoDecoratorService extends Service {
 		}
 	}
 
+	/**
+	 * Get the API version of Nevolution SDK supported by Nevolution engine installed on this device.
+	 * If the supported API version in user's device is lowed than API version of SDK used in your project, some new APIs may not work.
+	 *
+	 * API version of current Nevolution SDK is defined in {@link R.integer#nevo_api_version}
+	 */
+	protected final int getSupportedApiVersion() {
+		return mSupportedApiVersion;
+	}
+
 	@CallSuper @Override public IBinder onBind(final Intent intent) {
 		for (Class<?> clazz = getClass(); clazz != NevoDecoratorService.class; clazz = clazz.getSuperclass()) {
 			detectDerivedMethod(FLAG_DECORATION_AWARE, clazz, "apply", MutableStatusBarNotification.class);
@@ -198,6 +208,7 @@ public abstract class NevoDecoratorService extends Service {
 
 	private INevoDecoratorWrapper mWrapper;
 	private INevoController mController;
+	private int mSupportedApiVersion;
 	private int mFlags;
 
 	@RestrictTo(LIBRARY) static final int TYPE_LATEST   = 1;
@@ -209,6 +220,7 @@ public abstract class NevoDecoratorService extends Service {
 	@RestrictTo(LIBRARY) static final int FLAG_REMOVAL_AWARE_KEY_ONLY = 0x2;
 	@RestrictTo(LIBRARY) static final int FLAG_REMOVAL_AWARE = 0x4;
 	@RestrictTo(LIBRARY) static final String KEY_REASON = "reason";
+	@RestrictTo(LIBRARY) static final String KEY_SUPPORTED_API_VERSION = "version";
 
 	protected final String TAG = "Nevo.Decorator[" + shorten(getClass().getSimpleName()) + "]";
 
@@ -264,6 +276,7 @@ public abstract class NevoDecoratorService extends Service {
 			mCallerUid = caller_uid;
 
 			mController = controller;
+			if (options != null) mSupportedApiVersion = options.getInt(KEY_SUPPORTED_API_VERSION);
 			try {
 				Log.v(TAG, "onConnected");
 				NevoDecoratorService.this.onConnected();
