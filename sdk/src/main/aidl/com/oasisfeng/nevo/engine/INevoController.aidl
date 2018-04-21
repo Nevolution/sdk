@@ -21,10 +21,6 @@ import com.oasisfeng.nevo.decorator.INevoDecorator;
 
 interface INevoController {
 
-    List<StatusBarNotification> getArchivedNotifications(in INevoDecorator token, String key, int limit);
-    List<StatusBarNotification> getNotifications(in INevoDecorator token, in List<String> keys);
-    oneway void cancelNotification(in INevoDecorator token, String key);
-    oneway void reviveNotification(in INevoDecorator token, String key);
-	oneway void recastNotification(in INevoDecorator token, String key, in Bundle fillIn);
-	List<StatusBarNotification> getActiveNotifications(in INevoDecorator token, in List<String> keys);
+    List<StatusBarNotification> getNotifications(in INevoDecorator token, int type, in List<String> keys, int limit, in Bundle args);
+    oneway void performNotificationAction(in INevoDecorator token, int action, String key, in Bundle args);
 }

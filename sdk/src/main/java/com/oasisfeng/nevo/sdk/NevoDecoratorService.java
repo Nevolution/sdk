@@ -105,9 +105,9 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected List<StatusBarNotification> getArchivedNotifications(final String key, final int limit) {
+	protected final List<StatusBarNotification> getArchivedNotifications(final String key, final int limit) {
 		try {
-			return mController.getArchivedNotifications(mWrapper, key, limit);
+			return mController.getNotifications(mWrapper, TYPE_ARCHIVED, Collections.singletonList(key), limit, null);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error retrieving archived notifications: " + key, e);
 			return Collections.emptyList();
@@ -115,15 +115,16 @@ public abstract class NevoDecoratorService extends Service {
 	}
 
 	/**
-	 * Retrieve notifications by key (in evolved form, no matter active or removed, only the latest for each key).
-	 * Returned list may not contain entries for some of the requested keys, if not allowed or missing in archive.
+	 * Retrieve notifications by keys, latest one (in evolved form) for each key, no matter active or removed.
+	 *
+	 * The returned list may not contain entries for some of the requested keys, if not allowed or missing in archive.
 	 * It may also contain multiple entries for some requested keys, since split notifications with altered tag and ID share the same key.
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected List<StatusBarNotification> getNotifications(final List<String> keys) {
+	protected final List<StatusBarNotification> getLatestNotifications(final List<String> keys) {
 		try {
-			return mController.getNotifications(mWrapper, keys);
+			return mController.getNotifications(mWrapper, TYPE_LATEST, keys, 0, null);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error retrieving notifications", e);
 			return Collections.emptyList();
@@ -135,9 +136,9 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected void cancelNotification(final String key) {
+	protected final void cancelNotification(final String key) {
 		try {
-			mController.cancelNotification(mWrapper, key);
+			mController.performNotificationAction(mWrapper, ACTION_CANCEL, key, null);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error canceling notification: " + key, e);
 		}
@@ -149,9 +150,9 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected void reviveNotification(final String key) {
+	protected final void reviveNotification(final String key) {
 		try {
-			mController.reviveNotification(mWrapper, key);
+			mController.performNotificationAction(mWrapper, ACTION_REVIVE, key, null);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error reviving notification: " + key, e);
 		}
@@ -165,9 +166,9 @@ public abstract class NevoDecoratorService extends Service {
 	 *
 	 * @param fillInExtras additional extras to fill in the notification being recast.
 	 */
-	protected void recastNotification(final String key, final @Nullable Bundle fillInExtras) {
+	protected final void recastNotification(final String key, final @Nullable Bundle fillInExtras) {
 		try {
-			mController.recastNotification(mWrapper, key, fillInExtras);
+			mController.performNotificationAction(mWrapper, ACTION_RECAST, key, fillInExtras);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error recasting notification: " + key, e);
 		}
@@ -199,6 +200,11 @@ public abstract class NevoDecoratorService extends Service {
 	private INevoController mController;
 	private int mFlags;
 
+	@RestrictTo(LIBRARY) static final int TYPE_LATEST   = 1;
+	@RestrictTo(LIBRARY) static final int TYPE_ARCHIVED = 2;
+	@RestrictTo(LIBRARY) static final int ACTION_CANCEL = 1;
+	@RestrictTo(LIBRARY) static final int ACTION_REVIVE = 2;
+	@RestrictTo(LIBRARY) static final int ACTION_RECAST = 3;
 	@RestrictTo(LIBRARY) static final int FLAG_DECORATION_AWARE = 0x1;
 	@RestrictTo(LIBRARY) static final int FLAG_REMOVAL_AWARE_KEY_ONLY = 0x2;
 	@RestrictTo(LIBRARY) static final int FLAG_REMOVAL_AWARE = 0x4;
@@ -240,7 +246,7 @@ public abstract class NevoDecoratorService extends Service {
 			}
 		}
 
-		@Override public int onConnected(final INevoController controller, final @Nullable Bundle options) {
+		@Override public int onConnected(final INevoController controller, final Bundle options) {
 			RemoteImplementation.initializeIfNotYet(NevoDecoratorService.this);
 
 			final PackageManager pm = getPackageManager();
