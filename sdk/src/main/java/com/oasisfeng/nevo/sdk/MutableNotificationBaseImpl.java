@@ -51,6 +51,12 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 	public void addAction(final Action action) {
 		if (actions != null) {
+			for (int i = 0; i < actions.length; i++) {		// Replace if action with the same title already exists
+				final Action existent_action = actions[i];
+				if (existent_action.title == null || ! existent_action.title.equals(action.title)) continue;
+				actions[i] = action;
+				return;
+			}
 			actions = Arrays.copyOf(actions, actions.length + 1);
 			actions[actions.length - 1] = action;
 		} else actions = new Action[] { action };
