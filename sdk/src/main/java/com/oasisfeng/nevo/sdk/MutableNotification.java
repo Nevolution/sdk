@@ -20,8 +20,10 @@ import android.app.Notification;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.support.annotation.Keep;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 
+import static android.os.Build.VERSION_CODES.O;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 /**
@@ -41,8 +43,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	public abstract void setLargeIcon(final Icon icon);
 	/** Currently only supported on Android O+. TODO: If you want it supported on earlier Android versions, please file a feature request on issue tracker */
 	public abstract void setTimeoutAfter(final long durationMs);
+	@RequiresApi(O) public abstract void setChannelId(final String channelId);
 	void setGroupAlertBehavior(final int behavior) {}	// TODO: Please file a feature request if you want it eagerly.
-	void setChannelId(final String channelId) {}		// TODO: Please file a feature request if you want it eagerly.
 	void setSettingsText(final String text) {}			// TODO: Please file a feature request if you want it eagerly.
 
 	/* Helpers */

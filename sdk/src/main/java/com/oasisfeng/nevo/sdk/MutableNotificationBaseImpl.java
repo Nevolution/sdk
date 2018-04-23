@@ -39,6 +39,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	static final String EXTRA_ICON_SMALL = "nevo.icon";
 	static final String EXTRA_ICON_LARGE = "nevo.icon.large";
 	static final String EXTRA_TIMEOUT_AFTER = "nevo.timeout";
+	static final String EXTRA_APP_CHANNEL = "nevo.channel";
 
 	public void setGroup(final String groupKey) { extras.putString(EXTRA_GROUP, groupKey); }
 	public void setSortKey(final String sortKey) { extras.putString(EXTRA_SORT_KEY, sortKey); }
@@ -46,6 +47,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	public void setLargeIcon(final Icon icon) { extras.putParcelable(EXTRA_ICON_LARGE, icon); }
 	/** Currently only supported on Android O+. TODO: If you want it supported on earlier Android versions, please file a feature request on issue tracker */
 	public void setTimeoutAfter(final long durationMs) { extras.putLong(EXTRA_TIMEOUT_AFTER, durationMs); }
+	public void setChannelId(final String channelId) { extras.putString(EXTRA_APP_CHANNEL, channelId); }
 
 	// Helpers
 
@@ -77,6 +79,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@Override public String getSortKey() { return extras.containsKey(EXTRA_SORT_KEY) ? extras.getString(EXTRA_SORT_KEY) : super.getSortKey(); }
 	@Override public Icon getSmallIcon() { return extras.containsKey(EXTRA_ICON_SMALL) ? extras.getParcelable(EXTRA_ICON_SMALL) : super.getSmallIcon(); }
 	@Override public Icon getLargeIcon() { return extras.containsKey(EXTRA_ICON_LARGE) ? extras.getParcelable(EXTRA_ICON_LARGE) : super.getLargeIcon(); }
+	@Override public String getChannelId() { return extras.containsKey(EXTRA_APP_CHANNEL) ? extras.getString(EXTRA_APP_CHANNEL) : super.getChannelId(); }
 
 	// RemoteViews are intentionally always shallowly copied, to reduce cost.
 	private static void copyMutableFields(final Notification source, final Notification dest) {

@@ -17,6 +17,7 @@
 package com.oasisfeng.nevo.sdk;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -33,6 +34,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Keep;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 
@@ -44,6 +46,7 @@ import java.util.List;
 
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
+import static android.os.Build.VERSION_CODES.O;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 /**
@@ -171,6 +174,19 @@ public abstract class NevoDecoratorService extends Service {
 			mController.performNotificationAction(mWrapper, ACTION_RECAST, key, fillInExtras);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error recasting notification: " + key, e);
+		}
+	}
+
+	/**
+	 * Create {@link NotificationChannel} for targeted app. If specified package is not targeted by this decorator, channel will not be created.
+	 *
+	 * @see android.app.NotificationManager#createNotificationChannel(NotificationChannel)
+	 */
+	@RequiresApi(O) protected final void createNotificationChannels(final String pkg, final List<NotificationChannel> channels) {
+		try {
+			mController.createNotificationChannels(mWrapper, pkg, channels);
+		} catch (final RemoteException e) {
+			Log.w(TAG, "Error creating notification channels for " + pkg + ": " + channels, e);
 		}
 	}
 
