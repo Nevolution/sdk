@@ -24,5 +24,5 @@ interface INevoController {
 
     List<StatusBarNotification> getNotifications(in INevoDecorator token, int type, in List<String> keys, int limit, in Bundle args);
     oneway void performNotificationAction(in INevoDecorator token, int action, String key, in Bundle args);
-	void createNotificationChannels(in INevoDecorator token, String pkg, in List<NotificationChannel> channels);
+	void createNotificationChannels(in INevoDecorator token, String pkg, in List<NotificationChannel> channels, in Bundle args);
 }

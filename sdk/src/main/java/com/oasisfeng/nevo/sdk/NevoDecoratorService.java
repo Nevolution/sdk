@@ -184,7 +184,7 @@ public abstract class NevoDecoratorService extends Service {
 	 */
 	@RequiresApi(O) protected final void createNotificationChannels(final String pkg, final List<NotificationChannel> channels) {
 		try {
-			mController.createNotificationChannels(mWrapper, pkg, channels);
+			mController.createNotificationChannels(mWrapper, pkg, channels, null);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error creating notification channels for " + pkg + ": " + channels, e);
 		}
