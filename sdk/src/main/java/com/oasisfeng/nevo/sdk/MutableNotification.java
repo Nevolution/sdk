@@ -37,19 +37,29 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 	/* Setters for immutable fields in Notification */
 
+	/** @see Notification.Builder#setGroup(String) */
 	public abstract void setGroup(final String groupKey);
+	/** @see Notification.Builder#setSortKey(String) */
 	public abstract void setSortKey(final String sortKey);
+	/** @see Notification.Builder#setSmallIcon(Icon) */
 	public abstract void setSmallIcon(final Icon icon);
+	/** @see Notification.Builder#setLargeIcon(Icon) */
 	public abstract void setLargeIcon(final Icon icon);
-	/** Currently only supported on Android O+. TODO: If you want it supported on earlier Android versions, please file a feature request on issue tracker */
+	/** Currently only supported on Android O+. TODO: If you want it supported on earlier Android versions, please file a feature request on issue tracker
+	    @see Notification.Builder#setTimeoutAfter(long) */
 	public abstract void setTimeoutAfter(final long durationMs);
+	/** @see Notification.Builder#setChannelId(String) */
 	@RequiresApi(O) public abstract void setChannelId(final String channelId);
-	void setGroupAlertBehavior(final int behavior) {}	// TODO: Please file a feature request if you want it eagerly.
-	void setSettingsText(final String text) {}			// TODO: Please file a feature request if you want it eagerly.
+	/** @see Notification.Builder#setGroupAlertBehavior(int) */
+	@RequiresApi(O) void setGroupAlertBehavior(final int behavior) {}	// TODO: Please file a feature request if you want it eagerly.
+	/** @see Notification.Builder#setSettingsText(CharSequence) */
+	@RequiresApi(O) void setSettingsText(final String text) {}			// TODO: Please file a feature request if you want it eagerly.
 
 	/* Helpers */
 
+	/** Add action (existent action with the same title will be replaced) */
 	public abstract void addAction(final Action action);
+	/** @see Notification.Builder#addPerson(String) */
 	public abstract void addPerson(final String uri);
 
 	@Override public String toString() { return "Mutable" + super.toString(); }
