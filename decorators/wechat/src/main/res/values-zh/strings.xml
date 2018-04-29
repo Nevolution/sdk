@@ -5,4 +5,8 @@
     <string name="decorator_wechat_description">为微信通知带来符合当代 Android 的最佳体验：可展开的会话样式、直接回复、划除即已读等高级特性.</string>
     <string name="self_display_name">你</string>
     <string name="action_reply">回复</string>
+
+    <string name="channel_message">消息</string>
+    <string name="channel_group_message">群组消息</string>
+    <string name="channel_misc">其它</string>
 </resources>

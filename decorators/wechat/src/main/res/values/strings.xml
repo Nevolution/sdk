@@ -21,4 +21,8 @@
     <string name="decorator_wechat_description">Enhance WeChat notifications with expandable conversation, direct reply, swipe to mark read and more.</string>
     <string name="self_display_name">You</string>
     <string name="action_reply">Reply</string>
+
+    <string name="channel_message">Messages</string>
+    <string name="channel_group_message">Group Conversations</string>
+    <string name="channel_misc">Miscellaneous</string>
 </resources>

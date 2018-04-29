@@ -7,4 +7,6 @@ android {
 dependencies {
     debugImplementation project(':sdk')
     releaseImplementation 'com.oasisfeng.nevo:sdk:' + nevoSdkVersion
+
+    implementation 'com.android.support:support-compat:' + supportLibrariesVersion
 }
