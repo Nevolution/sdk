@@ -30,8 +30,10 @@
                 <action android:name="com.oasisfeng.nevo.Decorator" />
             </intent-filter>
             <meta-data android:name="packages" android:value="com.tencent.mm" />
+            <meta-data android:name="settings.receiver" android:value="WeChatDecoratorSettingsReceiver" />
         </service>
 
+        <receiver android:name=".WeChatDecoratorSettingsReceiver" android:permission="com.oasisfeng.nevo.permission.BIND_DECORATOR_SERVICE" />
     </application>
 
 </manifest>
