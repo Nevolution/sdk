@@ -1,4 +1,4 @@
-<a href='https://play.google.com/store/apps/details?id=com.oasisfeng.nevo&referrer=utm_source%3Dgithub%26utm_medium%3Dreadme%26utm_content%3Dbadge'><img height='20%' width='20%' alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
+<a href='https://play.google.com/store/apps/details?id=com.oasisfeng.nevo&referrer=utm_source%3Dgithub%26utm_medium%3Dreadme%26utm_content%3Dbadge'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'></a>
 
 About
 -------
