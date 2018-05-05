@@ -19,7 +19,7 @@ repositories {
 
 apply plugin: 'com.android.library'
 
-version = "0.9.1"
+version = "1.0.0"
 group = "com.oasisfeng.nevo"
 
 android {
