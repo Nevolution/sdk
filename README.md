@@ -25,9 +25,9 @@ Developing a simple plug-in for Nevolution with our developer-friendly SDK is ev
 
 We are devoted to working with the developer community to build high quality plug-ins and improve Nevolution. So developers are the most important roles to build a healthy community.
 
-Discussion goes to the **Developer Zone** of [our G+ community](https://plus.google.com/communities/108874686073587920040/stream/cb805978-78a9-49d1-b0e2-291d22531c6b), while issues and formal feature request should be posted on the GitHub for better tracking.
+Discussion goes to the Telegram Group (for developers): https://t.me/joinchat/E-QUwkmvU2dlVkivIZBYEQ, while issues and formal feature request should be posted on the GitHub for better tracking.
 
-Developers are suggested to [join the alpha channel](https://play.google.com/apps/testing/com.oasisfeng.nevo) for the fast iteration on new features and APIs.
+Developers are suggested to join the [BETA CHANNEL](https://play.google.com/apps/testing/com.oasisfeng.nevo) for the fast iteration on new features and APIs.
 
 
 How Does Nevolution Work
