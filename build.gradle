@@ -5,24 +5,42 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.1'
+        classpath 'com.android.tools.build:gradle:3.1.2'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
-if (file('local.gradle').exists()) apply from: 'local.gradle'
-
-allprojects {
-    repositories {
-        jcenter()
-        maven { url "https://maven.google.com" }
-    }
+repositories {
+    google()
+    jcenter()
 }
 
-subprojects {
-    ext.compileSdkVersion = 27
-    ext.supportLibrariesVersion = '26.0.2'
-    ext.nevoSdkVersion = '0.9.1'
+apply plugin: 'com.android.library'
+
+version = "0.9.1"
+group = "com.oasisfeng.nevo"
+
+android {
+    compileSdkVersion 27
+
+    buildTypes {
+        debug   { resValue("string", "nevo_sdk_version", "${version}") }
+        release { resValue("string", "nevo_sdk_version", "${version}") }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig.testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    lintOptions.abortOnError false
+}
+
+dependencies {
+    api 'com.android.support:support-annotations:25.3.1'    // The latest version of support libraries in local SDK repo, for developer convenience.
+
+    androidTestImplementation('com.android.support.test:runner:0.5') { exclude group: 'com.android.support', module: 'support-annotations' }
 }
