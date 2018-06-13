@@ -178,6 +178,24 @@ public abstract class NevoDecoratorService extends Service {
 	}
 
 	/**
+	 * (Android O+ only) Snooze a STICKY (on-going or foreground) notification.
+	 *
+	 * <p>Non-sticky notifications are not allowed to snooze at present. If you need to snooze them,
+	 * please file an issue to discuss the use case with us.
+	 *
+	 * @see android.service.notification.NotificationListenerService#snoozeNotification(String, long)
+	 */
+	protected final void snoozeNotification(final String key, final long duration) {
+		try {
+			final Bundle bundle = new Bundle();
+			bundle.putLong(KEY_DURATION, duration);
+			mController.performNotificationAction(mWrapper, ACTION_SNOOZE, key, bundle);
+		} catch (final RemoteException e) {
+			Log.w(TAG, "Error recasting notification: " + key, e);
+		}
+	}
+
+	/**
 	 * Create {@link NotificationChannel} for targeted app. If specified package is not targeted by this decorator, channel will not be created.
 	 *
 	 * @see android.app.NotificationManager#createNotificationChannel(NotificationChannel)
@@ -232,11 +250,13 @@ public abstract class NevoDecoratorService extends Service {
 	@RestrictTo(LIBRARY) static final int ACTION_CANCEL = 1;
 	@RestrictTo(LIBRARY) static final int ACTION_REVIVE = 2;
 	@RestrictTo(LIBRARY) static final int ACTION_RECAST = 3;
+	@RestrictTo(LIBRARY) static final int ACTION_SNOOZE = 4;
 	@RestrictTo(LIBRARY) static final int FLAG_DECORATION_AWARE = 0x1;
 	@RestrictTo(LIBRARY) static final int FLAG_REMOVAL_AWARE_KEY_ONLY = 0x2;
 	@RestrictTo(LIBRARY) static final int FLAG_REMOVAL_AWARE = 0x4;
 	@RestrictTo(LIBRARY) static final String KEY_REASON = "reason";
 	@RestrictTo(LIBRARY) static final String KEY_SUPPORTED_API_VERSION = "version";
+	@RestrictTo(LIBRARY) static final String KEY_DURATION = "duration";
 
 	protected final String TAG = "Nevo.Decorator[" + shorten(getClass().getSimpleName()) + "]";
 
