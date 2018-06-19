@@ -25,6 +25,11 @@ group = "com.oasisfeng.nevo"
 android {
     compileSdkVersion 27
 
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 27     // only used by androidTest build
+    }
+
     buildTypes {
         debug   { resValue("string", "nevo_sdk_version", "${version}") }
         release { resValue("string", "nevo_sdk_version", "${version}") }
