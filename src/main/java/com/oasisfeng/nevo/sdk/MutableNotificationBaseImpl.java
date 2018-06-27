@@ -107,7 +107,13 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 		if (source.actions != null) {		// Notification.Action is actually mutable due to Action.getExtras().
 			dest.actions = new Action[source.actions.length];
-			for (int i = 0; i < source.actions.length; i ++) if (source.actions[i] != null) dest.actions[i] = source.actions[i].clone();
+			for (int i = 0; i < source.actions.length; i ++) {
+				final Action action = source.actions[i];
+				if (action != null) {
+					action.getExtras().size();		// Un-parcel extras before cloning, to ensure identity equaling of values for later comparison.
+					dest.actions[i] = action.clone();
+				}
+			}
 		} else dest.actions = null;
 
 		dest.bigContentView = source.bigContentView;
@@ -125,6 +131,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	/** This instance keeps the original immutable values and exposes mutable members, whose original values are kept in an internal Notification instance. */
 	private MutableNotificationBaseImpl(final Parcel parcel) {
 		super(parcel);
+		extras.size();	// Un-parcel extras before copying, to ensure identity equaling of values for later comparison.
 		copyMutableFields(this, mOriginalMutableKeeper = new Notification());
 	}
 
