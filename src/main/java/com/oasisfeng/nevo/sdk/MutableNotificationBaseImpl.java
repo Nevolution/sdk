@@ -131,6 +131,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	/** This instance keeps the original immutable values and exposes mutable members, whose original values are kept in an internal Notification instance. */
 	private MutableNotificationBaseImpl(final Parcel parcel) {
 		super(parcel);
+		//noinspection deprecation
+		icon = 0;		// Notification.readFromParcelImpl() fills this field, which we never need.
 		extras.size();	// Un-parcel extras before copying, to ensure identity equaling of values for later comparison.
 		copyMutableFields(this, mOriginalMutableKeeper = new Notification());
 	}
