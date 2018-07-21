@@ -28,7 +28,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 14        // Should be 23, but just keep it low to avoid imposing "tools:overrideLibrary" in dependent project.
         targetSdkVersion 27     // only used by androidTest build
     }
 

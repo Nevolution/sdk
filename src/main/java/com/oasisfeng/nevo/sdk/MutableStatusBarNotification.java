@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
@@ -42,7 +43,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
  *
  * Created by Oasis on 2015/1/18.
  */
-@Keep public class MutableStatusBarNotification extends StatusBarNotification {
+@Keep @RequiresApi(M) public class MutableStatusBarNotification extends StatusBarNotification {
 
 	@Override public MutableNotification getNotification() { return (MutableNotification) super.getNotification(); }
 

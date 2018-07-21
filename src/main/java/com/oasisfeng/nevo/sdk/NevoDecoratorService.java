@@ -46,6 +46,7 @@ import java.util.List;
 
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
+import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
@@ -56,7 +57,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
  *
  * @author Oasis
  */
-public abstract class NevoDecoratorService extends Service {
+@RequiresApi(M) public abstract class NevoDecoratorService extends Service {
 
 	/** The action to bind {@link NevoDecoratorService} */
 	public static final String ACTION_DECORATOR_SERVICE = "com.oasisfeng.nevo.Decorator";

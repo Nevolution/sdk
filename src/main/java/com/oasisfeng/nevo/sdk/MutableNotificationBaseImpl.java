@@ -21,10 +21,12 @@ import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 
 import java.util.Arrays;
 
+import static android.os.Build.VERSION_CODES.M;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 /**
@@ -32,7 +34,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
  *
  * Created by Oasis on 2018/4/3.
  */
-@RestrictTo(LIBRARY) class MutableNotificationBaseImpl extends MutableNotification {
+@RestrictTo(LIBRARY) @RequiresApi(M) class MutableNotificationBaseImpl extends MutableNotification {
 
 	static final String EXTRA_GROUP = "nevo.group";
 	static final String EXTRA_SORT_KEY = "nevo.sort";
