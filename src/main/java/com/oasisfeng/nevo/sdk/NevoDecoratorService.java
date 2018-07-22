@@ -79,7 +79,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 * <p>Notice: Since the notification might be evolved already, the tag and ID could be altered, only the key is immutable.
 	 *
 	 * <p>Beware: Not all notifications can be modified, the decoration made here may be ignored if it is not modifiable.
-	 * For example, sticky notification ({@link StatusBarNotification#isClearable()} is false) is not modifiable at present.
+	 * For example, sticky notification ({@link android.app.Notification#FLAG_ONGOING_EVENT FLAG_ONGOING_EVENT}
+	 * or {@link android.app.Notification#FLAG_FOREGROUND_SERVICE FLAG_FOREGROUND_SERVICE}) is not modifiable at present.
 	 *
 	 * @param evolving the incoming notification evolved by preceding decorators and to be evolved by this decorator,
 	 *                 or an already evolved notification (with or without this decorator).
