@@ -130,6 +130,9 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	/** For derived class only. */
 	MutableNotificationBaseImpl(final Notification original) { mOriginalMutableKeeper = original; }
 
+	/** For derived class only. */
+	MutableNotificationBaseImpl(final Notification original, final Parcel parcel) { super(parcel); mOriginalMutableKeeper = original; }
+
 	/** This instance keeps the original immutable values and exposes mutable members, whose original values are kept in an internal Notification instance. */
 	private MutableNotificationBaseImpl(final Parcel parcel) {
 		super(parcel);
