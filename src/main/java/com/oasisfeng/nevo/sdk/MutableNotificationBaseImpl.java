@@ -25,6 +25,7 @@ import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static android.os.Build.VERSION_CODES.M;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
@@ -43,14 +44,31 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	static final String EXTRA_TIMEOUT_AFTER = "nevo.timeout";
 	static final String EXTRA_APP_CHANNEL = "nevo.channel";
 
-	public void setGroup(final String groupKey) { extras.putString(EXTRA_GROUP, groupKey); }
-	public void setSortKey(final String sortKey) { extras.putString(EXTRA_SORT_KEY, sortKey); }
-	public void setSmallIcon(final Icon icon) { extras.putParcelable(EXTRA_ICON_SMALL, icon); }
-	public void setLargeIcon(final Icon icon) { extras.putParcelable(EXTRA_ICON_LARGE, icon); }
+	@Override public void setGroup(final String groupKey) {
+		if (Objects.equals(groupKey, super.getGroup())) extras.remove(EXTRA_GROUP);
+		else extras.putString(EXTRA_GROUP, groupKey);
+	}
+	@Override public void setSortKey(final String sortKey) {
+		if (Objects.equals(sortKey, super.getSortKey())) extras.remove(EXTRA_SORT_KEY);
+		else extras.putString(EXTRA_SORT_KEY, sortKey);
+	}
+	@Override public void setSmallIcon(final Icon icon) {
+		if (icon == super.getSmallIcon()) extras.remove(EXTRA_ICON_SMALL);	// Unfortunately, class Icon has no equals().
+		else extras.putParcelable(EXTRA_ICON_SMALL, icon);
+	}
+	@Override public void setLargeIcon(final Icon icon) {
+		if (icon == super.getLargeIcon()) extras.remove(EXTRA_ICON_LARGE);	// Unfortunately, class Icon has no equals().
+		else extras.putParcelable(EXTRA_ICON_LARGE, icon);
+	}
 	/** Currently only supported on Android O+. TODO: If you want it supported on earlier Android versions, please file a feature request on issue tracker */
-	public void setTimeoutAfter(final long durationMs) { extras.putLong(EXTRA_TIMEOUT_AFTER, durationMs); }
-	public void setChannelId(final String channelId) { extras.putString(EXTRA_APP_CHANNEL, channelId); }
-
+	@Override public void setTimeoutAfter(final long durationMs) {
+		if (durationMs == super.getTimeoutAfter()) extras.remove(EXTRA_TIMEOUT_AFTER);
+		else extras.putLong(EXTRA_TIMEOUT_AFTER, durationMs);
+	}
+	@Override public void setChannelId(final String channelId) {
+		if (Objects.equals(channelId, super.getChannelId())) extras.remove(EXTRA_APP_CHANNEL);
+		else extras.putString(EXTRA_APP_CHANNEL, channelId);
+	}
 	// Helpers
 
 	public void addAction(final Action action) {
@@ -140,10 +158,6 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 		icon = 0;		// Notification.readFromParcelImpl() fills this field, which we never need.
 		extras.size();	// Un-parcel extras before copying, to ensure identity equaling of values for later comparison.
 		copyMutableFields(this, mOriginalMutableKeeper = new Notification());
-	}
-
-	@Override public void writeToParcel(final Parcel out, final int flags) {
-		super.writeToParcel(out, flags);
 	}
 
 	private final transient Notification mOriginalMutableKeeper;	// The instance with original mutable field values (intact).
