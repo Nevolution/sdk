@@ -43,6 +43,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	static final String EXTRA_ICON_LARGE = "nevo.icon.large";
 	static final String EXTRA_TIMEOUT_AFTER = "nevo.timeout";
 	static final String EXTRA_APP_CHANNEL = "nevo.channel";
+	static final String EXTRA_GROUP_ALERT_BEHAVIOR = "nevo.group.alert";
 
 	@Override public void setGroup(final String groupKey) {
 		if (Objects.equals(groupKey, super.getGroup())) extras.remove(EXTRA_GROUP);
@@ -68,6 +69,10 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@Override public void setChannelId(final String channelId) {
 		if (Objects.equals(channelId, super.getChannelId())) extras.remove(EXTRA_APP_CHANNEL);
 		else extras.putString(EXTRA_APP_CHANNEL, channelId);
+	}
+	@Override public void setGroupAlertBehavior(final int behavior) {
+		if (behavior == super.getGroupAlertBehavior()) extras.remove(EXTRA_GROUP_ALERT_BEHAVIOR);
+		else extras.putInt(EXTRA_GROUP_ALERT_BEHAVIOR, behavior);
 	}
 	// Helpers
 
@@ -100,6 +105,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@Override public Icon getSmallIcon() { return extras.containsKey(EXTRA_ICON_SMALL) ? extras.getParcelable(EXTRA_ICON_SMALL) : super.getSmallIcon(); }
 	@Override public Icon getLargeIcon() { return extras.containsKey(EXTRA_ICON_LARGE) ? extras.getParcelable(EXTRA_ICON_LARGE) : super.getLargeIcon(); }
 	@Override public String getChannelId() { return extras.containsKey(EXTRA_APP_CHANNEL) ? extras.getString(EXTRA_APP_CHANNEL) : super.getChannelId(); }
+	@Override public int getGroupAlertBehavior() { return extras.containsKey(EXTRA_GROUP_ALERT_BEHAVIOR) ? extras.getInt(EXTRA_GROUP_ALERT_BEHAVIOR) : super.getGroupAlertBehavior(); }
 
 	// RemoteViews are intentionally always shallowly copied, to reduce cost.
 	private static void copyMutableFields(final Notification source, final Notification dest) {

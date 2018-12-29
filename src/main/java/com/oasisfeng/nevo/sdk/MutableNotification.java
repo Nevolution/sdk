@@ -51,7 +51,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	/** @see Notification.Builder#setChannelId(String) */
 	@RequiresApi(O) public abstract void setChannelId(final String channelId);
 	/** @see Notification.Builder#setGroupAlertBehavior(int) */
-	@RequiresApi(O) void setGroupAlertBehavior(final int behavior) {}	// TODO: Please file a feature request if you want it eagerly.
+	@RequiresApi(O) public abstract void setGroupAlertBehavior(final int behavior);
 	/** @see Notification.Builder#setSettingsText(CharSequence) */
 	@RequiresApi(O) void setSettingsText(final String text) {}			// TODO: Please file a feature request if you want it eagerly.
 
