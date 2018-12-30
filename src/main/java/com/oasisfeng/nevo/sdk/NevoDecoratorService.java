@@ -87,22 +87,28 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 */
 	@Keep protected void apply(final MutableStatusBarNotification evolving) {}
 
-	/** Override this method to perform initial process. */
-	protected void onConnected() {}
+	/** Called when connected by Nevolution engine. Override this method to perform initial process. */
+	@Keep protected void onConnected() {}
 
 	/**
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
+	 * <p>
+	 * This is also called with original key and {@link android.service.notification.NotificationListenerService#REASON_APP_CANCEL REASON_APP_CANCEL}
+	 * when originating app requests notification removal, only if the feature "Removal-aware" of Nevolution is activated.
 	 *
-	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}
+	 * @param key the original key for removal requested by originating app, or the real key (may be different from original key) otherwise.
+	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}, always 0 before Android O.
 	 */
-	@Keep protected void onNotificationRemoved(final String key, @SuppressWarnings("unused") final int reason) {}
+	@Keep protected void onNotificationRemoved(final String key, final int reason) {}
 
 	/**
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
 	 *
 	 * If notification payload is not relevant, please consider overriding {@link #onNotificationRemoved(String, int)} instead.
+	 *
+	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}, always 0 before Android O.
 	 */
-	@Keep protected void onNotificationRemoved(final StatusBarNotification notification, @SuppressWarnings("unused") final int reason) {}
+	@Keep protected void onNotificationRemoved(final StatusBarNotification notification, final int reason) {}
 
 	/**
 	 * Retrieve historic notifications posted with the given key (including the incoming one without decoration at the last).
@@ -154,6 +160,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 * If the notification is still active, it will not be affected.
 	 *
 	 * Decorator permission restriction applies.
+	 *
+	 * @param key the real key (may be different from original key)
 	 */
 	protected final void reviveNotification(final String key) {
 		try {
@@ -169,7 +177,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 *
 	 * Decorator permission restriction applies.
 	 *
-	 * @param fillInExtras additional extras to fill in the notification being recast.
+	 * @param key the original key of the notification to recast
+	 * @param fillInExtras additional extras to fill in the notification being recast. These additions are only present during the recasting procedure.
 	 */
 	protected final void recastNotification(final String key, final @Nullable Bundle fillInExtras) {
 		try {
@@ -223,9 +232,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@CallSuper @Override public IBinder onBind(final Intent intent) {
 		for (Class<?> clazz = getClass(); clazz != NevoDecoratorService.class; clazz = clazz.getSuperclass()) {
 			detectDerivedMethod(FLAG_DECORATION_AWARE, clazz, "apply", MutableStatusBarNotification.class);
-			detectDerivedMethod(FLAG_REMOVAL_AWARE_KEY_ONLY, clazz, "onNotificationRemoved", String.class);
 			detectDerivedMethod(FLAG_REMOVAL_AWARE_KEY_ONLY, clazz, "onNotificationRemoved", String.class, int.class);
-			detectDerivedMethod(FLAG_REMOVAL_AWARE, clazz, "onNotificationRemoved", StatusBarNotification.class);
 			detectDerivedMethod(FLAG_REMOVAL_AWARE, clazz, "onNotificationRemoved", StatusBarNotification.class, int.class);
 		}
 		return mWrapper == null ? mWrapper = new INevoDecoratorWrapper() : mWrapper;
