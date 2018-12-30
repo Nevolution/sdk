@@ -207,7 +207,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	}
 
 	/**
-	 * Create {@link NotificationChannel} for targeted app. If specified package is not targeted by this decorator, channel will not be created.
+	 * Create {@link NotificationChannel} for targeted app. If specified package is not targeted by this decorator, {@link SecurityException} will be thrown.
 	 *
 	 * @see android.app.NotificationManager#createNotificationChannel(NotificationChannel)
 	 */
@@ -216,6 +216,20 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 			mController.createNotificationChannels(mWrapper, pkg, channels, null);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error creating notification channels for " + pkg + ": " + channels, e);
+		}
+	}
+
+	/**
+	 * Delete {@link NotificationChannel} for targeted app. If specified package is not targeted by this decorator
+	 * or specified channel is not created by this decorator, nothing will be deleted.
+	 *
+	 * @see android.app.NotificationManager#deleteNotificationChannel(String)
+	 */
+	@RequiresApi(O) protected final void deleteNotificationChannel(final String pkg, final String channel) {
+		try {
+			mController.deleteNotificationChannel(mWrapper, pkg, channel, null);
+		} catch (final RemoteException e) {
+			Log.w(TAG, "Error deleting notification channel for " + pkg + ": " + channel, e);
 		}
 	}
 
