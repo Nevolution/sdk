@@ -213,6 +213,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 * @see android.app.NotificationManager#getNotificationChannel(String)
 	 */
 	@RequiresApi(O) protected final @Nullable NotificationChannel getNotificationChannel(final String pkg, final String channel) {
+		if (mSupportedApiVersion < 4) return null;
 		try {
 			final List<NotificationChannel> channels = mController.getNotificationChannels(mWrapper, pkg, Collections.singletonList(channel), null);
 			return channels == null || channels.isEmpty() ? null : channels.get(0);
@@ -242,6 +243,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 * @see android.app.NotificationManager#deleteNotificationChannel(String)
 	 */
 	@RequiresApi(O) protected final void deleteNotificationChannel(final String pkg, final String channel) {
+		if (mSupportedApiVersion < 4) return;
 		try {
 			mController.deleteNotificationChannel(mWrapper, pkg, channel, null);
 		} catch (final RemoteException e) {
