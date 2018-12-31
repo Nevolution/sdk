@@ -207,6 +207,22 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	}
 
 	/**
+	 * Returns the notification channel settings for a given channel id in targeted app.
+	 * If specified package is not targeted by this decorator, {@link SecurityException} will be thrown.
+	 *
+	 * @see android.app.NotificationManager#getNotificationChannel(String)
+	 */
+	@RequiresApi(O) protected final @Nullable NotificationChannel getNotificationChannel(final String pkg, final String channel) {
+		try {
+			final List<NotificationChannel> channels = mController.getNotificationChannels(mWrapper, pkg, Collections.singletonList(channel), null);
+			return channels == null || channels.isEmpty() ? null : channels.get(0);
+		} catch (final RemoteException e) {
+			Log.w(TAG, "Error querying notification channel in " + pkg + ": " + channel, e);
+			return null;
+		}
+	}
+
+	/**
 	 * Create {@link NotificationChannel} for targeted app. If specified package is not targeted by this decorator, {@link SecurityException} will be thrown.
 	 *
 	 * @see android.app.NotificationManager#createNotificationChannel(NotificationChannel)
