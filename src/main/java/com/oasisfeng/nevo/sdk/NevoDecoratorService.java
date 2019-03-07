@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.NetworkOnMainThreadException;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Keep;
@@ -49,6 +50,7 @@ import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
+import static java.util.Collections.singletonList;
 
 /**
  * Interface for notification decorator.
@@ -118,7 +120,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 */
 	protected final List<StatusBarNotification> getArchivedNotifications(final String key, final int limit) {
 		try {
-			return mController.getNotifications(mWrapper, TYPE_ARCHIVED, Collections.singletonList(key), limit, null);
+			return mController.getNotifications(mWrapper, TYPE_ARCHIVED, singletonList(key), limit, null);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error retrieving archived notifications: " + key, e);
 			return Collections.emptyList();
@@ -212,10 +214,10 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 *
 	 * @see android.app.NotificationManager#getNotificationChannel(String)
 	 */
-	@RequiresApi(O) protected final @Nullable NotificationChannel getNotificationChannel(final String pkg, final String channel) {
+	@RequiresApi(O) protected final @Nullable NotificationChannel getNotificationChannel(final String pkg, final UserHandle user, final String channel) {
 		if (mSupportedApiVersion < 4) return null;
 		try {
-			final List<NotificationChannel> channels = mController.getNotificationChannels(mWrapper, pkg, Collections.singletonList(channel), null);
+			final List<NotificationChannel> channels = mController.getNotificationChannels(mWrapper, pkg, singletonList(channel), bundleIfNeeded(user));
 			return channels == null || channels.isEmpty() ? null : channels.get(0);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error querying notification channel in " + pkg + ": " + channel, e);
@@ -228,12 +230,17 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 *
 	 * @see android.app.NotificationManager#createNotificationChannel(NotificationChannel)
 	 */
-	@RequiresApi(O) protected final void createNotificationChannels(final String pkg, final List<NotificationChannel> channels) {
+	@RequiresApi(O) protected final void createNotificationChannels(final String pkg, final UserHandle user, final List<NotificationChannel> channels) {
 		try {
-			mController.createNotificationChannels(mWrapper, pkg, channels, null);
+			mController.createNotificationChannels(mWrapper, pkg, channels, bundleIfNeeded(user));
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error creating notification channels for " + pkg + ": " + channels, e);
 		}
+	}
+
+	/** @deprecated use {@link #createNotificationChannels(String, UserHandle, List)} instead */
+	@Deprecated @RequiresApi(O) protected final void createNotificationChannels(final String pkg, final List<NotificationChannel> channels) {
+		createNotificationChannels(pkg, Process.myUserHandle(), channels);
 	}
 
 	/**
@@ -242,10 +249,10 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	 *
 	 * @see android.app.NotificationManager#deleteNotificationChannel(String)
 	 */
-	@RequiresApi(O) protected final void deleteNotificationChannel(final String pkg, final String channel) {
+	@RequiresApi(O) protected final void deleteNotificationChannel(final String pkg, final UserHandle user, final String channel) {
 		if (mSupportedApiVersion < 4) return;
 		try {
-			mController.deleteNotificationChannel(mWrapper, pkg, channel, null);
+			mController.deleteNotificationChannel(mWrapper, pkg, channel, bundleIfNeeded(user));
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error deleting notification channel for " + pkg + ": " + channel, e);
 		}
@@ -268,6 +275,13 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 			detectDerivedMethod(FLAG_REMOVAL_AWARE, clazz, "onNotificationRemoved", StatusBarNotification.class, int.class);
 		}
 		return mWrapper == null ? mWrapper = new INevoDecoratorWrapper() : mWrapper;
+	}
+
+	private static Bundle bundleIfNeeded(final UserHandle user) {
+		if (user == null || Process.myUserHandle().equals(user)) return null;
+		final Bundle bundle = new Bundle();
+		bundle.putParcelable(Intent.EXTRA_USER, user);
+		return bundle;
 	}
 
 	private void detectDerivedMethod(final int flag, final Class<?> clazz, final String name, final Class<?>... parameter_types) {
