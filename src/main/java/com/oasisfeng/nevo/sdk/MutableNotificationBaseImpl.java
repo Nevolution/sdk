@@ -104,6 +104,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@Override public String getSortKey() { return extras.containsKey(EXTRA_SORT_KEY) ? extras.getString(EXTRA_SORT_KEY) : super.getSortKey(); }
 	@Override public Icon getSmallIcon() { return extras.containsKey(EXTRA_ICON_SMALL) ? extras.getParcelable(EXTRA_ICON_SMALL) : super.getSmallIcon(); }
 	@Override public Icon getLargeIcon() { return extras.containsKey(EXTRA_ICON_LARGE) ? extras.getParcelable(EXTRA_ICON_LARGE) : super.getLargeIcon(); }
+	@Override public long getTimeoutAfter() { return extras.containsKey(EXTRA_TIMEOUT_AFTER) ? extras.getLong(EXTRA_TIMEOUT_AFTER) : super.getTimeoutAfter(); }
 	@Override public String getChannelId() { return extras.containsKey(EXTRA_APP_CHANNEL) ? extras.getString(EXTRA_APP_CHANNEL) : super.getChannelId(); }
 	@Override public int getGroupAlertBehavior() { return extras.containsKey(EXTRA_GROUP_ALERT_BEHAVIOR) ? extras.getInt(EXTRA_GROUP_ALERT_BEHAVIOR) : super.getGroupAlertBehavior(); }
 
