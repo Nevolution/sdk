@@ -16,5 +16,5 @@
   -->
 
 <resources>
-    <integer name="nevo_api_version">4</integer>
+    <integer name="nevo_api_version">5</integer>
 </resources>
