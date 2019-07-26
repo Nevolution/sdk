@@ -86,8 +86,9 @@ import static java.util.Collections.singletonList;
 	 *
 	 * @param evolving the incoming notification evolved by preceding decorators and to be evolved by this decorator,
 	 *                 or an already evolved notification (with or without this decorator).
+	 * @return whether decoration has been applied. Returning false causes engine to ignore any decoration actually applied.
 	 */
-	@Keep protected void apply(final MutableStatusBarNotification evolving) {}
+	@Keep protected boolean apply(final MutableStatusBarNotification evolving) { return false; }
 
 	/** Called when connected by Nevolution engine. Override this method to perform initial process. */
 	@Keep protected void onConnected() {}
@@ -323,8 +324,9 @@ import static java.util.Collections.singletonList;
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
 			try {
 				Log.v(TAG, "Applying to " + evolving.getKey());
-				NevoDecoratorService.this.apply(evolving);
-				evolving.setAllowIncrementalWriteBack();
+				final boolean applied = NevoDecoratorService.this.apply(evolving);
+				if (applied) evolving.setAllowIncrementalWriteBack();
+				else evolving.setNoWriteBack();
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running apply()", t);
 				throw asParcelableException(t);

@@ -128,10 +128,13 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 		sFieldUid = field;
 	}
 
-	@RestrictTo(LIBRARY) public void setAllowIncrementalWriteBack() { mAllowIncWriteBack = true; }
+	@RestrictTo(LIBRARY) void setAllowIncrementalWriteBack() { mWriteBackMode = 1; }
+	@RestrictTo(LIBRARY) void setNoWriteBack() { mWriteBackMode = -1; }
 
 	@Override public void writeToParcel(final Parcel out, final int flags) {
-		if (mAllowIncWriteBack && (flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {
+		if (mWriteBackMode == -1) {																// No write-back
+			out.writeInt(MARK_NO_WRITE_BACK);
+		} else if (mWriteBackMode == 1 && (flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {		// Incremental write-back
 			writeMutableFieldsToParcel(out);
 			// Use remote implementation to ensure the consistency of parceling across SDK versions.
 			final MutableNotification mutable = getNotification();
@@ -256,11 +259,12 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	private String mTag;
 	private int mId;
 	private transient String mKey;
-	private transient boolean mAllowIncWriteBack;
+	private transient int mWriteBackMode;	// 0: Full, 1: Incremental, -1 No write-back
 
 	private static final String EXTRA_ORIGINAL_TAG = "nevo.tag";
 	private static final String EXTRA_ORIGINAL_ID = "nevo.id";
 	@VisibleForTesting static final String EXTRA_ORIGINAL_OVERRIDE_GROUP = "nevo.group.override";
+	@RestrictTo(LIBRARY) static final int MARK_NO_WRITE_BACK = - 128;
 
 	private static final String TAG = "Nevo.MSBN";
 }
