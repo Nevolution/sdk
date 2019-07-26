@@ -20,7 +20,7 @@ public class TestUtils {
 		return new MutableStatusBarNotification(pkg, null, id, tag, uid, 0, mutable(n), user, time);
 	}
 
-	public static <T extends Parcelable> T pup(final T object) {
+	static <T extends Parcelable> T pup(final T object) {
 		final Parcel parcel = Parcel.obtain();
 		try {
 			parcel.writeParcelable(object, 0);
@@ -31,7 +31,7 @@ public class TestUtils {
 		}
 	}
 
-	public static MutableNotification incPup(final MutableNotification mutable) {
+	static MutableNotification incPup(final MutableNotification mutable) {
 		final Parcel parcel = Parcel.obtain();
 		RemoteImplementation.initializeIfNotYet(InstrumentationRegistry.getTargetContext());
 		try {
@@ -55,17 +55,18 @@ public class TestUtils {
 			assertEquals("Extra key: " + key, sbn.getNotification().extras.get(key), transformed.getNotification().extras.get(key));
 	}
 
-	public static Notification n() { return b().build(); }
+	static Notification n() { return b().build(); }
 
 	static Notification.Builder b() {
 		return new Notification.Builder(InstrumentationRegistry.getContext()).setSmallIcon(android.R.drawable.stat_notify_chat).setContentTitle("Hello");
 	}
 
-	public static MutableNotificationBaseImpl mutable(final Notification n) {
+	static MutableNotificationBaseImpl mutable(final Notification n) {
+		if (n instanceof MutableNotification) return (MutableNotificationBaseImpl) n;
 		final MutableNotificationBaseImpl mutable = new MutableNotificationBaseImpl(n);
 		try { //noinspection JavaReflectionMemberAccess
 			Notification.class.getMethod("cloneInto", Notification.class, boolean.class).invoke(n, mutable, true);
-		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+		} catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 		return mutable;

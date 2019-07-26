@@ -21,6 +21,7 @@ import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.O;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 /**
@@ -54,26 +56,27 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 		else extras.putString(EXTRA_SORT_KEY, sortKey);
 	}
 	@Override public void setSmallIcon(final Icon icon) {
-		if (icon == super.getSmallIcon()) extras.remove(EXTRA_ICON_SMALL);	// Unfortunately, class Icon has no equals().
+		if (icon == super.getSmallIcon()) extras.remove(EXTRA_ICON_SMALL);	// TODO: Implement equality check for Icon.
 		else extras.putParcelable(EXTRA_ICON_SMALL, icon);
 	}
 	@Override public void setLargeIcon(final Icon icon) {
-		if (icon == super.getLargeIcon()) extras.remove(EXTRA_ICON_LARGE);	// Unfortunately, class Icon has no equals().
+		if (icon == super.getLargeIcon()) extras.remove(EXTRA_ICON_LARGE);	// TODO: Implement equality check for Icon.
 		else extras.putParcelable(EXTRA_ICON_LARGE, icon);
 	}
 	/** Currently only supported on Android O+. TODO: If you want it supported on earlier Android versions, please file a feature request on issue tracker */
-	@Override public void setTimeoutAfter(final long durationMs) {
+	@RequiresApi(O) @Override public void setTimeoutAfter(final long durationMs) {
 		if (durationMs == super.getTimeoutAfter()) extras.remove(EXTRA_TIMEOUT_AFTER);
 		else extras.putLong(EXTRA_TIMEOUT_AFTER, durationMs);
 	}
-	@Override public void setChannelId(final String channelId) {
+	@RequiresApi(O) @Override public void setChannelId(final String channelId) {
 		if (Objects.equals(channelId, super.getChannelId())) extras.remove(EXTRA_APP_CHANNEL);
 		else extras.putString(EXTRA_APP_CHANNEL, channelId);
 	}
-	@Override public void setGroupAlertBehavior(final int behavior) {
+	@RequiresApi(O) @Override public void setGroupAlertBehavior(final int behavior) {
 		if (behavior == super.getGroupAlertBehavior()) extras.remove(EXTRA_GROUP_ALERT_BEHAVIOR);
 		else extras.putInt(EXTRA_GROUP_ALERT_BEHAVIOR, behavior);
 	}
+
 	// Helpers
 
 	public void addAction(final Action action) {
@@ -100,13 +103,13 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 	// Delegated getters
 
-	@Override public String getGroup() { return extras.containsKey(EXTRA_GROUP) ? extras.getString(EXTRA_GROUP) : super.getGroup(); }
-	@Override public String getSortKey() { return extras.containsKey(EXTRA_SORT_KEY) ? extras.getString(EXTRA_SORT_KEY) : super.getSortKey(); }
-	@Override public Icon getSmallIcon() { return extras.containsKey(EXTRA_ICON_SMALL) ? extras.getParcelable(EXTRA_ICON_SMALL) : super.getSmallIcon(); }
-	@Override public Icon getLargeIcon() { return extras.containsKey(EXTRA_ICON_LARGE) ? extras.getParcelable(EXTRA_ICON_LARGE) : super.getLargeIcon(); }
-	@Override public long getTimeoutAfter() { return extras.containsKey(EXTRA_TIMEOUT_AFTER) ? extras.getLong(EXTRA_TIMEOUT_AFTER) : super.getTimeoutAfter(); }
-	@Override public String getChannelId() { return extras.containsKey(EXTRA_APP_CHANNEL) ? extras.getString(EXTRA_APP_CHANNEL) : super.getChannelId(); }
-	@Override public int getGroupAlertBehavior() { return extras.containsKey(EXTRA_GROUP_ALERT_BEHAVIOR) ? extras.getInt(EXTRA_GROUP_ALERT_BEHAVIOR) : super.getGroupAlertBehavior(); }
+	@Override public @Nullable String getGroup() { return extras.getString(EXTRA_GROUP, super.getGroup()); }
+	@Override public @Nullable String getSortKey() { return extras.getString(EXTRA_SORT_KEY, super.getSortKey()); }
+//	@Override public Icon getSmallIcon() { return extras.containsKey(EXTRA_ICON_SMALL) ? extras.getParcelable(EXTRA_ICON_SMALL) : super.getSmallIcon(); }
+	@Override public @Nullable Icon getLargeIcon() { return extras.containsKey(EXTRA_ICON_LARGE) ? extras.getParcelable(EXTRA_ICON_LARGE) : super.getLargeIcon(); }
+	@Override public long getTimeoutAfter() { return extras.getLong(EXTRA_TIMEOUT_AFTER, super.getTimeoutAfter()); }
+	@Override public @Nullable String getChannelId() { return extras.getString(EXTRA_APP_CHANNEL, super.getChannelId()); }
+	@Override public int getGroupAlertBehavior() { return extras.getInt(EXTRA_GROUP_ALERT_BEHAVIOR, super.getGroupAlertBehavior()); }
 
 	// RemoteViews are intentionally always shallowly copied, to reduce cost.
 	private static void copyMutableFields(final Notification source, final Notification dest) {
@@ -119,7 +122,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 		dest.contentView = source.contentView;
 		dest.iconLevel = source.iconLevel;
 		dest.sound = source.sound;
-		//noinspection deprecation, due to still being used in NotificationRecord.calculateAttributes() when "audioAttributes" is absennt.
+		// "audioStreamType" is still being used in NotificationRecord.calculateAttributes() when "audioAttributes" is absennt.
 		dest.audioStreamType = source.audioStreamType;
 		dest.audioAttributes = source.audioAttributes;
 		dest.vibrate = source.vibrate == null ? null : source.vibrate.clone();
@@ -161,7 +164,6 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	/** This instance keeps the original immutable values and exposes mutable members, whose original values are kept in an internal Notification instance. */
 	private MutableNotificationBaseImpl(final Parcel parcel) {
 		super(parcel);
-		//noinspection deprecation
 		icon = 0;		// Notification.readFromParcelImpl() fills this field, which we never need.
 		extras.size();	// Un-parcel extras before copying, to ensure identity equaling of values for later comparison.
 		copyMutableFields(this, mOriginalMutableKeeper = new Notification());

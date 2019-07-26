@@ -17,6 +17,7 @@ import static android.os.Build.VERSION_CODES.O;
 import static com.oasisfeng.nevo.sdk.TestUtils.b;
 import static com.oasisfeng.nevo.sdk.TestUtils.mutable;
 import static com.oasisfeng.nevo.sdk.TestUtils.n;
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
@@ -47,8 +48,8 @@ public class MutableNotificationTest {
 ACTION:	testMutation(mutable, MutableNotification::addAction, m -> m.actions[0], new Action.Builder(RES_ICON, "Hello", null).build());
 		testMutation(mutable, MutableNotification::addAction, m -> m.actions[1], new Action.Builder(RES_ICON, "Bye", null).build());
 
-PERSON: testMutation(mutable, MutableNotification::addPerson, m -> m.extras.getStringArray(Notification.EXTRA_PEOPLE)[0], "Tom");
-		testMutation(mutable, MutableNotification::addPerson, m -> m.extras.getStringArray(Notification.EXTRA_PEOPLE)[1], "Jerry");
+PERSON: testMutation(mutable, MutableNotification::addPerson, m -> requireNonNull(m.extras.getStringArray(Notification.EXTRA_PEOPLE))[0], "Tom");
+		testMutation(mutable, MutableNotification::addPerson, m -> requireNonNull(m.extras.getStringArray(Notification.EXTRA_PEOPLE))[1], "Jerry");
 
 PUBLIC: testMutation(mutable, (m, p) -> m.publicVersion = p, m -> ensureParcelingEquality(m.publicVersion), n(), b().setGroup("x").build());
 	}
@@ -74,7 +75,7 @@ PUBLIC: testMutation(mutable, (m, p) -> m.publicVersion = p, m -> ensureParcelin
 	}
 
 	/** Notification(Parcel) will set the legacy "icon" if small icon is built from resource, thus breaks parceling equality. */
-	@SuppressWarnings("deprecation") private Notification ensureParcelingEquality(final Notification n) { n.icon = 0; return n; }
+	@SuppressWarnings("deprecation") private static Notification ensureParcelingEquality(final Notification n) { n.icon = 0; return n; }
 
 	private final Icon RES_ICON = Icon.createWithResource(InstrumentationRegistry.getTargetContext(), android.R.drawable.stat_notify_chat);
 	private final Icon DATA_ICON = Icon.createWithData(new byte[] { 1, 2, 3 }, 0, 3);

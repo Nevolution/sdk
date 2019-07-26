@@ -295,7 +295,8 @@ import static java.util.Collections.singletonList;
 
 	private void detectDerivedMethod(final int flag, final Class<?> clazz, final String name, final Class<?>... parameter_types) {
 		if ((mFlags & flag) == 0) try {
-			if (clazz.getDeclaredMethod(name, parameter_types) != null) mFlags |= flag;
+			clazz.getDeclaredMethod(name, parameter_types);
+			mFlags |= flag;
 		} catch (final NoSuchMethodException ignored) {}
 	}
 
@@ -329,7 +330,6 @@ import static java.util.Collections.singletonList;
 		@Override public void apply(final/* inout */MutableStatusBarNotification evolving, final @Nullable Bundle options) {
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
 			try {
-				Log.v(TAG, "Applying to " + evolving.getKey());
 				final boolean applied = NevoDecoratorService.this.apply(evolving);
 				if (applied) evolving.setAllowIncrementalWriteBack();
 				else evolving.setNoWriteBack();
@@ -367,9 +367,10 @@ import static java.util.Collections.singletonList;
 			if (caller_uid != my_uid && pm.checkSignatures(caller_uid, my_uid) != SIGNATURE_MATCH) {
 				final String[] caller_pkgs = pm.getPackagesForUid(caller_uid);
 				if (caller_pkgs == null || caller_pkgs.length == 0) throw new SecurityException();
-				try { @SuppressLint("PackageManagerGetSignatures")
-				final PackageInfo caller_info = pm.getPackageInfo(caller_pkgs[0], GET_SIGNATURES);
+				try { @SuppressWarnings("deprecation") @SuppressLint("PackageManagerGetSignatures")
+					final PackageInfo caller_info = pm.getPackageInfo(caller_pkgs[0], GET_SIGNATURES);
 					if (caller_info == null) throw new SecurityException();
+					//noinspection deprecation
 					for (final Signature signature : caller_info.signatures)
 						if (signature.hashCode() != SIGNATURE_HASH) throw new SecurityException("Caller signature mismatch");
 				} catch (final PackageManager.NameNotFoundException e) { throw new SecurityException(); }	// Should not happen

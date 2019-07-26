@@ -28,13 +28,13 @@ public class MutableStatusBarNotificationTest {
 		testTagIdMutation(createWithTag(null));
 	}
 
-	private void testTagIdMutation(final MutableStatusBarNotification mutable) {
+	private static void testTagIdMutation(final MutableStatusBarNotification mutable) {
 		mutable.setTag("tag2");
 		assertEquals(createWithTag("tag2").getKey(), mutable.getKey());
 		mutable.setTag("");
 		assertEquals(createWithTag("").getKey(), mutable.getKey());
 		mutable.setTag(null);
-		assertEquals(null, mutable.getTag());
+		assertNull(mutable.getTag());
 		assertEquals(createWithTag(null).getKey(), mutable.getKey());
 		mutable.setId(9);
 		assertEquals(9, mutable.getId());
@@ -60,15 +60,20 @@ public class MutableStatusBarNotificationTest {
 	}
 
 	@Test public void testExtrasMutation() {
-		// TODO
+		final MutableStatusBarNotification mutable = createWithTag("");
+		final MutableNotification n = mutable.getNotification();
+		n.extras.putString("test", "new");
+
+		final MutableStatusBarNotification pup = TestUtils.pup(mutable);
+		assertEquals("new", pup.getNotification().extras.getString("test"));
 	}
 
 	@Test public void testParceling() {
-		final MutableStatusBarNotification sbn = TestUtils.create("pkg", "tag", 9, Process.myUserHandle(), 1, TestUtils.n(), TestUtils.now());
+		final MutableStatusBarNotification sbn = create("pkg", "tag", 9, Process.myUserHandle(), 1, n(), now());
 		pupAndVerify(sbn, sbn1 -> sbn1.setTag(""));
 	}
 
-	private void pupAndVerify(final MutableStatusBarNotification sbn, final Consumer<MutableStatusBarNotification> procedure) {
+	private static void pupAndVerify(final MutableStatusBarNotification sbn, final Consumer<MutableStatusBarNotification> procedure) {
 		final MutableStatusBarNotification pup = TestUtils.pup(sbn);
 		TestUtils.assertSbnEquals(sbn, pup);
 

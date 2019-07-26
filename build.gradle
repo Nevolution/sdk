@@ -25,7 +25,7 @@ group = "com.oasisfeng.nevo"
 if (file('deploy.gradle').exists()) apply from: 'deploy.gradle'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 14        // Should be 23, but just keep it low to avoid imposing "tools:overrideLibrary" in dependent project.

@@ -38,7 +38,8 @@ public class RemoteImplementationTest {
 	static {
 		RemoteImplementation.initializeIfNotYet(InstrumentationRegistry.getTargetContext());
 		try {
-			readBackFromParcel = RemoteImplementation.sClass.getMethod("readBackFromParcel", Parcel.class, Notification.class);
+			readBackFromParcel = RemoteImplementation.sClass.getDeclaredMethod("readBackFromParcel", Parcel.class, Notification.class);
+			readBackFromParcel.setAccessible(true);
 		} catch (final NoSuchMethodException e) {
 			throw new IllegalStateException("Incompatible engine installed");
 		}
