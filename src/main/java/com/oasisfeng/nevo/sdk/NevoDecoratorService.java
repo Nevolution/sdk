@@ -120,8 +120,10 @@ import static java.util.Collections.singletonList;
 	 * The number of notifications kept in archive is undefined.
 	 *
 	 * Decorator permission restriction applies.
+	 *
+	 * @deprecated This API will no longer be supported in the future
 	 */
-	protected final List<StatusBarNotification> getArchivedNotifications(final String key, final int limit) {
+	@Deprecated protected final List<StatusBarNotification> getArchivedNotifications(final String key, final int limit) {
 		try {
 			return mController.getNotifications(mWrapper, TYPE_ARCHIVED, singletonList(key), limit, null);
 		} catch (final RemoteException e) {
