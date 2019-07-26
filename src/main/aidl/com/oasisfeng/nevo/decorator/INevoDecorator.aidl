@@ -25,6 +25,6 @@ interface INevoDecorator {
 
     int onConnected(in INevoController controller, in Bundle options);
     void apply(inout MutableStatusBarNotification evolved, in Bundle options);
-    oneway void onNotificationRemoved(in String key, in Bundle options);
-    oneway void onNotificationRemovedLight(in StatusBarNotification notification, in Bundle options);
+    boolean onNotificationRemoved(in String key, in Bundle options);
+    boolean onNotificationRemovedLight(in StatusBarNotification notification, in Bundle options);
 }

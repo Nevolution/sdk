@@ -96,12 +96,13 @@ import static java.util.Collections.singletonList;
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
 	 * <p>
 	 * This is also called with original key and {@link android.service.notification.NotificationListenerService#REASON_APP_CANCEL REASON_APP_CANCEL}
-	 * when originating app requests notification removal, only if the feature "Removal-aware" of Nevolution is activated.
+	 * when originating app requests notification removal, only for ongoing notification, or if the feature "Removal-aware" of Nevolution is activated.
 	 *
 	 * @param key the original key for removal requested by originating app, or the real key (may be different from original key) otherwise.
 	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}, always 0 before Android O.
+	 * @return true if decorator handled this removal in its own way, thus notifications evolved from the removed one will NOT be removed automatically.
 	 */
-	@Keep protected void onNotificationRemoved(final String key, final int reason) {}
+	@Keep protected boolean onNotificationRemoved(final String key, final int reason) { return false; }
 
 	/**
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
@@ -109,8 +110,9 @@ import static java.util.Collections.singletonList;
 	 * If notification payload is not relevant, please consider overriding {@link #onNotificationRemoved(String, int)} instead.
 	 *
 	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}, always 0 before Android O.
+	 * @return true if decorator handled this removal in its own way, thus notifications evolved from the removed one will NOT be removed automatically.
 	 */
-	@Keep protected void onNotificationRemoved(final StatusBarNotification notification, final int reason) {}
+	@Keep protected boolean onNotificationRemoved(final StatusBarNotification notification, final int reason) { return false; }
 
 	/**
 	 * Retrieve historic notifications posted with the given key (including the incoming one without decoration at the last).
@@ -329,20 +331,20 @@ import static java.util.Collections.singletonList;
 			}
 		}
 
-		@Override public void onNotificationRemoved(final String key, final @Nullable Bundle options) {
+		@Override public boolean onNotificationRemoved(final String key, final @Nullable Bundle options) {
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
 			try {
-				NevoDecoratorService.this.onNotificationRemoved(key, options != null ? options.getInt(KEY_REASON) : 0);
+				return NevoDecoratorService.this.onNotificationRemoved(key, options != null ? options.getInt(KEY_REASON) : 0);
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running onNotificationRemoved()", t);
 				throw asParcelableException(t);
 			}
 		}
 
-		@Override public void onNotificationRemovedLight(final StatusBarNotification notification, final @Nullable Bundle options) {
+		@Override public boolean onNotificationRemovedLight(final StatusBarNotification notification, final @Nullable Bundle options) {
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
 			try {
-				NevoDecoratorService.this.onNotificationRemoved(notification, options != null ? options.getInt(KEY_REASON) : 0);
+				return NevoDecoratorService.this.onNotificationRemoved(notification, options != null ? options.getInt(KEY_REASON) : 0);
 			} catch (final Throwable t) {
 				Log.e(TAG, "Error running onNotificationRemoved()", t);
 				throw asParcelableException(t);
