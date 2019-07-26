@@ -153,8 +153,12 @@ import static java.util.Collections.singletonList;
 	 * Cancel an active notification, remove it from notification panel.
 	 *
 	 * Decorator permission restriction applies.
+	 *
+	 * @deprecated Notification will not be allowed to remove explicitly to eliminate the risk of notification lost due to potential bugs in decorator.
+	 * @see #onNotificationRemoved(String, int)
+	 * @see #onNotificationRemoved(StatusBarNotification, int)
 	 */
-	public final void cancelNotification(final String key) {
+	@Deprecated public final void cancelNotification(final String key) {
 		try {
 			mController.performNotificationAction(mWrapper, ACTION_CANCEL, key, null);
 		} catch (final RemoteException e) {
