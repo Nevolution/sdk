@@ -138,7 +138,7 @@ import static java.util.Collections.singletonList;
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected final List<StatusBarNotification> getLatestNotifications(final List<String> keys) {
+	public final List<StatusBarNotification> getLatestNotifications(final List<String> keys) {
 		try {
 			return mController.getNotifications(mWrapper, TYPE_LATEST, keys, 0, null);
 		} catch (final RemoteException e) {
@@ -152,7 +152,7 @@ import static java.util.Collections.singletonList;
 	 *
 	 * Decorator permission restriction applies.
 	 */
-	protected final void cancelNotification(final String key) {
+	public final void cancelNotification(final String key) {
 		try {
 			mController.performNotificationAction(mWrapper, ACTION_CANCEL, key, null);
 		} catch (final RemoteException e) {
@@ -168,7 +168,7 @@ import static java.util.Collections.singletonList;
 	 *
 	 * @param key the real key (may be different from original key)
 	 */
-	protected final void reviveNotification(final String key) {
+	public final void reviveNotification(final String key) {
 		try {
 			mController.performNotificationAction(mWrapper, ACTION_REVIVE, key, null);
 		} catch (final RemoteException e) {
@@ -177,15 +177,15 @@ import static java.util.Collections.singletonList;
 	}
 
 	/**
-	 * Recast a past (either still active or already removed) notification asynchronously,
-	 * which will then go through the decorators (including this one) as if just posted.
+	 * Recast an active notification asynchronously, which will then go through the decorators (including this one) as if just posted.
+	 * Useful for making additional tweaks asynchronously after initial decoration pass.
 	 *
 	 * Decorator permission restriction applies.
 	 *
 	 * @param key the original key of the notification to recast
 	 * @param fillInExtras additional extras to fill in the notification being recast. These additions are only present during the recasting procedure.
 	 */
-	protected final void recastNotification(final String key, final @Nullable Bundle fillInExtras) {
+	public final void recastNotification(final String key, final @Nullable Bundle fillInExtras) {
 		try {
 			mController.performNotificationAction(mWrapper, ACTION_RECAST, key, fillInExtras);
 		} catch (final RemoteException e) {
@@ -201,7 +201,7 @@ import static java.util.Collections.singletonList;
 	 *
 	 * @see android.service.notification.NotificationListenerService#snoozeNotification(String, long)
 	 */
-	protected final void snoozeNotification(final String key, final long duration) {
+	public final void snoozeNotification(final String key, final long duration) {
 		try {
 			final Bundle bundle = new Bundle();
 			bundle.putLong(KEY_DURATION, duration);
