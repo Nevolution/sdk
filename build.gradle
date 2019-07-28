@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath 'com.android.tools.build:gradle:3.5.0-rc01'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -25,11 +25,11 @@ group = "com.oasisfeng.nevo"
 if (file('deploy.gradle').exists()) apply from: 'deploy.gradle'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 14        // Should be 23, but just keep it low to avoid imposing "tools:overrideLibrary" in dependent project.
-        targetSdkVersion 27     // only used by androidTest build
+        targetSdkVersion 29     // only used by androidTest build
     }
 
     buildTypes {

@@ -30,6 +30,7 @@ import java.util.Objects;
 
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
+import static android.os.Build.VERSION_CODES.Q;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 /**
@@ -46,6 +47,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	static final String EXTRA_TIMEOUT_AFTER = "nevo.timeout";
 	static final String EXTRA_APP_CHANNEL = "nevo.channel";
 	static final String EXTRA_GROUP_ALERT_BEHAVIOR = "nevo.group.alert";
+	static final String EXTRA_BUBBLE_METADATA = "nevo.bubble";
+	static final String EXTRA_ALLOW_SYS_GEN_ACTIONS = "nevo.allow.actions";
 
 	@Override public void setGroup(final String groupKey) {
 		if (Objects.equals(groupKey, super.getGroup())) extras.remove(EXTRA_GROUP);
@@ -75,6 +78,14 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@RequiresApi(O) @Override public void setGroupAlertBehavior(final int behavior) {
 		if (behavior == super.getGroupAlertBehavior()) extras.remove(EXTRA_GROUP_ALERT_BEHAVIOR);
 		else extras.putInt(EXTRA_GROUP_ALERT_BEHAVIOR, behavior);
+	}
+	@RequiresApi(Q) @Override public void setBubbleMetadata(final BubbleMetadata metadata) {
+		if (Objects.equals(metadata, super.getBubbleMetadata())) extras.remove(EXTRA_BUBBLE_METADATA);
+		else extras.putParcelable(EXTRA_BUBBLE_METADATA, metadata);
+	}
+	@RequiresApi(Q) @Override public void setAllowSystemGeneratedContextualActions(final boolean allowed) {
+		if (allowed == super.getAllowSystemGeneratedContextualActions()) extras.remove(EXTRA_ALLOW_SYS_GEN_ACTIONS);
+		else extras.putBoolean(EXTRA_ALLOW_SYS_GEN_ACTIONS, allowed);
 	}
 
 	// Helpers
@@ -110,6 +121,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@Override public long getTimeoutAfter() { return extras.getLong(EXTRA_TIMEOUT_AFTER, super.getTimeoutAfter()); }
 	@Override public @Nullable String getChannelId() { return extras.getString(EXTRA_APP_CHANNEL, super.getChannelId()); }
 	@Override public int getGroupAlertBehavior() { return extras.getInt(EXTRA_GROUP_ALERT_BEHAVIOR, super.getGroupAlertBehavior()); }
+	@Override public @Nullable BubbleMetadata getBubbleMetadata() { return extras.containsKey(EXTRA_BUBBLE_METADATA) ? extras.getParcelable(EXTRA_BUBBLE_METADATA) : super.getBubbleMetadata(); }
+	@Override public boolean getAllowSystemGeneratedContextualActions() { return extras.getBoolean(EXTRA_ALLOW_SYS_GEN_ACTIONS, super.getAllowSystemGeneratedContextualActions()); }
 
 	// RemoteViews are intentionally always shallowly copied, to reduce cost.
 	private static void copyMutableFields(final Notification source, final Notification dest) {

@@ -24,6 +24,7 @@ import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 
 import static android.os.Build.VERSION_CODES.O;
+import static android.os.Build.VERSION_CODES.Q;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 /**
@@ -54,6 +55,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@RequiresApi(O) public abstract void setGroupAlertBehavior(int behavior);
 	/** @see Notification.Builder#setSettingsText(CharSequence) */
 	@RequiresApi(O) void setSettingsText(final String text) {}			// TODO: Please file a feature request if you want it eagerly.
+	@RequiresApi(Q) public abstract void setBubbleMetadata(BubbleMetadata metadata);
+	@RequiresApi(Q) public abstract void setAllowSystemGeneratedContextualActions(boolean allowed);
 
 	/* Helpers */
 
