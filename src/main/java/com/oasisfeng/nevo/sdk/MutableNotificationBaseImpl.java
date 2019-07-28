@@ -17,6 +17,7 @@
 package com.oasisfeng.nevo.sdk;
 
 import android.app.Notification;
+import android.app.Person;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -25,11 +26,14 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
+import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
@@ -104,12 +108,19 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	}
 
 	public void addPerson(final String uri) {
-		String[] persons = extras.getStringArray(EXTRA_PEOPLE);
-		if (persons != null) {
-			persons = Arrays.copyOf(persons, persons.length + 1);
-			persons[persons.length - 1] = uri;
-		} else persons = new String[] { uri };
-		extras.putStringArray(EXTRA_PEOPLE, persons);
+		if (SDK_INT >= P) {
+			ArrayList<Person> persons = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
+			if (persons == null) persons = new ArrayList<>(1);
+			persons.add(new Person.Builder().setUri(uri).build());
+		} else {
+			@SuppressWarnings("deprecation") String[] persons = extras.getStringArray(EXTRA_PEOPLE);
+			if (persons != null) {
+				persons = Arrays.copyOf(persons, persons.length + 1);
+				persons[persons.length - 1] = uri;
+			} else persons = new String[] { uri };
+			//noinspection deprecation
+			extras.putStringArray(EXTRA_PEOPLE, persons);
+		}
 	}
 
 	// Delegated getters
