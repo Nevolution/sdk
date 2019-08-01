@@ -37,6 +37,7 @@ import android.support.annotation.Keep;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import com.oasisfeng.nevo.decorator.INevoDecorator;
@@ -59,7 +60,7 @@ import static java.util.Collections.singletonList;
  *
  * @author Oasis
  */
-@RequiresApi(M) public abstract class NevoDecoratorService extends Service {
+@WorkerThread @RequiresApi(M) public abstract class NevoDecoratorService extends Service {
 
 	/** The action to bind {@link NevoDecoratorService} */
 	public static final String ACTION_DECORATOR_SERVICE = "com.oasisfeng.nevo.Decorator";
@@ -325,7 +326,7 @@ import static java.util.Collections.singletonList;
 
 	protected final String TAG = "Nevo.Decorator[" + shorten(getClass().getSimpleName()) + "]";
 
-	private class INevoDecoratorWrapper extends INevoDecorator.Stub {
+	@WorkerThread private class INevoDecoratorWrapper extends INevoDecorator.Stub {
 
 		@Override public void apply(final/* inout */MutableStatusBarNotification evolving, final @Nullable Bundle options) {
 			if (Binder.getCallingUid() != mCallerUid) throw new SecurityException();
