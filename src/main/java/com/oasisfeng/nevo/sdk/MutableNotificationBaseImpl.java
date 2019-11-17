@@ -113,12 +113,11 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 			if (persons == null) persons = new ArrayList<>(1);
 			persons.add(new Person.Builder().setUri(uri).build());
 		} else {
-			@SuppressWarnings("deprecation") String[] persons = extras.getStringArray(EXTRA_PEOPLE);
+			String[] persons = extras.getStringArray(EXTRA_PEOPLE);
 			if (persons != null) {
 				persons = Arrays.copyOf(persons, persons.length + 1);
 				persons[persons.length - 1] = uri;
 			} else persons = new String[] { uri };
-			//noinspection deprecation
 			extras.putStringArray(EXTRA_PEOPLE, persons);
 		}
 	}
@@ -137,6 +136,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 
 	// RemoteViews are intentionally always shallowly copied, to reduce cost.
 	private static void copyMutableFields(final Notification source, final Notification dest) {
+		source.extras.size();	// Un-parcel extras before copying, to ensure identity equaling of values for later comparison.
+
 		dest.when = source.when;
 		dest.number = source.number;
 		dest.contentIntent = source.contentIntent;
@@ -186,17 +187,25 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	MutableNotificationBaseImpl(final Notification original, final Parcel parcel) { super(parcel); mOriginalMutableKeeper = original; }
 
 	/** This instance keeps the original immutable values and exposes mutable members, whose original values are kept in an internal Notification instance. */
-	private MutableNotificationBaseImpl(final Parcel parcel) {
+	MutableNotificationBaseImpl(final Parcel parcel, final boolean initialize) {
 		super(parcel);
 		icon = 0;		// Notification.readFromParcelImpl() fills this field, which we never need.
-		extras.size();	// Un-parcel extras before copying, to ensure identity equaling of values for later comparison.
+		if (initialize) initialize();
+	}
+
+	/** Initialization can be postponed to reduce the cost of instance creation in certain cases. */
+	private void initialize() {
 		copyMutableFields(this, mOriginalMutableKeeper = new Notification());
 	}
 
-	private final transient Notification mOriginalMutableKeeper;	// The instance with original mutable field values (intact).
+	void ensureInitialized() {
+		if (mOriginalMutableKeeper == null) initialize();
+	}
+
+	private transient Notification mOriginalMutableKeeper;	// The instance with original mutable field values (intact).
 
 	public static final Creator<MutableNotificationBaseImpl> CREATOR = new Parcelable.Creator<MutableNotificationBaseImpl>() {
-		public MutableNotificationBaseImpl createFromParcel(final Parcel parcel) { return new MutableNotificationBaseImpl(parcel); }
+		public MutableNotificationBaseImpl createFromParcel(final Parcel parcel) { return new MutableNotificationBaseImpl(parcel, true); }
 		public MutableNotificationBaseImpl[] newArray(final int size) { return new MutableNotificationBaseImpl[size]; }
 	};
 }

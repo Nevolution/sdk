@@ -178,9 +178,13 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	}
 
 	protected MutableStatusBarNotification(final Parcel in) {
+		this(in, true);
+	}
+
+	@RestrictTo(LIBRARY) MutableStatusBarNotification(final Parcel in, final boolean initialize) {
 		// The only difference from AOSP super constructor: create MutableNotification instead of Notification in place.
 		this(in.readString(), in.readString(), in.readInt(), in.readInt() == 0 ? null : in.readString(), in.readInt(), in.readInt(),
-				MutableNotificationBaseImpl.CREATOR.createFromParcel(in), UserHandle.readFromParcel(in), in.readLong(),
+				new MutableNotificationBaseImpl(in, initialize), UserHandle.readFromParcel(in), in.readLong(),
 				SDK_INT < N ? null : (in.readInt() != 0 ? in.readString() : null));
 	}
 
@@ -251,7 +255,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	public void readFromParcel(final Parcel reply) { throw new UnsupportedOperationException(); }		// Not implemented in SDK
 
 	public static final Parcelable.Creator<MutableStatusBarNotification> CREATOR = new Parcelable.Creator<MutableStatusBarNotification>() {
-		@Override public MutableStatusBarNotification createFromParcel(final Parcel in) { return new MutableStatusBarNotification(in); }
+		@Override public MutableStatusBarNotification createFromParcel(final Parcel in) { return new MutableStatusBarNotification(in, true); }
 		@Override public MutableStatusBarNotification[] newArray(final int size) { return new MutableStatusBarNotification[size]; }
 	};
 
