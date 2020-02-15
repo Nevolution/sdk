@@ -68,6 +68,9 @@ import static java.util.Collections.singletonList;
 	/** Optional meta-data key within the &lt;service&gt; tag, to indicate the target packages (separated by comma) of the app-specific decorator */
 	public static final String META_KEY_PACKAGES = "packages";
 
+	/** Extra to indicate whether the notification being evolved with {@link #apply(MutableStatusBarNotification)} is currently snoozed. */
+	public static final String EXTRA_SNOOZED = "nevo.snoozed";
+
 	/** Valid constant values for {@link android.app.Notification#EXTRA_TEMPLATE} */
 	public static final String TEMPLATE_BIG_TEXT	= "android.app.Notification$BigTextStyle";
 	public static final String TEMPLATE_INBOX		= "android.app.Notification$InboxStyle";
