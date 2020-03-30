@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Keep;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
@@ -86,7 +87,11 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 		super.setOverrideGroupKey(override_group_key);
 	}
 
-	@Override public String toString() {
+	@RestrictTo(LIBRARY) @RequiresApi(N) void updateGroupKey() {
+		super.setOverrideGroupKey(super.getOverrideGroupKey());   // Force the group key to be updated.
+	}
+
+	@Override public @NonNull String toString() {
 		final StringBuilder string = new StringBuilder("StatusBarNotificationEvo(key=");
 		string.append(getOriginalKey());
 		if (mKey != null) string.append(" -> ").append(mKey);
@@ -194,7 +199,13 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 		super(pkg, opPkg, extractOriginal(n, EXTRA_ORIGINAL_ID, id), extractOriginal(n, EXTRA_ORIGINAL_TAG, tag), uid, initialPid, 0, n, user, postTime);
 		setTag(tag);
 		setId(id);
-		if (SDK_INT >= N) super.setOverrideGroupKey(override_group);
+		if (SDK_INT >= N) {
+			if (override_group != null) super.setOverrideGroupKey(override_group);
+			else if (getOverrideGroupKey() == null) {
+				final String group = n.extras.getString(MutableNotificationBaseImpl.EXTRA_GROUP);
+				if (group != null) super.setOverrideGroupKey(group);  // Simulate the group key mutation
+			}
+		}
 	}
 
 	private static <T> T extractOriginal(final Notification n, final String key, final T value) {
