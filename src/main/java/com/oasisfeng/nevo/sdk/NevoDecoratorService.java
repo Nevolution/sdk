@@ -101,7 +101,7 @@ import static java.util.Collections.singletonList;
 	 * Called when notification (no matter decorated or not) from packages with this decorator enabled is removed.
 	 * <p>
 	 * This is also called with original key and {@link android.service.notification.NotificationListenerService#REASON_APP_CANCEL REASON_APP_CANCEL}
-	 * when originating app requests notification removal, only for ongoing notification, or if the feature "Removal-aware" of Nevolution is activated.
+	 * when originating app requests notification removal, only for ongoing notification, or if the feature "Synchronous Removal" of Nevolution is activated.
 	 *
 	 * @param key the original key for removal requested by originating app, or the real key (may be different from original key) otherwise.
 	 * @param reason see REASON_XXX constants in {@link android.service.notification.NotificationListenerService}, always 0 before Android O.
@@ -125,7 +125,7 @@ import static java.util.Collections.singletonList;
 	 *
 	 * Decorator permission restriction applies.
 	 *
-	 * @deprecated This API will no longer be supported in the future
+	 * @deprecated This API will no longer be supported in the future.
 	 */
 	@Deprecated protected final List<StatusBarNotification> getArchivedNotifications(final String key, final int limit) {
 		try {
@@ -143,8 +143,10 @@ import static java.util.Collections.singletonList;
 	 * It may also contain multiple entries for some requested keys, since split notifications with altered tag and ID share the same key.
 	 *
 	 * Decorator permission restriction applies.
+	 *
+	 * @deprecated This API will no longer be supported in the future.
 	 */
-	public final List<StatusBarNotification> getLatestNotifications(final List<String> keys) {
+	@Deprecated public final List<StatusBarNotification> getLatestNotifications(final List<String> keys) {
 		try {
 			return mController.getNotifications(mWrapper, TYPE_LATEST, keys, 0, null);
 		} catch (final RemoteException e) {
@@ -223,14 +225,20 @@ import static java.util.Collections.singletonList;
 
 	/**
 	 * Returns the notification channel settings for a given channel id in targeted app.
-	 * If specified package is not targeted by this decorator, {@link SecurityException} will be thrown.
+	 * The returned channel settings may not be same with the original channel in target app.
+	 *
+	 * <p>If specified package is not targeted by this decorator, {@link SecurityException} will be thrown.
+	 *
+	 * <p>Channel without notifications posted before (seen by Nevolution) may not be visible, due to permission restriction.
 	 *
 	 * @see android.app.NotificationManager#getNotificationChannel(String)
 	 */
-	@RequiresApi(O) protected final @Nullable NotificationChannel getNotificationChannel(final String pkg, final UserHandle user, final String channel) {
+	@RequiresApi(O) protected final @Nullable NotificationChannel getNotificationChannel(
+			final String pkg, final UserHandle user, final String channel) {
 		if (mSupportedApiVersion < 4) return null;
 		try {
-			final List<NotificationChannel> channels = mController.getNotificationChannels(mWrapper, pkg, singletonList(channel), bundleIfNeeded(user));
+			final List<NotificationChannel> channels
+					= mController.getNotificationChannels(mWrapper, pkg, singletonList(channel), bundleIfNeeded(user));
 			return channels == null || channels.isEmpty() ? null : channels.get(0);
 		} catch (final RemoteException e) {
 			Log.w(TAG, "Error querying notification channel in " + pkg + ": " + channel, e);
@@ -243,7 +251,8 @@ import static java.util.Collections.singletonList;
 	 *
 	 * @see android.app.NotificationManager#createNotificationChannel(NotificationChannel)
 	 */
-	@RequiresApi(O) protected final void createNotificationChannels(final String pkg, final UserHandle user, final List<NotificationChannel> channels) {
+	@RequiresApi(O) protected final void createNotificationChannels(
+			final String pkg, final UserHandle user, final List<NotificationChannel> channels) {
 		try {
 			mController.createNotificationChannels(mWrapper, pkg, channels, bundleIfNeeded(user));
 		} catch (final RemoteException e) {
@@ -252,7 +261,8 @@ import static java.util.Collections.singletonList;
 	}
 
 	/** @deprecated use {@link #createNotificationChannels(String, UserHandle, List)} instead */
-	@Deprecated @RequiresApi(O) protected final void createNotificationChannels(final String pkg, final List<NotificationChannel> channels) {
+	@Deprecated @RequiresApi(O) protected final void createNotificationChannels(
+			final String pkg, final List<NotificationChannel> channels) {
 		createNotificationChannels(pkg, Process.myUserHandle(), channels);
 	}
 
@@ -371,10 +381,10 @@ import static java.util.Collections.singletonList;
 			if (caller_uid != my_uid && pm.checkSignatures(caller_uid, my_uid) != SIGNATURE_MATCH) {
 				final String[] caller_pkgs = pm.getPackagesForUid(caller_uid);
 				if (caller_pkgs == null || caller_pkgs.length == 0) throw new SecurityException();
-				try { @SuppressWarnings("deprecation") @SuppressLint("PackageManagerGetSignatures")
+				try { @SuppressLint("PackageManagerGetSignatures")
 					final PackageInfo caller_info = pm.getPackageInfo(caller_pkgs[0], GET_SIGNATURES);
 					if (caller_info == null) throw new SecurityException();
-					//noinspection deprecation
+
 					for (final Signature signature : caller_info.signatures)
 						if (signature.hashCode() != SIGNATURE_HASH) throw new SecurityException("Caller signature mismatch");
 				} catch (final PackageManager.NameNotFoundException e) { throw new SecurityException(); }	// Should not happen

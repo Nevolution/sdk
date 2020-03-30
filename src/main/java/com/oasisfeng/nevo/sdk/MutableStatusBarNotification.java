@@ -66,6 +66,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 					getUid(this), 0, 0, super.getNotification(), getUser(), getPostTime());
 			if (SDK_INT >= N) sbn.setOverrideGroupKey(getOverrideGroupKey());
 			mKey = sbn.getKey();
+			if (mKey.equals(super.getKey())) mKey = null;
 		} else mKey = null;
 	}
 
@@ -126,7 +127,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 			method = StatusBarNotification.class.getMethod("getUid");
 		} catch (final NoSuchMethodException ignored) {}
 		sMethodGetUid = method;
-		if (method == null) try {       // If no such method, try accessing the field
+		if (method == null) try {   //noinspection JavaReflectionMemberAccess, If no such method, try accessing the field
 			field = StatusBarNotification.class.getDeclaredField("uid");
 			field.setAccessible(true);
 		} catch (final NoSuchFieldException ignored) {}
@@ -219,7 +220,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	}
 
 	private void writeMutableFieldsToParcel(final Parcel out) {
-		if (mTag == null ? super.getTag() != null : ! mTag.equals(super.getTag())) {
+		if (! Objects.equals(mTag, super.getTag())) {
 			if (mTag != null) {
 				out.writeInt(1);
 				out.writeString(mTag);
@@ -244,8 +245,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 		int mark = parcel.readInt();
 		if (mark != 0) {
 			mutated = true;
-			if (mark == -1) mTag = null;
-			else mTag = parcel.readString();
+			mTag = mark == - 1 ? null : parcel.readString();
 		}
 		final int id = parcel.readInt();
 		if (mId != id) {
