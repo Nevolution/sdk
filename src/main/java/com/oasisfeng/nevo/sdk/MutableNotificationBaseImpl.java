@@ -18,6 +18,7 @@ package com.oasisfeng.nevo.sdk;
 
 import android.app.Notification;
 import android.app.Person;
+import android.content.LocusId;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -53,6 +54,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	static final String EXTRA_GROUP_ALERT_BEHAVIOR = "nevo.group.alert";
 	static final String EXTRA_BUBBLE_METADATA = "nevo.bubble";
 	static final String EXTRA_ALLOW_SYS_GEN_ACTIONS = "nevo.allow.actions";
+	static final String EXTRA_LOCUS_ID = "nevo.locus";
 
 	@Override public void setGroup(final String groupKey) {
 		if (Objects.equals(groupKey, super.getGroup())) extras.remove(EXTRA_GROUP);
@@ -90,6 +92,10 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@RequiresApi(Q) @Override public void setAllowSystemGeneratedContextualActions(final boolean allowed) {
 		if (allowed == super.getAllowSystemGeneratedContextualActions()) extras.remove(EXTRA_ALLOW_SYS_GEN_ACTIONS);
 		else extras.putBoolean(EXTRA_ALLOW_SYS_GEN_ACTIONS, allowed);
+	}
+	@RequiresApi(Q) @Override public void setLocusId(final @Nullable LocusId locusId) {
+		if (Objects.equals(locusId, super.getLocusId())) extras.remove(EXTRA_LOCUS_ID);
+		else extras.putParcelable(EXTRA_LOCUS_ID, locusId);
 	}
 
 	// Helpers
@@ -133,6 +139,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@Override public int getGroupAlertBehavior() { return extras.getInt(EXTRA_GROUP_ALERT_BEHAVIOR, super.getGroupAlertBehavior()); }
 	@Override public @Nullable BubbleMetadata getBubbleMetadata() { return extras.containsKey(EXTRA_BUBBLE_METADATA) ? extras.getParcelable(EXTRA_BUBBLE_METADATA) : super.getBubbleMetadata(); }
 	@Override public boolean getAllowSystemGeneratedContextualActions() { return extras.getBoolean(EXTRA_ALLOW_SYS_GEN_ACTIONS, super.getAllowSystemGeneratedContextualActions()); }
+	@Override public @Nullable LocusId getLocusId() { return extras.containsKey(EXTRA_LOCUS_ID) ? extras.getParcelable(EXTRA_LOCUS_ID) : super.getLocusId(); }
 
 	// RemoteViews are intentionally always shallowly copied, to reduce cost.
 	private static void copyMutableFields(final Notification source, final Notification dest) {

@@ -17,9 +17,11 @@
 package com.oasisfeng.nevo.sdk;
 
 import android.app.Notification;
+import android.content.LocusId;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.support.annotation.Keep;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
 
@@ -59,6 +61,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@RequiresApi(Q) public abstract void setBubbleMetadata(BubbleMetadata metadata);
 	/** @see Notification.Builder#setAllowSystemGeneratedContextualActions(boolean) */
 	@RequiresApi(Q) public abstract void setAllowSystemGeneratedContextualActions(boolean allowed);
+	/** @see Notification.Builder#setLocusId(LocusId) */
+	@RequiresApi(Q) public abstract void setLocusId(@Nullable LocusId locusId);
 
 	/* Helpers */
 
