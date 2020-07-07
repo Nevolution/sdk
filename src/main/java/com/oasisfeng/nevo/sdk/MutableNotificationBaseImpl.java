@@ -52,6 +52,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	static final String EXTRA_TIMEOUT_AFTER = "nevo.timeout";
 	static final String EXTRA_APP_CHANNEL = "nevo.channel";
 	static final String EXTRA_GROUP_ALERT_BEHAVIOR = "nevo.group.alert";
+	static final String EXTRA_SHORTCUT_ID = "nevo.shortcut";
 	static final String EXTRA_BUBBLE_METADATA = "nevo.bubble";
 	static final String EXTRA_ALLOW_SYS_GEN_ACTIONS = "nevo.allow.actions";
 	static final String EXTRA_LOCUS_ID = "nevo.locus";
@@ -84,6 +85,10 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@RequiresApi(O) @Override public void setGroupAlertBehavior(final int behavior) {
 		if (behavior == super.getGroupAlertBehavior()) extras.remove(EXTRA_GROUP_ALERT_BEHAVIOR);
 		else extras.putInt(EXTRA_GROUP_ALERT_BEHAVIOR, behavior);
+	}
+	@RequiresApi(O) @Override public void setShortcutId(@Nullable final String shortcutId) {
+		if (Objects.equals(shortcutId, super.getShortcutId())) extras.remove(EXTRA_SHORTCUT_ID);
+		else extras.putString(EXTRA_SHORTCUT_ID, shortcutId);
 	}
 	@RequiresApi(Q) @Override public void setBubbleMetadata(final BubbleMetadata metadata) {
 		if (Objects.equals(metadata, super.getBubbleMetadata())) extras.remove(EXTRA_BUBBLE_METADATA);
@@ -137,6 +142,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@Override public long getTimeoutAfter() { return extras.getLong(EXTRA_TIMEOUT_AFTER, super.getTimeoutAfter()); }
 	@Override public @Nullable String getChannelId() { return extras.getString(EXTRA_APP_CHANNEL, super.getChannelId()); }
 	@Override public int getGroupAlertBehavior() { return extras.getInt(EXTRA_GROUP_ALERT_BEHAVIOR, super.getGroupAlertBehavior()); }
+	@Override public @Nullable String getShortcutId() { return extras.containsKey(EXTRA_SHORTCUT_ID) ? extras.getString(EXTRA_SHORTCUT_ID) : super.getShortcutId(); }
 	@Override public @Nullable BubbleMetadata getBubbleMetadata() { return extras.containsKey(EXTRA_BUBBLE_METADATA) ? extras.getParcelable(EXTRA_BUBBLE_METADATA) : super.getBubbleMetadata(); }
 	@Override public boolean getAllowSystemGeneratedContextualActions() { return extras.getBoolean(EXTRA_ALLOW_SYS_GEN_ACTIONS, super.getAllowSystemGeneratedContextualActions()); }
 	@Override public @Nullable LocusId getLocusId() { return extras.containsKey(EXTRA_LOCUS_ID) ? extras.getParcelable(EXTRA_LOCUS_ID) : super.getLocusId(); }

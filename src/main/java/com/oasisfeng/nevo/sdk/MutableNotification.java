@@ -57,6 +57,8 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY;
 	@RequiresApi(O) public abstract void setGroupAlertBehavior(int behavior);
 	/** @see Notification.Builder#setSettingsText(CharSequence) */
 	@RequiresApi(O) void setSettingsText(final String text) {}			// TODO: Please file a feature request if you want it eagerly.
+	/** @see Notification.Builder#setShortcutId(String) */
+	@RequiresApi(O) public abstract void setShortcutId(@Nullable String shortcutId);
 	/** @see Notification.Builder#setBubbleMetadata(BubbleMetadata) */
 	@RequiresApi(Q) public abstract void setBubbleMetadata(BubbleMetadata metadata);
 	/** @see Notification.Builder#setAllowSystemGeneratedContextualActions(boolean) */
